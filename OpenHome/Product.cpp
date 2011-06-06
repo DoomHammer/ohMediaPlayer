@@ -90,11 +90,10 @@ ProductImpl::ProductImpl(Net::DvDevice& aDevice
     aDevice.SetAttribute("Upnp.Type", "ProductImpl");
     aDevice.SetAttribute("Upnp.Version", "1");
 
-    Bwh tmp(aProductRoom);
-    tmp.Grow(strlen(aProductName) + strlen(aProductRoom) + 2); 
+    Bwh tmp(strlen(aProductName) + strlen(aProductRoom) + 1);
+    tmp.Append(aProductRoom);
     tmp.Append(':');
     tmp.Append(aProductName);
-    tmp.Append('\0');
     Brhz friendlyName;
     tmp.TransferTo(friendlyName);
     aDevice.SetAttribute("Upnp.FriendlyName", friendlyName.CString());

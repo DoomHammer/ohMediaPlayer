@@ -91,7 +91,7 @@ ProductImpl::ProductImpl(Net::DvDevice& aDevice
     aDevice.SetAttribute("Upnp.Version", "1");
 
     Bwh tmp(aProductRoom);
-    tmp.Grow(strlen(aProductName) + 100); 
+    tmp.Grow(strlen(aProductName) + strlen(aProductRoom) + 2); 
     tmp.Append(':');
     tmp.Append(aProductName);
     tmp.Append('\0');

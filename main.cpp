@@ -126,6 +126,8 @@ int CDECL main(int aArgc, char* aArgv[])
 
     device->SetEnabled();
 
+    (void)productImpl;
+
     while(1) {}
 
     delete (device);

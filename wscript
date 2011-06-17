@@ -70,7 +70,7 @@ def configure(ctx):
 
 def build(ctx):
     ctx.program(
-        source      = ['main.cpp', 'OpenHome/Product.cpp'],
+        source      = ['main.cpp', 'OpenHome/Product.cpp', 'OpenHome/Playlist.cpp'],
         target      = 'ohMediaPlayer',
         includes    = ctx.env.HeaderPath,
         defines     = ctx.env.Defines,

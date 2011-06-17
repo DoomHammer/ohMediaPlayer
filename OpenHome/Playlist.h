@@ -7,7 +7,7 @@
 #include <Thread.h>
 #include <Timer.h>
 
-#include <Core/DvAvOpenhomeOrgPlaylist.h>
+#include <Core/DvAvOpenhomeOrgPlaylist1.h>
 
 namespace OpenHome {
 namespace MediaPlayer {
@@ -20,6 +20,7 @@ public:
 
 public:
     Track(TUint aId, const Brx& aUri, const Brx& aMetadata);
+    TBool IsId(TUint aId) const;
     TUint Id() const;
     const Brx& Uri() const;
     const Brx& Metadata() const;
@@ -33,7 +34,7 @@ private:
 class PlaylistImpl : public Net::DvProviderAvOpenhomeOrgPlaylist1
 {
 public:
-	PlaylistImpl(Net::DvDevice aDevice, TUint aMaxTracks, const Brx& aProtocolInfo);
+	PlaylistImpl(Net::DvDevice& aDevice, TUint aMaxTracks, const Brx& aProtocolInfo);
 
     //From DvProviderAvOpenhomeOrgPlaylist1
 private:
@@ -63,18 +64,20 @@ private:
     virtual void ProtocolInfo(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue);
 
 private:
-    void UpdateIdArray()
+    void UpdateIdArray();
 
 private:
-    std::list<Track> iList;
+    std::list<Track*> iList;
 
     Bws<20> iTransportState;
     TBool iRepeat;
     TBool iShuffle;
     TUint iId;
-    Bwd iIdArray;
-    const TUint kTracksMax;
-    Bwd iProtocolInfo;  
+    TUint iNextId;
+    TUint iToken;
+    Bwh iIdArray;
+    TUint iTracksMax;
+    Mutex iMutex;
 };
 
 } // namespace MediaPlayer

@@ -2,6 +2,9 @@
 #include "Playlist.h"
 #include <functional>
 #include <algorithm>
+#include <Parser.h>
+#include <Ascii.h>
+#include <Converter.h>
 
 using namespace OpenHome;
 using namespace OpenHome::MediaPlayer;
@@ -223,7 +226,66 @@ void PlaylistImpl::Read(Net::IInvocationResponse& aResponse, TUint aVersion, TUi
 
 void PlaylistImpl::ReadList(Net::IInvocationResponse& aResponse, TUint aVersion, const Brx& aIdList, Net::IInvocationResponseString& aTrackList)
 {
-    Log::Print("PlaylistImpl::Readlist\n");
+    uint32_t tracksMax;
+    GetPropertyTracksMax(tracksMax);
+    vector<uint32_t> v(tracksMax);
+
+    try {
+        Parser parser(aIdList);
+        Brn id;
+        id.Set(parser.Next(' '));
+
+        for( ; id != Brx::Empty(); id.Set(parser.Next(' ')) ) {
+            v.push_back(Ascii::Uint(id));
+            if(v.size() > tracksMax) {
+                THROW(AsciiError);
+            }
+        }
+    }
+    catch(AsciiError) {
+        aResponse.Error(kInvalidRequest, kInvalidRequestMsg);
+    }
+
+    Brn entryStart("<Entry>");
+    Brn entryEnd("</Entry>");
+    Brn idStart("<Id>");
+    Brn idEnd("</Id>");
+    Brn uriStart("<Uri>");
+    Brn uriEnd("</Uri>");
+    Brn metaStart("<Metadata>");
+    Brn metaEnd("</Metadata>");
+
+    aResponse.Start();
+    aTrackList.Write(Brn("<TrackList>"));
+
+    for( vector<uint32_t>::const_iterator id=v.begin(); id!= v.end(); id++) {
+
+        iMutex.Wait();
+        list<Track*>::const_iterator i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),*id));
+        iMutex.Signal();
+
+        if(i != iList.end()) {
+            aTrackList.Write(entryStart);
+
+            aTrackList.Write(idStart);
+            Ascii::StreamWriteUint(aTrackList, *id);
+            aTrackList.Write(idEnd);
+
+            aTrackList.Write(uriStart);
+            Converter::ToXmlEscaped(aTrackList, (*i)->Uri());
+            aTrackList.Write(uriEnd);
+
+            aTrackList.Write(metaStart);
+            Converter::ToXmlEscaped(aTrackList, (*i)->Metadata());
+            aTrackList.Write(metaEnd);
+
+            aTrackList.Write(entryEnd);
+        }
+    }
+
+    aTrackList.Write(Brn("</TrackList>"));
+    aTrackList.WriteFlush();
+    aResponse.End();
 }
 
 void PlaylistImpl::Insert(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aAfterId, const Brx& aUri, const Brx& aMetadata, Net::IInvocationResponseUint& aNewId)

@@ -14,7 +14,11 @@ def options(ctx):
     ctx.add_option('--debug', action='store', default='true', help='Generate and use binaries with debugging support')
 
 def configure(ctx):
-    ctx.load('compiler_cxx')
+    if sys.platform == 'win32':
+        ctx.env['MSVC_TARGETS'] = ['x64']
+        ctx.load('msvc')
+    else:
+        ctx.load('compiler_cxx')
 
     #Arrange include paths and store in ctx.env.HeaderPath
     hpath = ctx.path.find_node(ctx.options.ohNetHeaders)

@@ -200,7 +200,6 @@ void PlaylistImpl::Read(Net::IInvocationResponse& aResponse, TUint aVersion, TUi
 {
     if(aId == 0) {
         aResponse.Error(kIdNotFound, kIdNotFoundMsg);
-        return;
     }   
 
     iMutex.Wait();
@@ -208,6 +207,7 @@ void PlaylistImpl::Read(Net::IInvocationResponse& aResponse, TUint aVersion, TUi
     list<Track*>::const_iterator i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),aId));
 
     if(i == iList.end()) {
+        iMutex.Signal();
         aResponse.Error(kIdNotFound, kIdNotFoundMsg);
     }
     else {
@@ -217,9 +217,8 @@ void PlaylistImpl::Read(Net::IInvocationResponse& aResponse, TUint aVersion, TUi
         aMetadata.Write((*i)->Metadata());
         aMetadata.WriteFlush();
         aResponse.End();
+        iMutex.Signal();
     }
-
-    iMutex.Signal();
 }
 
 void PlaylistImpl::ReadList(Net::IInvocationResponse& aResponse, TUint aVersion, const Brx& aIdList, Net::IInvocationResponseString& aTrackList)
@@ -234,10 +233,8 @@ void PlaylistImpl::Insert(Net::IInvocationResponse& aResponse, TUint aVersion, T
     TUint tracksMax;
     GetPropertyTracksMax(tracksMax);
     if(iList.size() == tracksMax) {
-        aResponse.Error(kPlaylistFull, kPlaylistFullMsg);
-
         iMutex.Signal();
-        return;
+        aResponse.Error(kPlaylistFull, kPlaylistFullMsg);
     }
 
     list<Track*>::iterator i;
@@ -247,10 +244,8 @@ void PlaylistImpl::Insert(Net::IInvocationResponse& aResponse, TUint aVersion, T
     else {
         i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),aAfterId));
         if(i == iList.end()) {
-            aResponse.Error(kIdNotFound, kIdNotFoundMsg);
-
             iMutex.Signal();
-            return;
+            aResponse.Error(kIdNotFound, kIdNotFoundMsg);
         }
         ++i;  //we insert after the id, not before
     }
@@ -271,13 +266,9 @@ void PlaylistImpl::DeleteId(Net::IInvocationResponse& aResponse, TUint aVersion,
     list<Track*>::iterator i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),aValue));
 
     if(i != iList.end()) {
-        Log::Print("PlaylistImpl::DeleteId(%d), found\n", aValue);
         delete (*i);
-        Log::Print("Step 2\n");
         iList.erase(i);
-        Log::Print("Step 3\n");
         UpdateIdArray();
-        Log::Print("Step 4\n");
     }
 
     iMutex.Signal();

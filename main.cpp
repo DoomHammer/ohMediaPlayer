@@ -54,7 +54,7 @@ static void RandomiseUdn(Bwh& aUdn)
     Bws<Ascii::kMaxUintStringBytes> buf;
     NetworkInterface* nif = Net::Stack::NetworkInterfaceList().CurrentInterface();
     TUint max = nif->Address();
-    delete nif;
+    nif->RemoveRef();
     (void)Ascii::AppendDec(buf, Random(max));
     aUdn.Append(buf);
     aUdn.PtrZ();
@@ -75,7 +75,7 @@ int CDECL main(int aArgc, char* aArgv[])
     ASSERT(ifs->size() > 0 && optionAdapter.Value() < ifs->size());
     TIpAddress interface = (*ifs)[optionAdapter.Value()]->Address();
     for (TUint i=0; i<ifs->size(); i++) {
-        delete (*ifs)[i];
+        ((*ifs)[i])->RemoveRef();
     }
     delete ifs;
     

@@ -267,7 +267,6 @@ void PlaylistImpl::ReadList(Net::IInvocationResponse& aResponse, TUint aVersion,
 
         iMutex.Wait();
         list<Track*>::const_iterator i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),*id));
-        iMutex.Signal();
 
         if(i != iList.end()) {
             aTrackList.Write(entryStart);
@@ -286,6 +285,7 @@ void PlaylistImpl::ReadList(Net::IInvocationResponse& aResponse, TUint aVersion,
 
             aTrackList.Write(entryEnd);
         }
+        iMutex.Signal();
     }
 
     aTrackList.Write(Brn("</TrackList>"));

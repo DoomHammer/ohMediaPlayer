@@ -47,40 +47,8 @@ void SourceIndexHandler::SetSourceIndex(TUint aValue)
     printf("Setting source: %d\n", aValue);
 }
 
-static void RandomiseUdn(Bwh& aUdn)
-{
-    aUdn.Grow(aUdn.Bytes() + 1 + Ascii::kMaxUintStringBytes + 1);
-    aUdn.Append('-');
-    Bws<Ascii::kMaxUintStringBytes> buf;
-    NetworkInterface* nif = Net::Stack::NetworkInterfaceList().CurrentInterface();
-    TUint max = nif->Address();
-    nif->RemoveRef();
-    (void)Ascii::AppendDec(buf, Random(max));
-    aUdn.Append(buf);
-    aUdn.PtrZ();
-}
-
 int CDECL main(int aArgc, char* aArgv[])
 {
-    OptionParser parser;
-
-    OptionUint optionAdapter("-a", "--adapter", 0, "[adapter] index of network adapter to use");
-    parser.AddOption(&optionAdapter);
-
-    if(!parser.Parse(aArgc, aArgv)) {
-        return (1);
-    }
-
-    std::vector<NetworkInterface*>* ifs = Os::NetworkListInterfaces(false);
-    ASSERT(ifs->size() > 0 && optionAdapter.Value() < ifs->size());
-    TIpAddress interface = (*ifs)[optionAdapter.Value()]->Address();
-    for (TUint i=0; i<ifs->size(); i++) {
-        ((*ifs)[i])->RemoveRef();
-    }
-    delete ifs;
-    
-    printf("Using network interface %d.%d.%d.%d\n", interface&0xff, (interface>>8)&0xff, (interface>>16)&0xff, (interface>>24)&0xff);
-
     Net::InitialisationParams* initParams = Net::InitialisationParams::Create();
 
     Net::UpnpLibrary::Initialise(initParams);
@@ -88,7 +56,6 @@ int CDECL main(int aArgc, char* aArgv[])
     Net::UpnpLibrary::StartDv();
 
 	Bwh udn("device");
-    RandomiseUdn(udn);
 
     Net::DvDeviceStandard* device = new Net::DvDeviceStandard(udn);
 

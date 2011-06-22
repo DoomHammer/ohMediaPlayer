@@ -42,13 +42,11 @@ static const Brn kIdNotFoundMsg("Id not found");
 static const TInt kPlaylistFull = 801;
 static const Brn kPlaylistFullMsg("Playlist full");
 static const TInt kInvalidRequest = 802;
-static const Brn kInvalidRequestMsg("Comma separated id request list invalid");
+static const Brn kInvalidRequestMsg("Space separated id request list invalid");
 
 PlaylistImpl::PlaylistImpl(Net::DvDevice& aDevice, TUint aTracksMax, const Brx& aProtocolInfo)
     : DvProviderAvOpenhomeOrgPlaylist1(aDevice)
     , iTransportState("Stopped")
-    , iRepeat(false)
-    , iShuffle(false)
     , iId(0)
     , iNextId(1)
     , iToken(0)
@@ -82,8 +80,8 @@ PlaylistImpl::PlaylistImpl(Net::DvDevice& aDevice, TUint aTracksMax, const Brx& 
     EnableActionProtocolInfo();
 
     SetPropertyTransportState(iTransportState);
-    SetPropertyRepeat(iRepeat);
-    SetPropertyShuffle(iShuffle);
+    SetPropertyRepeat(false);
+    SetPropertyShuffle(false);
     SetPropertyId(iId);
     SetPropertyTracksMax(aTracksMax);
     SetPropertyProtocolInfo(aProtocolInfo);
@@ -124,31 +122,33 @@ void PlaylistImpl::Previous(Net::IInvocationResponse& aResponse, TUint aVersion)
 
 void PlaylistImpl::SetRepeat(Net::IInvocationResponse& aResponse, TUint aVersion, TBool aValue)
 {
-    iRepeat = aValue;
+    SetPropertyRepeat(aValue);
     aResponse.Start();
     aResponse.End();
 }
 
 void PlaylistImpl::Repeat(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseBool& aValue)
 {
-    TBool value = iRepeat;
+    TBool repeat;
+    GetPropertyRepeat(repeat);
     aResponse.Start();
-    aValue.Write(value);
+    aValue.Write(repeat);
     aResponse.End();
 }
 
 void PlaylistImpl::SetShuffle(Net::IInvocationResponse& aResponse, TUint aVersion, TBool aValue)
 {
-    iShuffle = aValue;
+    SetPropertyShuffle(aValue);
     aResponse.Start();
     aResponse.End();
 }
 
 void PlaylistImpl::Shuffle(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseBool& aValue)
 {
-    TBool value = iShuffle;
+    TBool shuffle;
+    GetPropertyShuffle(shuffle);
     aResponse.Start();
-    aValue.Write(value);
+    aValue.Write(shuffle);
     aResponse.End();
 }
 

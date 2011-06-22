@@ -70,8 +70,6 @@ private:
     std::list<Track*> iList;
 
     Bws<20> iTransportState;
-    TBool iRepeat;
-    TBool iShuffle;
     TUint iId;
     TUint iNextId;
     TUint iToken;

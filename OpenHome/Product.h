@@ -31,7 +31,7 @@ class Observable
 {
 public:
     Observable();
-    void Add(IObserver& aObserver);
+    void RegisterObserver(IObserver& aObserver);
 
 protected:
     void InformObservers() const;
@@ -70,7 +70,7 @@ public:
     void SetVisible(TBool aValue);
 
 private:
-    Source(const Brx& aSystemName, const Brx& aType, const Brx& aName, TBool aVisible, ILockable& aLockable);
+    Source(const Brx& aSystemName, const Brx& aType, const Brx& aName, TBool aVisible, ILockable& aLockable, IObserver& aObserver);
 
 private:
     Bws<kMaxNameBytes> iSystemName;

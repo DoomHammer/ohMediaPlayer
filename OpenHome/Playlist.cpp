@@ -182,6 +182,7 @@ void PlaylistImpl::SeekIndex(Net::IInvocationResponse& aResponse, TUint aVersion
 
 void PlaylistImpl::TransportState(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue)
 {
+    Log::Print("PlaylistImpl::TransportState\n");
     Brhz transportState;
     GetPropertyTransportState(transportState);
     aResponse.Start();
@@ -192,6 +193,7 @@ void PlaylistImpl::TransportState(Net::IInvocationResponse& aResponse, TUint aVe
 
 void PlaylistImpl::Id(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
 {
+    Log::Print("PlaylistImpl::Id\n");
     TUint id;
     GetPropertyId(id);
     aResponse.Start();
@@ -201,6 +203,7 @@ void PlaylistImpl::Id(Net::IInvocationResponse& aResponse, TUint aVersion, Net::
 
 void PlaylistImpl::Read(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aId, Net::IInvocationResponseString& aUri, Net::IInvocationResponseString& aMetadata)
 {
+    Log::Print("PlaylistImpl::Read\n");
     if(aId == 0) {
         aResponse.Error(kIdNotFound, kIdNotFoundMsg);
     }   
@@ -226,9 +229,11 @@ void PlaylistImpl::Read(Net::IInvocationResponse& aResponse, TUint aVersion, TUi
 
 void PlaylistImpl::ReadList(Net::IInvocationResponse& aResponse, TUint aVersion, const Brx& aIdList, Net::IInvocationResponseString& aTrackList)
 {
+    Log::Print("PlaylistImpl::ReadList\n");
     uint32_t tracksMax;
     GetPropertyTracksMax(tracksMax);
-    vector<uint32_t> v(tracksMax);
+    vector<uint32_t> v;
+    v.reserve(tracksMax);
 
     try {
         Parser parser(aIdList);
@@ -290,6 +295,7 @@ void PlaylistImpl::ReadList(Net::IInvocationResponse& aResponse, TUint aVersion,
 
 void PlaylistImpl::Insert(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aAfterId, const Brx& aUri, const Brx& aMetadata, Net::IInvocationResponseUint& aNewId)
 {
+    Log::Print("PlaylistImpl::Insert\n");
     iMutex.Wait();
 
     TUint tracksMax;
@@ -323,6 +329,7 @@ void PlaylistImpl::Insert(Net::IInvocationResponse& aResponse, TUint aVersion, T
 
 void PlaylistImpl::DeleteId(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
 {
+    Log::Print("PlaylistImpl::DeleteId\n");
     iMutex.Wait();
 
     list<Track*>::iterator i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),aValue));
@@ -341,6 +348,7 @@ void PlaylistImpl::DeleteId(Net::IInvocationResponse& aResponse, TUint aVersion,
 
 void PlaylistImpl::DeleteAll(Net::IInvocationResponse& aResponse, TUint aVersion)
 {
+    Log::Print("PlaylistImpl::DeleteAll\n");
     iMutex.Wait();
 
     if(iList.size() > 0) {
@@ -361,6 +369,7 @@ void PlaylistImpl::DeleteAll(Net::IInvocationResponse& aResponse, TUint aVersion
 
 void PlaylistImpl::TracksMax(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
 {
+    Log::Print("PlaylistImpl::TracksMax\n");
     TUint tracksMax;
     GetPropertyTracksMax(tracksMax);
     aResponse.Start();
@@ -370,6 +379,7 @@ void PlaylistImpl::TracksMax(Net::IInvocationResponse& aResponse, TUint aVersion
 
 void PlaylistImpl::IdArray(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aToken, Net::IInvocationResponseBinary& aArray)
 {
+    Log::Print("PlaylistImpl::IdArray\n");
     iMutex.Wait();
 
     aResponse.Start();
@@ -383,6 +393,7 @@ void PlaylistImpl::IdArray(Net::IInvocationResponse& aResponse, TUint aVersion, 
 
 void PlaylistImpl::IdArrayChanged(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aToken, Net::IInvocationResponseBool& aValue)
 {
+    Log::Print("PlaylistImpl::IdArrayChanged\n");
     TBool changed = false;
 
     iMutex.Wait();

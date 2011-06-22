@@ -81,6 +81,8 @@ int CDECL main(int aArgc, char* aArgv[])
         "",
         "");
 
+    productImpl->CreateSource(Brn("Playlist"), Brn("Playlist"), Brn("Playlist"), true);
+
     
     device->SetAttribute("Upnp.Domain", "av.openhome.org");
     device->SetAttribute("Upnp.Type", "MediaPlayer");

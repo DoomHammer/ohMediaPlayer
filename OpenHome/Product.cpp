@@ -10,27 +10,30 @@ Observable::Observable()
 {
 }
 
-void Observable::Add(IObserver& aObserver)
+void Observable::RegisterObserver(IObserver& aObserver)
 {
+    Log::Print("Observable::RegisterObserver()\n");
 	iObserverList.push_back(&aObserver);
-}
+}   
 
 void Observable::InformObservers() const
 {
-	for (std::vector<IObserver*>::const_iterator it = iObserverList.begin(); it != iObserverList.end(); ++it) {
-		(*it)->ObservableChanged();
-	}	
+    Log::Print("Observable::InformObservers()\n");
+    for (std::vector<IObserver*>::const_iterator it = iObserverList.begin(); it != iObserverList.end(); ++it) {
+        (*it)->ObservableChanged();
+    }	
 }
 
 // Source
 
-Source::Source(const Brx& aSystemName, const Brx& aType, const Brx& aName, TBool aVisible, ILockable& aLockable)
-	: iSystemName(aSystemName)
-	, iType(aType)
-	, iName(aName)
-	, iVisible(aVisible)
-	, iLockable(aLockable)
+Source::Source(const Brx& aSystemName, const Brx& aType, const Brx& aName, TBool aVisible, ILockable& aLockable, IObserver& aObserver)
+    : iSystemName(aSystemName)
+    , iType(aType)
+    , iName(aName)
+    , iVisible(aVisible)
+    , iLockable(aLockable)
 {
+    RegisterObserver(aObserver);
 }
 
 TBool Source::Details(Bwx& aSystemName, Bwx& aType, Bwx& aName)
@@ -85,6 +88,7 @@ ProductImpl::ProductImpl(Net::DvDevice& aDevice
     , iSourceIndexHandler(aSourceIndexHandler)
     , iSourceXmlChangeCount(0)
     , iMutex("PROD")
+    , iSourceXml(Brx::Empty())
 {
     aDevice.SetAttribute("Upnp.Domain", "av.openhome.org");
     aDevice.SetAttribute("Upnp.Type", "ProductImpl");
@@ -142,26 +146,29 @@ ProductImpl::ProductImpl(Net::DvDevice& aDevice
     
     SetPropertySourceIndex(0);
     SetPropertySourceCount(0);
-    SetPropertySourceXml(Brn(""));
+    SetPropertySourceXml(iSourceXml);
 }
 
 TUint ProductImpl::CreateSource(const Brx& aSystemName, const Brx& aType, const Brx& aName, TBool aVisible) 
 {
-    MediaPlayer::Source* source = new MediaPlayer::Source(aSystemName, aType, aName, aVisible, *this);
+    MediaPlayer::Source* source = new MediaPlayer::Source(aSystemName, aType, aName, aVisible, *this, *this);
     iSourceList.push_back(source); 
-    TUint count(iSourceList.size() - 1);
+    ObservableChanged();
+    TUint count(iSourceList.size());
     SetPropertySourceCount(count);
+    Log::Print("Created source, source count now: %d\n", count);
     return count;
 }
 
 Source& ProductImpl::GetSource(TUint aIndex)
 {
-   ASSERT(aIndex < iSourceList.size());
-   return *(iSourceList[aIndex]); 
+    ASSERT(aIndex < iSourceList.size());
+    return *(iSourceList[aIndex]);
 }
 
 void ProductImpl::UpdateSourceXml()
 {
+    Log::Print("ProductImpl::UpdateSourceXml()\n");
     iSourceXml.Replace("<SourceList>");
 
     Wait();
@@ -191,6 +198,8 @@ void ProductImpl::UpdateSourceXml()
     }
 
     iSourceXml.Append("</SourceList>");
+
+    SetPropertySourceXml(iSourceXml);
 
     iSourceXmlChangeCount++;
 

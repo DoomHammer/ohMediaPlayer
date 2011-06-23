@@ -39,10 +39,12 @@ def configure(ctx):
         lpath = lpath + os.sep + 'Windows'
         ctx.env.Libraries = ['Ws2_32', 'Iphlpapi']
         ctx.env.Defines = ['DllExport=__declspec(dllexport)', 'DllExportClass=']
-        ctx.env.CxxFlags = ['/EHsc', '/FR']
+        ctx.env.CxxFlags = ['/EHsc', '/FR', '/Gz']
         if(debug):
             ctx.env.CxxFlags += ['/MTd', '/Od', '/Zi']
             ctx.env.LinkFlags += ['/debug']
+        else:
+            ctx.env.CxxFlags += ['/MT', '/Ox']
 
     elif sys.platform == 'linux2':
         lpath = lpath + os.sep + 'Posix'

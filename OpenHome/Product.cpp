@@ -4,68 +4,9 @@
 using namespace OpenHome;
 using namespace OpenHome::MediaPlayer;
 
-// Observable
-
-Observable::Observable()
-{
-}
-
-void Observable::RegisterObserver(IObserver& aObserver)
-{
-    Log::Print("Observable::RegisterObserver()\n");
-	iObserverList.push_back(&aObserver);
-}   
-
-void Observable::InformObservers() const
-{
-    Log::Print("Observable::InformObservers()\n");
-    for (std::vector<IObserver*>::const_iterator it = iObserverList.begin(); it != iObserverList.end(); ++it) {
-        (*it)->ObservableChanged();
-    }	
-}
-
-// Source
-
-Source::Source(const Brx& aSystemName, const Brx& aType, const Brx& aName, TBool aVisible, ILockable& aLockable, IObserver& aObserver)
-    : iSystemName(aSystemName)
-    , iType(aType)
-    , iName(aName)
-    , iVisible(aVisible)
-    , iLockable(aLockable)
-{
-    RegisterObserver(aObserver);
-}
-
-TBool Source::Details(Bwx& aSystemName, Bwx& aType, Bwx& aName)
-{
-	aSystemName.Replace(iSystemName);
-	aType.Replace(iType);
-	iLockable.Wait();
-	aName.Replace(iName);
-	TBool visible = iVisible;
-	iLockable.Signal();
-	return (visible);
-}
-
-void Source::SetName(const Brx& aValue)
-{
-	iLockable.Wait();
-	iName.Replace(aValue);
-	iLockable.Signal();
-	InformObservers();
-}
-
-void Source::SetVisible(TBool aValue)
-{
-	iLockable.Wait();
-	iVisible = aValue;
-	iLockable.Signal();
-	InformObservers();
-}
-
 // Product
 
-ProductImpl::ProductImpl(Net::DvDevice& aDevice
+ProviderProduct::ProviderProduct(Net::DvDevice& aDevice
     , IStandbyHandler& aStandbyHandler
     , ISourceIndexHandler& aSourceIndexHandler
 	, TBool aStandby
@@ -90,27 +31,6 @@ ProductImpl::ProductImpl(Net::DvDevice& aDevice
     , iMutex("PROD")
     , iSourceXml(Brx::Empty())
 {
-    aDevice.SetAttribute("Upnp.Domain", "av.openhome.org");
-    aDevice.SetAttribute("Upnp.Type", "ProductImpl");
-    aDevice.SetAttribute("Upnp.Version", "1");
-
-    Bwh tmp(strlen(aProductName) + strlen(aProductRoom) + 1);
-    tmp.Append(aProductRoom);
-    tmp.Append(':');
-    tmp.Append(aProductName);
-    Brhz friendlyName;
-    tmp.TransferTo(friendlyName);
-    aDevice.SetAttribute("Upnp.FriendlyName", friendlyName.CString());
-
-    aDevice.SetAttribute("Upnp.Manufacturer", aManufacturerName);
-    aDevice.SetAttribute("Upnp.ManufacturerUrl", aManufacturerUrl);
-    aDevice.SetAttribute("Upnp.ModelDescription", aModelInfo);
-    aDevice.SetAttribute("Upnp.ModelName", aModelName);
-    aDevice.SetAttribute("Upnp.ModelNumber", "");
-    aDevice.SetAttribute("Upnp.ModelUrl", aModelUrl);
-    aDevice.SetAttribute("Upnp.SerialNumber", "");
-    aDevice.SetAttribute("Upnp.Upc", "");
-
     EnableActionManufacturer();
     EnableActionModel();
     EnableActionProduct();
@@ -149,26 +69,26 @@ ProductImpl::ProductImpl(Net::DvDevice& aDevice
     SetPropertySourceXml(iSourceXml);
 }
 
-TUint ProductImpl::CreateSource(const Brx& aSystemName, const Brx& aType, const Brx& aName, TBool aVisible) 
+uint32_t ProviderProduct::AddSource(class Source* aSource)
 {
-    MediaPlayer::Source* source = new MediaPlayer::Source(aSystemName, aType, aName, aVisible, *this, *this);
-    iSourceList.push_back(source); 
-    ObservableChanged();
+    iSourceList.push_back(aSource);
+    aSource->SetModifiable(*this, *this);
+
     TUint count(iSourceList.size());
     SetPropertySourceCount(count);
-    Log::Print("Created source, source count now: %d\n", count);
-    return count;
+    Log::Print("Added source, source count now: %d\n", count);
+    return count-1;
 }
 
-Source& ProductImpl::GetSource(TUint aIndex)
+Source& ProviderProduct::GetSource(uint32_t aIndex)
 {
     ASSERT(aIndex < iSourceList.size());
     return *(iSourceList[aIndex]);
 }
 
-void ProductImpl::UpdateSourceXml()
+void ProviderProduct::UpdateSourceXml()
 {
-    Log::Print("ProductImpl::UpdateSourceXml()\n");
+    Log::Print("ProviderProduct::UpdateSourceXml()\n");
     iSourceXml.Replace("<SourceList>");
 
     Wait();
@@ -207,24 +127,24 @@ void ProductImpl::UpdateSourceXml()
 }
 
 //From IObserver
-void ProductImpl::ObservableChanged()
+void ProviderProduct::ObservableChanged()
 {
     UpdateSourceXml();
 }
 
 //From ILockable
-void ProductImpl::Wait() const
+void ProviderProduct::Wait() const
 {
     iMutex.Wait();
 }
 
-void ProductImpl::Signal() const
+void ProviderProduct::Signal() const
 {
     iMutex.Signal();
 }
 
 //From DvProviderAvOpenhomeOrgProduct1
-void ProductImpl::Manufacturer(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aName, Net::IInvocationResponseString& aInfo, Net::IInvocationResponseString& aUrl, Net::IInvocationResponseString& aImageUri)
+void ProviderProduct::Manufacturer(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aName, Net::IInvocationResponseString& aInfo, Net::IInvocationResponseString& aUrl, Net::IInvocationResponseString& aImageUri)
 {
 	Brhz name;
 	Brhz info;
@@ -246,7 +166,7 @@ void ProductImpl::Manufacturer(Net::IInvocationResponse& aResponse, TUint aVersi
     aResponse.End();
 }
 
-void ProductImpl::Model(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aName, Net::IInvocationResponseString& aInfo, Net::IInvocationResponseString& aUrl, Net::IInvocationResponseString& aImageUri)
+void ProviderProduct::Model(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aName, Net::IInvocationResponseString& aInfo, Net::IInvocationResponseString& aUrl, Net::IInvocationResponseString& aImageUri)
 {
 	Brhz name;
 	Brhz info;
@@ -268,7 +188,7 @@ void ProductImpl::Model(Net::IInvocationResponse& aResponse, TUint aVersion, Net
     aResponse.End();
 }
 
-void ProductImpl::Product(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aRoom, Net::IInvocationResponseString& aName, Net::IInvocationResponseString& aInfo, Net::IInvocationResponseString& aUrl, Net::IInvocationResponseString& aImageUri)
+void ProviderProduct::Product(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aRoom, Net::IInvocationResponseString& aName, Net::IInvocationResponseString& aInfo, Net::IInvocationResponseString& aUrl, Net::IInvocationResponseString& aImageUri)
 {
 	Brhz room;
 	Brhz name;
@@ -294,7 +214,7 @@ void ProductImpl::Product(Net::IInvocationResponse& aResponse, TUint aVersion, N
     aResponse.End();
 }
 
-void ProductImpl::Standby(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseBool& aValue)
+void ProviderProduct::Standby(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseBool& aValue)
 {
 	TBool value;
     GetPropertyStandby(value);
@@ -303,7 +223,7 @@ void ProductImpl::Standby(Net::IInvocationResponse& aResponse, TUint aVersion, N
     aResponse.End();
 }
 
-void ProductImpl::SetStandby(Net::IInvocationResponse& aResponse, TUint aVersion, TBool aValue)
+void ProviderProduct::SetStandby(Net::IInvocationResponse& aResponse, TUint aVersion, TBool aValue)
 {
     aResponse.Start();
     aResponse.End();
@@ -313,7 +233,7 @@ void ProductImpl::SetStandby(Net::IInvocationResponse& aResponse, TUint aVersion
     }
 }
 
-void ProductImpl::SourceCount(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
+void ProviderProduct::SourceCount(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
 {
 	TUint value;
     GetPropertySourceCount(value);
@@ -322,7 +242,7 @@ void ProductImpl::SourceCount(Net::IInvocationResponse& aResponse, TUint aVersio
     aResponse.End();
 }
 
-void ProductImpl::SourceXml(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue)
+void ProviderProduct::SourceXml(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue)
 {
 	Brhz value;
     GetPropertySourceXml(value);
@@ -332,7 +252,7 @@ void ProductImpl::SourceXml(Net::IInvocationResponse& aResponse, TUint aVersion,
     aResponse.End();
 }
 
-void ProductImpl::SourceIndex(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
+void ProviderProduct::SourceIndex(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
 {
 	TUint value;
     GetPropertySourceIndex(value);
@@ -341,7 +261,7 @@ void ProductImpl::SourceIndex(Net::IInvocationResponse& aResponse, TUint aVersio
     aResponse.End();
 }
 
-void ProductImpl::SetSourceIndex(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
+void ProviderProduct::SetSourceIndex(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
 {
 	TUint count;
     GetPropertySourceCount(count);
@@ -357,12 +277,13 @@ void ProductImpl::SetSourceIndex(Net::IInvocationResponse& aResponse, TUint aVer
 	}
 }
 
-void ProductImpl::SetSourceIndexByName(Net::IInvocationResponse& aResponse, TUint aVersion, const Brx& aValue)
+void ProviderProduct::SetSourceIndexByName(Net::IInvocationResponse& aResponse, TUint aVersion, const Brx& aValue)
 {
 }
 
-void ProductImpl::Source(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aIndex, Net::IInvocationResponseString& aSystemName, Net::IInvocationResponseString& aType, Net::IInvocationResponseString& aName, Net::IInvocationResponseBool& aVisible)
+void ProviderProduct::Source(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aIndex, Net::IInvocationResponseString& aSystemName, Net::IInvocationResponseString& aType, Net::IInvocationResponseString& aName, Net::IInvocationResponseBool& aVisible)
 {
+    //TODO: Missing locking
 	TUint count;
     GetPropertySourceCount(count);
 	if (aIndex < count) {
@@ -382,7 +303,7 @@ void ProductImpl::Source(Net::IInvocationResponse& aResponse, TUint aVersion, TU
 	}
 }
 
-void ProductImpl::Attributes(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue)
+void ProviderProduct::Attributes(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue)
 {
 	Brhz value;
     GetPropertyAttributes(value);
@@ -392,7 +313,7 @@ void ProductImpl::Attributes(Net::IInvocationResponse& aResponse, TUint aVersion
     aResponse.End();
 }
 
-void ProductImpl::SourceXmlChangeCount(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
+void ProviderProduct::SourceXmlChangeCount(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
 {
 	iMutex.Wait();
 	TUint value = iSourceXmlChangeCount;

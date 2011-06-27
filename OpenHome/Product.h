@@ -9,105 +9,39 @@
 
 #include <Core/DvAvOpenhomeOrgProduct1.h>
 
+#include "Source.h"
+#include "Player.h"
+
 namespace OpenHome {
 namespace MediaPlayer {
 
-class ILockable
-{
-public:
-    virtual void Wait() const = 0;
-    virtual void Signal()  const = 0;
-    virtual ~ILockable() {}
-};
-
-class IObserver
-{
-public:
-    virtual void ObservableChanged() = 0;
-    virtual ~IObserver() {}
-};
-
-class Observable
-{
-public:
-    Observable();
-    void RegisterObserver(IObserver& aObserver);
-
-protected:
-    void InformObservers() const;
-
-private:
-    std::vector<IObserver*> iObserverList;
-};
-
-class IStandbyHandler
-{
-public:
-    virtual void SetStandby(TBool aValue) = 0;
-    virtual ~IStandbyHandler() {}
-};
-
-class ISourceIndexHandler
-{
-public:
-    virtual void SetSourceIndex(TUint aValue) = 0;
-    virtual ~ISourceIndexHandler() {}
-};
-
-class ProductImpl;
-
-class Source : public Observable
-{
-    friend class ProductImpl;
-
-private:
-    static const TUint kMaxTypeBytes = 20;
-    static const TUint kMaxNameBytes = 20;
-
-public:
-    TBool Details(Bwx& aSystemName, Bwx& aType, Bwx& aName); //returns Visibility boolean
-    void SetName(const Brx& aValue);
-    void SetVisible(TBool aValue);
-
-private:
-    Source(const Brx& aSystemName, const Brx& aType, const Brx& aName, TBool aVisible, ILockable& aLockable, IObserver& aObserver);
-
-private:
-    Bws<kMaxNameBytes> iSystemName;
-    Bws<kMaxTypeBytes> iType;
-    Bws<kMaxNameBytes> iName;
-    TBool iVisible;
-    ILockable& iLockable;
-
-};
-
-class ProductImpl : public Net::DvProviderAvOpenhomeOrgProduct1, public IObserver, public ILockable
+class ProviderProduct : public Net::DvProviderAvOpenhomeOrgProduct1, public IObserver, public ILockable
 {
 	static const TUint kMaxRoomBytes = 30;
     static const TUint kMaxSourceXmlBytes = 4000;
 
 public:
-	ProductImpl(Net::DvDevice& aDevice
-	, IStandbyHandler& aStandbyHandler
-    , ISourceIndexHandler& aSourceIndexHandler
-	, TBool aStandby
-	, const TChar* aAtrributes
-	, const TChar* aManufacturerName
-	, const TChar* aManufacturerInfo
-	, const TChar* aManufacturerUrl
-	, const TChar* aManufacturerImageUri
-	, const TChar* aModelName
-	, const TChar* aModelInfo
-	, const TChar* aModelUrl
-	, const TChar* aModelImageUri
-	, const TChar* aProductRoom
-	, const TChar* aProductName
-	, const TChar* aProductInfo
-	, const TChar* aProductUrl
-	, const TChar* aProductImageUri);
+	ProviderProduct(Net::DvDevice& aDevice
+        , IStandbyHandler& aStandbyHandler
+        , ISourceIndexHandler& aSourceIndexHandler
+        , TBool aStandby
+        , const TChar* aAtrributes
+        , const TChar* aManufacturerName
+        , const TChar* aManufacturerInfo
+        , const TChar* aManufacturerUrl
+        , const TChar* aManufacturerImageUri
+        , const TChar* aModelName
+        , const TChar* aModelInfo
+        , const TChar* aModelUrl
+        , const TChar* aModelImageUri
+        , const TChar* aProductRoom
+        , const TChar* aProductName
+        , const TChar* aProductInfo
+        , const TChar* aProductUrl
+        , const TChar* aProductImageUri);
     
-    TUint CreateSource(const Brx& aSystemName, const Brx& aType, const Brx& aName, TBool aVisible);
-    class Source& GetSource(TUint aIndex);
+    uint32_t AddSource(class Source* aSource);
+    class Source& GetSource(uint32_t aIndex);
 
 private:
     void UpdateSourceXml();

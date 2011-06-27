@@ -10,20 +10,26 @@ namespace MediaPlayer {
 
 class Source : public Observable
 {
-friend class ProviderProduct;
-private:
+public:
     static const TUint kMaxTypeBytes = 20;
     static const TUint kMaxNameBytes = 20;
 
 public:
-    void SetModifiable(ILockable& aLockable, IObserver& aObserver);
     bool Details(Bwx& aSystemName, Bwx& aType, Bwx& aName); //returns Visibility boolean
     void SetName(const Brx& aValue);
     void SetVisible(bool aValue);
+public:
+    virtual void Finished(uint32_t aId) = 0;
+    virtual void Next(uint32_t aAfterId, uint32_t& aNextId, Bwx& aUri, Bwx& aProvider) = 0;
+    virtual void Buffering(uint32_t aId) = 0;
+    virtual void Playing(uint32_t aId) = 0;
 
 protected:
     Source(const Brx& aSystemName, const Brx& aType, const Brx& aName, bool aVisible);
 
+private:
+    friend class ProviderProduct;
+    void SetModifiable(ILockable& aLockable, IObserver& aObserver);
 private:
     Bws<kMaxNameBytes> iSystemName;
     Bws<kMaxTypeBytes> iType;

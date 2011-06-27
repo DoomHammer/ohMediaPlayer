@@ -23,7 +23,7 @@ using namespace OpenHome::MediaPlayer;
 using namespace OpenHome::TestFramework;
 
 static const TUint kTracksMax = 1000;
-static const Brn kProtocolInfo("http-get:*:audio/x-flac:*,http-get:*:audio/wav:*,http-get:*:audio/wave:*,http-get:*:audio/x-wav:*,http-get:*:audio/mpeg:*,http-get:*:audio/x-mpeg:*,http-get:*:audio/mp1:*,http-get:*:audio/aiff:*,http-get:*:audio/x-aiff:*,http-get:*:audio/x-m4a:*,http-get:*:audio/x-ms-wma:*,rtsp-rtp-udp:*:audio/x-ms-wma:*,http-get:*:audio/x-scpls:*,http-get:*:audio/x-mpegurl:*,http-get:*:audio/x-ms-asf:*,http-get:*:audio/x-ms-wax:*,http-get:*:audio/x-ms-wvx:*,http-get:*:video/x-ms-asf:*,http-get:*:video/x-ms-wax:*,http-get:*:video/x-ms-wvx:*,http-get:*:text/xml:*,http-get:*:audio/aac:*,http-get:*:audio/aacp:*,http-get:*:audio/mp4:*,http-get:*:audio/ogg:*,http-get:*:audio/x-ogg:*,http-get:*:application/ogg:*");
+static const char* kProtocolInfo = "http-get:*:audio/x-flac:*,http-get:*:audio/wav:*,http-get:*:audio/wave:*,http-get:*:audio/x-wav:*,http-get:*:audio/mpeg:*,http-get:*:audio/x-mpeg:*,http-get:*:audio/mp1:*,http-get:*:audio/aiff:*,http-get:*:audio/x-aiff:*,http-get:*:audio/x-m4a:*,http-get:*:audio/x-ms-wma:*,rtsp-rtp-udp:*:audio/x-ms-wma:*,http-get:*:audio/x-scpls:*,http-get:*:audio/x-mpegurl:*,http-get:*:audio/x-ms-asf:*,http-get:*:audio/x-ms-wax:*,http-get:*:audio/x-ms-wvx:*,http-get:*:video/x-ms-asf:*,http-get:*:video/x-ms-wax:*,http-get:*:video/x-ms-wvx:*,http-get:*:text/xml:*,http-get:*:audio/aac:*,http-get:*:audio/aacp:*,http-get:*:audio/mp4:*,http-get:*:audio/ogg:*,http-get:*:audio/x-ogg:*,http-get:*:application/ogg:*";
 
 class StandbyHandler : public IStandbyHandler
 {
@@ -62,7 +62,7 @@ int CDECL main(int aArgc, char* aArgv[])
     SourceIndexHandler* sourceIndexHandler = new SourceIndexHandler();
     StandbyHandler* standbyHandler = new StandbyHandler();
 
-    ProductImpl* productImpl = new ProductImpl(*device, 
+    Player* player = new Player(*device, 
         *standbyHandler, 
         *sourceIndexHandler, 
         true,
@@ -81,28 +81,12 @@ int CDECL main(int aArgc, char* aArgv[])
         "",
         "");
 
-    productImpl->CreateSource(Brn("Playlist"), Brn("Playlist"), Brn("Playlist"), true);
+    SourcePlaylist* sourcePlaylist = new SourcePlaylist(*device, kTracksMax, kProtocolInfo, *player);
 
+    player->AddSource(sourcePlaylist);
     
-    device->SetAttribute("Upnp.Domain", "av.openhome.org");
-    device->SetAttribute("Upnp.Type", "MediaPlayer");
-    device->SetAttribute("Upnp.Version", "1");
-    device->SetAttribute("Upnp.FriendlyName", "ohMediaPlayer");
-    device->SetAttribute("Upnp.Manufacturer", "OpenHome");
-    device->SetAttribute("Upnp.ManufacturerUrl", "http://www.openhome.org");
-    device->SetAttribute("Upnp.ModelDescription", "OpenHome MediaPlayer");
-    device->SetAttribute("Upnp.ModelName", "OpenHome MediaPlayer");
-    device->SetAttribute("Upnp.ModelNumber", "1");
-    device->SetAttribute("Upnp.ModelUrl", "http://www.openhome.org");
-    device->SetAttribute("Upnp.SerialNumber", "");
-    device->SetAttribute("Upnp.Upc", "");
-
-    PlaylistImpl* playlistImpl = new PlaylistImpl(*device, kTracksMax, kProtocolInfo);
 
     device->SetEnabled();
-
-    (void)productImpl;
-    (void)playlistImpl;
 
     while(1) {}
 

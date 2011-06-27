@@ -15,7 +15,7 @@ def options(ctx):
 
 def configure(ctx):
     if sys.platform == 'win32':
-        ctx.env['MSVC_TARGETS'] = ['x64']
+        ctx.env['MSVC_TARGETS'] = ['x86']
         ctx.load('msvc')
     else:
         ctx.load('compiler_cxx')
@@ -76,7 +76,15 @@ def configure(ctx):
 
 def build(ctx):
     ctx.program(
-        source      = ['main.cpp', 'OpenHome/Product.cpp', 'OpenHome/Playlist.cpp'],
+        source      = [
+            'main.cpp' 
+            ,'OpenHome/Product.cpp' 
+            ,'OpenHome/Playlist.cpp' 
+            ,'OpenHome/Player.cpp'
+            ,'OpenHome/Standard.cpp'
+            ,'OpenHome/Source.cpp'
+            ,'OpenHome/SourcePlaylist.cpp'
+            ],
         target      = 'ohMediaPlayer',
         includes    = ctx.env.HeaderPath,
         defines     = ctx.env.Defines,

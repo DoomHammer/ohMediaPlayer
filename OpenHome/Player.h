@@ -25,11 +25,23 @@ public:
     virtual ~ISourceIndexHandler() {}
 };
 
+class IPlayer
+{
+public:
+    virtual void Play(uint32_t aSourceId, const Brx& aUri, uint32_t aSecond, const Brx& aProvider) = 0;
+    virtual void Pause() = 0;
+    virtual void Unpause() = 0;
+    virtual void Stop() = 0;
+    virtual void Deleted(uint32_t aSourceId) = 0;
+    virtual void DeletedAll() = 0;
+    virtual ~IPlayer() {}
+};
+
 class ProviderProduct;
 class ProviderTime;
 class ProviderInfo;
 
-class Player : public IRendererStatus 
+class Player : public IRendererStatus, public IPlayer
 {
 //External Api
 public:
@@ -61,9 +73,19 @@ public:
 public:
     virtual void Finished(uint32_t aId);
     virtual void Next(uint32_t& aId, std::string& aUri, std::string& aProvider);
+    virtual void Buffering(uint32_t aId);
     virtual void Started(uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aSampleRate, bool aLossless, std::string aCodecName);
     virtual void Playing(uint32_t aId, uint32_t aSeconds);
     virtual void Metatext(uint32_t aId, std::string aDidlLite);
+
+    //from IPlayer
+public:
+    virtual void Play(uint32_t aSourceId, const Brx& aUri, uint32_t aSecond, const Brx& aProvider);
+    virtual void Pause();
+    virtual void Unpause();
+    virtual void Stop();
+    virtual void Deleted(uint32_t aSourceId);
+    virtual void DeletedAll();
 
 private:
     ProviderProduct* iProduct;

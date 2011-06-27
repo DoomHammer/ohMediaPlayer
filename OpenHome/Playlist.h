@@ -9,6 +9,8 @@
 
 #include <Core/DvAvOpenhomeOrgPlaylist1.h>
 
+#include "SourcePlaylist.h"
+
 namespace OpenHome {
 namespace MediaPlayer {
 
@@ -31,10 +33,26 @@ private:
     Bws<kMaxMetadataBytes> iMetadata;
 };
 
-class PlaylistImpl : public Net::DvProviderAvOpenhomeOrgPlaylist1
+class ProviderPlaylist : public Net::DvProviderAvOpenhomeOrgPlaylist1
 {
 public:
-	PlaylistImpl(Net::DvDevice& aDevice, TUint aMaxTracks, const Brx& aProtocolInfo);
+    static const Brn kProvider;
+
+    enum ETransportState 
+    {
+        ePlaying = 0,
+        ePaused = 1,
+        eStopped = 2,
+        eBuffering = 3
+    }; 
+
+	ProviderPlaylist(Net::DvDevice& aDevice, TUint aMaxTracks, const Brx& aProtocolInfo, IPlayer& aPlayer);
+
+    void Next(TUint aAfterId, TUint& aSourceId, Bwx& aUri);
+    void SetTransportState(ETransportState aState);
+    void SetId(TUint aId);
+
+private:
 
     //From DvProviderAvOpenhomeOrgPlaylist1
 private:
@@ -69,13 +87,14 @@ private:
 private:
     std::list<Track*> iList;
 
-    Bws<20> iTransportState;
     TUint iId;
-    TUint iNextId;
+    TUint iIdCounter;
     TUint iToken;
     Bwh iIdArray;
     TUint iTracksMax;
     Mutex iMutex;
+    IPlayer& iPlayer;
+    ETransportState iState;
 };
 
 } // namespace MediaPlayer

@@ -160,14 +160,17 @@ void ProviderPlaylist::Play(Net::IInvocationResponse& aResponse, TUint aVersion)
         case eBuffering: 
             {
                 if(iList.empty() == false) {
-                    list<Track*>::const_iterator i = iList.begin();
+                    list<Track*>::const_iterator i;
                     TUint id;
                     GetPropertyId(id);
-                    if(id != 0) {
-                        i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),id));
+                    if(id == 0) {
+                        i = iList.begin();
                     }
-                    if(i == iList.end()) {
-                        ASSERTS();
+                    else {
+                        i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),id));
+                        if(i == iList.end()) {
+                            ASSERTS();
+                        }
                     }
                     iPlayer.Play((*i)->Id(), (*i)->Uri(), 0, kProvider);
                 }
@@ -274,6 +277,7 @@ void ProviderPlaylist::Next(Net::IInvocationResponse& aResponse, TUint aVersion)
                         else {
                             //TODO: Pre seek to first track?
                             iPlayer.Stop();
+                            break;
                         }
                     }
                 }
@@ -321,6 +325,10 @@ void ProviderPlaylist::Previous(Net::IInvocationResponse& aResponse, TUint aVers
                         i = iList.end();
                         --i;
                     }
+                    else {
+                        iPlayer.Stop();
+                        break;
+                    }
                 }
                 //4) If it's not 0, we find the id and play the previous track, if it exists
                 else {
@@ -338,6 +346,7 @@ void ProviderPlaylist::Previous(Net::IInvocationResponse& aResponse, TUint aVers
                         else {
                             //TODO: Pre seek to first track?
                             iPlayer.Stop();
+                            break;
                         }
                     }
                 }
@@ -385,30 +394,97 @@ void ProviderPlaylist::Shuffle(Net::IInvocationResponse& aResponse, TUint aVersi
 
 void ProviderPlaylist::SeekSecondAbsolute(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
 {
-    Log::Print("SeekSecondAbsolute: %d\n", aValue);
     aResponse.Start();
     aResponse.End();
+
+    iMutex.Wait();
+
+    if(iList.empty() == false) {
+        list<Track*>::const_iterator i;
+        TUint id;
+        GetPropertyId(id);
+        if(id == 0) {
+            i = iList.begin();
+        }
+        else {
+            i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),id));
+            if(i == iList.end()) {
+                ASSERTS();
+            }
+        }
+        iPlayer.Play((*i)->Id(), (*i)->Uri(), aValue, kProvider);
+    }
+
+    iMutex.Signal();
 }
 
 void ProviderPlaylist::SeekSecondRelative(Net::IInvocationResponse& aResponse, TUint aVersion, TInt aValue)
 {
-    Log::Print("SeekSecondRelative: %d\n", aValue);
     aResponse.Start();
     aResponse.End();
+
+    iMutex.Wait();
+
+    if(iList.empty() == false) {
+        list<Track*>::const_iterator i;
+        TUint id;
+        GetPropertyId(id);
+        if(id == 0) {
+            i = iList.begin();
+        }
+        else {
+            i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),id));
+            if(i == iList.end()) {
+                ASSERTS();
+            }
+        }
+        //TODO: iPlayer.PlayRelative required
+        iPlayer.Play((*i)->Id(), (*i)->Uri(), aValue, kProvider);
+    }
+
+    iMutex.Signal();
 }
 
 void ProviderPlaylist::SeekId(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
 {
-    Log::Print("SeekId: %d\n", aValue);
     aResponse.Start();
     aResponse.End();
+
+    iMutex.Wait();
+
+    list<Track*>::const_iterator i;
+    i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),aValue));
+    if(i != iList.end()) {
+        iPlayer.Play((*i)->Id(), (*i)->Uri(), 0, kProvider);
+    }
+
+    //Not found, do nothing
+
+    iMutex.Signal();
 }
 
 void ProviderPlaylist::SeekIndex(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
 {
-    Log::Print("SeekIndex: %d\n", aValue);
     aResponse.Start();
     aResponse.End();
+
+    iMutex.Wait();
+
+    list<Track*>::const_iterator i = iList.begin();
+
+    bool hitEnd = false;
+    for(TUint j=0; j < aValue; j++, i++) {
+        if(i == iList.end()) {
+            hitEnd = true;
+            break;
+        }
+    }
+
+    if(hitEnd == false) {
+        iPlayer.Play((*i)->Id(), (*i)->Uri(), 0, kProvider);
+    }
+    
+    iMutex.Signal();
 }
 
 void ProviderPlaylist::TransportState(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue)

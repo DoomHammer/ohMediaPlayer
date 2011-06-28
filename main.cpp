@@ -88,11 +88,19 @@ int CDECL main(int aArgc, char* aArgv[])
 
     device->SetEnabled();
 
-    while(1) {}
+    char c = '\0';
+    while (c != 'q') {
+        scanf("%c", &c);
+    }
+
+	printf("Quiting...\n");
 
     delete (device);
-    
-	printf("\n");
+    delete sourceIndexHandler;
+    delete standbyHandler;
+    delete player;
+
+    printf("Exit complete\n");
 	
     return (0);
 }

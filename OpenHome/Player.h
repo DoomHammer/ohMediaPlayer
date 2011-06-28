@@ -76,7 +76,7 @@ public:
     virtual void Buffering(uint32_t aId);
     virtual void Started(uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aSampleRate, bool aLossless, std::string aCodecName);
     virtual void Playing(uint32_t aId, uint32_t aSeconds);
-    virtual void Metatext(uint32_t aId, std::string aDidlLite);
+    virtual void Metatext(uint32_t aId, const std::string& aDidlLite);
 
     //from IPlayer
 public:

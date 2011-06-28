@@ -105,7 +105,7 @@ void Player::Playing(uint32_t aId, uint32_t aSeconds)
     Log::Print("Player::Playing %d\n", aId);
 }
 
-void Player::Metatext(uint32_t aId, std::string aDidlLite)
+void Player::Metatext(uint32_t aId, const std::string& aDidlLite)
 {
     Log::Print("Player::Metatext %d\n", aId);
 }

@@ -53,7 +53,6 @@ const Brn ProviderPlaylist::kProvider("av.openhome.org/Providers/Playlist");
 
 ProviderPlaylist::ProviderPlaylist(Net::DvDevice& aDevice, TUint aTracksMax, const Brx& aProtocolInfo, IPlayer& aPlayer)
     : DvProviderAvOpenhomeOrgPlaylist1(aDevice)
-    , iIdCounter(1)
     , iToken(0)
     , iIdArray(sizeof(TUint)*aTracksMax)
     , iMutex("Play")
@@ -625,9 +624,10 @@ void ProviderPlaylist::Insert(Net::IInvocationResponse& aResponse, TUint aVersio
         ++i;  //we insert after the id, not before
     }
 
-    iList.insert(i, new Track(iIdCounter, aUri, aMetadata));
+    uint32_t id = iPlayer.NewId();
+    iList.insert(i, new Track(id, aUri, aMetadata));
     aResponse.Start();
-    aNewId.Write(iIdCounter++);
+    aNewId.Write(id);
     aResponse.End();
     UpdateIdArray();
 

@@ -34,9 +34,9 @@ void SourcePlaylist::Finished(uint32_t aId)
     }
 }
 
-void SourcePlaylist::Next(uint32_t aAfterId, uint32_t& aNextId, Bwx& aUri, Bwx& aProvider)
+void SourcePlaylist::Next(uint32_t aAfterId, uint32_t& aId, Bwx& aUri, Bwx& aProvider)
 {
-    iProviderPlaylist->Next(aAfterId, aNextId, aUri);
+    iProviderPlaylist->Next(aAfterId, aId, aUri);
 
     aProvider.Replace(kProvider);
 }

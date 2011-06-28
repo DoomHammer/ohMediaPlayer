@@ -3,6 +3,7 @@
 
 #include <OhNetTypes.h>
 #include <Core/DvDevice.h>
+#include <Thread.h>
 #include <Buffer.h>
 #include "Renderer.h"
 #include "Standard.h"
@@ -28,12 +29,13 @@ public:
 class IPlayer
 {
 public:
-    virtual void Play(uint32_t aSourceId, const Brx& aUri, uint32_t aSecond, const Brx& aProvider) = 0;
+    virtual void Play(uint32_t aId, const Brx& aUri, uint32_t aSecond, const Brx& aProvider) = 0;
     virtual void Pause() = 0;
     virtual void Unpause() = 0;
     virtual void Stop() = 0;
-    virtual void Deleted(uint32_t aSourceId) = 0;
+    virtual void Deleted(uint32_t aId) = 0;
     virtual void DeletedAll() = 0;
+    virtual uint32_t NewId() = 0;
     virtual ~IPlayer() {}
 };
 
@@ -69,7 +71,7 @@ public:
 
 //Internal Api
 
-    //from IRendererStatus
+    //from IRendererStatus, to be called by IRenderer implementations
 public:
     virtual void Finished(uint32_t aId);
     virtual void Next(uint32_t& aId, std::string& aUri, std::string& aProvider);
@@ -78,19 +80,23 @@ public:
     virtual void Playing(uint32_t aId, uint32_t aSeconds);
     virtual void Metatext(uint32_t aId, const std::string& aDidlLite);
 
-    //from IPlayer
+    //from IPlayer, to be called from Source implementations
 public:
-    virtual void Play(uint32_t aSourceId, const Brx& aUri, uint32_t aSecond, const Brx& aProvider);
+    virtual void Play(uint32_t aId, const Brx& aUri, uint32_t aSecond, const Brx& aProvider);
     virtual void Pause();
     virtual void Unpause();
     virtual void Stop();
-    virtual void Deleted(uint32_t aSourceId);
+    virtual void Deleted(uint32_t aId);
     virtual void DeletedAll();
+    virtual uint32_t NewId();
 
 private:
     ProviderProduct* iProduct;
     //ProviderInfo* iInfo;
     //ProviderTime* iTime;
+
+    uint32_t iId;
+    Mutex iMutex;
 };
 
 

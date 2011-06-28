@@ -25,6 +25,8 @@ Player::Player(Net::DvDevice& aDevice
 	, const TChar* aProductInfo
 	, const TChar* aProductUrl
 	, const TChar* aProductImageUri)
+    : iId(0)
+    , iMutex("PLYR")
 {
     aDevice.SetAttribute("Upnp.Domain", "av.openhome.org");
     aDevice.SetAttribute("Upnp.Type", "av.openhome.org");
@@ -110,9 +112,9 @@ void Player::Metatext(uint32_t aId, const std::string& aDidlLite)
     Log::Print("Player::Metatext %d\n", aId);
 }
 
-void Player::Play(uint32_t aSourceId, const Brx& aUri, uint32_t aSecond, const Brx& aProvider)  
+void Player::Play(uint32_t aId, const Brx& aUri, uint32_t aSecond, const Brx& aProvider)  
 {
-    Log::Print("Player::Play %d\n", aSourceId);
+    Log::Print("Player::Play %d\n", aId);
 }
 
 void Player::Pause()
@@ -130,12 +132,21 @@ void Player::Stop()
     Log::Print("Player::Stop\n");
 }
 
-void Player::Deleted(uint32_t aSourceId)
+void Player::Deleted(uint32_t aId)
 {
-    Log::Print("Player::Deleted: %d\n", aSourceId);
+    Log::Print("Player::Deleted: %d\n", aId);
 }
 
 void Player::DeletedAll() 
 {
     Log::Print("Player::DeletedAll\n");
+}
+
+uint32_t Player::NewId() 
+{
+    uint32_t id;
+    iMutex.Wait();
+    id = ++iId;
+    iMutex.Signal();
+    return id;
 }

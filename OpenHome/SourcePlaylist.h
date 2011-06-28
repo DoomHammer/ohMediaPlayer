@@ -19,7 +19,7 @@ public:
 //from Source
 public:
     virtual void Finished(uint32_t aId);
-    virtual void Next(uint32_t aAfterId, uint32_t& aNextId, Bwx& aUri, Bwx& aProvider);
+    virtual void Next(uint32_t aAfterId, uint32_t& aId, Bwx& aUri, Bwx& aProvider);
     virtual void Buffering(uint32_t aId);
     virtual void Playing(uint32_t aId);
 

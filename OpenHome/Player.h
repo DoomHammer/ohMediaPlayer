@@ -29,7 +29,7 @@ public:
 class IPlayer
 {
 public:
-    virtual void Play(uint32_t aId, const Brx& aUri, uint32_t aSecond, const Brx& aProvider) = 0;
+    virtual void Play(uint32_t aHandle, uint32_t aId, const Brx& aUri, uint32_t aSecond) = 0;
     virtual void Pause() = 0;
     virtual void Unpause() = 0;
     virtual void Stop() = 0;
@@ -75,21 +75,20 @@ public:
 
     //from IRendererStatus, to be called by IRenderer implementations
 public:
-    virtual void Finished(uint32_t aId);
-    virtual void Next(uint32_t aAfterId, uint32_t& aId, std::string& aUri, std::string& aProvider);
-    virtual void Buffering(uint32_t aId);
-    virtual void Started(uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aBitDepth, uint32_t aSampleRate, bool aLossless, std::string aCodecName);
-    virtual void Playing(uint32_t aId, uint32_t aSeconds);
-    virtual void Metatext(uint32_t aId, const std::string& aDidlLite);
+    virtual void Finished(uint32_t aHandle, uint32_t aId);
+    virtual void Next(uint32_t aHandle, uint32_t aAfterId, uint32_t& aId, std::string& aUri);
+    virtual void Buffering(uint32_t aHandle, uint32_t aId);
+    virtual void Started(uint32_t aHandle, uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aBitDepth, uint32_t aSampleRate, bool aLossless, const char* aCodecName);
+    virtual void Playing(uint32_t aHandle, uint32_t aId, uint32_t aSeconds);
+    virtual void Metatext(uint32_t aHandle, uint32_t aId, const std::string& aDidlLite);
 
     //from IPlayer, to be called from Source implementations
 public:
-    virtual void Play(uint32_t aId, const Brx& aUri, uint32_t aSecond, const Brx& aProvider);
+    virtual void Play(uint32_t aHandle, uint32_t aId, const Brx& aUri, uint32_t aSecond);
     virtual void Pause();
     virtual void Unpause();
     virtual void Stop();
     virtual void Deleted(uint32_t aId);
-    virtual void DeletedAll();
     virtual uint32_t NewId();
 
 private:

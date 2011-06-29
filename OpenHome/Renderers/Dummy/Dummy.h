@@ -15,12 +15,12 @@ class Dummy : public IRenderer
 public:
     Dummy();
     ~Dummy();
-    virtual void Play(uint32_t aId, const std::string& aUri, uint32_t aSecond, const std::string& aProvider);
+    virtual void Play(uint32_t aHandle, uint32_t aId, const std::string& aUri, uint32_t aSecond);
     virtual void Pause();
     virtual void Unpause();
     virtual void Stop();
     virtual void Invalidate(uint32_t aIdFinal);
-    virtual void SetStatusHandler(IRendererStatus& aHandler);
+    virtual void SetStatusHandler(IRendererStatus& aStatus);
 private:
     void Tick();
     void Prefetch();
@@ -31,10 +31,10 @@ private:
     Timer iPrefetchTimer;
     IRendererStatus* iStatus;
 
+    uint32_t iHandle;
     uint32_t iId;
     std::string iUri;
     uint32_t iSecond;
-    std::string iProvider;
 
     uint32_t iDuration;
 };

@@ -17,14 +17,14 @@ Dummy::~Dummy()
 {
 }
 
-void Dummy::Play(uint32_t aId, const std::string& aUri, uint32_t aSecond, const std::string& aProvider)
+void Dummy::Play(uint32_t aHandle, uint32_t aId, const std::string& aUri, uint32_t aSecond)
 {
     cout << "Dummy::Play called with id: " << aId << " Uri: " << aUri << endl;
 
+    iHandle = aHandle;
     iId = aId;
     iUri.assign(aUri);
     iSecond = aSecond;
-    iProvider.assign(aProvider);
 
     iDuration = 10; //10 seconds
 
@@ -61,17 +61,17 @@ void Dummy::SetStatusHandler(IRendererStatus& aHandler)
 
 void Dummy::Prefetch()
 {
-    iStatus->Started(iId, iDuration, 128000, 24, 44100, false, std::string("mp3"));
-    iStatus->Playing(iId, iSecond);
+    iStatus->Started(iHandle, iId, iDuration, 128000, 24, 44100, false, std::string("mp3"));
+    iStatus->Playing(iHandle, iId, iSecond);
     iTickTimer.FireIn(1000);
 }
 
 void Dummy::Tick()
 {
     ++iSecond;
-    iStatus->Playing(iId, iSecond);
+    iStatus->Playing(iHandle, iId, iSecond);
     if(iSecond == iDuration) {
-        iStatus->Finished(iId); 
+        iStatus->Finished(iHandle, iId); 
     }
     else {
         iTickTimer.FireIn(1000);

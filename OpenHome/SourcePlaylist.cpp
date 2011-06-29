@@ -30,15 +30,13 @@ void SourcePlaylist::Finished(uint32_t aId)
         iProviderPlaylist->SetTransportState(ProviderPlaylist::eStopped);
     }
     else {
-        iPlayer.Play(nextId, uri, 0, kProvider);
+        iPlayer.Play(Handle(), nextId, uri, 0);
     }
 }
 
-void SourcePlaylist::Next(uint32_t aAfterId, uint32_t& aId, Bwx& aUri, Bwx& aProvider)
+void SourcePlaylist::Next(uint32_t aAfterId, uint32_t& aId, Bwx& aUri)
 {
     iProviderPlaylist->Next(aAfterId, aId, aUri);
-
-    aProvider.Replace(kProvider);
 }
 
 void SourcePlaylist::Buffering(uint32_t aId)

@@ -18,9 +18,11 @@ public:
     bool Details(Bwx& aSystemName, Bwx& aType, Bwx& aName); //returns Visibility boolean
     void SetName(const Brx& aValue);
     void SetVisible(bool aValue);
+    void SetHandle(uint32_t aHandle);
+    uint32_t Handle() const;
 public:
     virtual void Finished(uint32_t aId) = 0;
-    virtual void Next(uint32_t aAfterId, uint32_t& aNextId, Bwx& aUri, Bwx& aProvider) = 0;
+    virtual void Next(uint32_t aAfterId, uint32_t& aNextId, Bwx& aUri) = 0;
     virtual void Buffering(uint32_t aId) = 0;
     virtual void Playing(uint32_t aId) = 0;
 
@@ -36,6 +38,7 @@ private:
     Bws<kMaxNameBytes> iName;
     bool iVisible;
     ILockable* iLockable;
+    uint32_t iHandle;
 };
 
 } // namespace MediaPlayer

@@ -12,6 +12,7 @@ Source::Source(const Brx& aSystemName, const Brx& aType, const Brx& aName, TBool
     , iName(aName)
     , iVisible(aVisible)
     , iLockable(0)
+    , iHandle(-1)
 {
 }
 
@@ -57,3 +58,12 @@ void Source::SetVisible(TBool aValue)
 	InformObservers();
 }
 
+void Source::SetHandle(uint32_t aHandle)
+{
+    iHandle = aHandle;    
+}
+
+uint32_t Source::Handle() const
+{
+    return iHandle;
+}

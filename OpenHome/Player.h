@@ -47,7 +47,8 @@ class Player : public IRendererStatus, public IPlayer
 {
 //External Api
 public:
-    Player(Net::DvDevice& aDevice
+    Player(IRenderer* aRenderer
+        , Net::DvDevice& aDevice
         , IStandbyHandler& aStandbyHandler
         , ISourceIndexHandler& aSourceIndexHandler
         , bool aStandby
@@ -65,6 +66,7 @@ public:
         , const char* aProductInfo
         , const char* aProductUrl
         , const char* aProductImageUri); 
+    ~Player();
 
     uint32_t AddSource(Source* aSource);
     Source& GetSource(uint32_t aIndex);
@@ -74,9 +76,9 @@ public:
     //from IRendererStatus, to be called by IRenderer implementations
 public:
     virtual void Finished(uint32_t aId);
-    virtual void Next(uint32_t& aId, std::string& aUri, std::string& aProvider);
+    virtual void Next(uint32_t aAfterId, uint32_t& aId, std::string& aUri, std::string& aProvider);
     virtual void Buffering(uint32_t aId);
-    virtual void Started(uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aSampleRate, bool aLossless, std::string aCodecName);
+    virtual void Started(uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aBitDepth, uint32_t aSampleRate, bool aLossless, std::string aCodecName);
     virtual void Playing(uint32_t aId, uint32_t aSeconds);
     virtual void Metatext(uint32_t aId, const std::string& aDidlLite);
 
@@ -94,6 +96,7 @@ private:
     ProviderProduct* iProduct;
     //ProviderInfo* iInfo;
     //ProviderTime* iTime;
+    IRenderer* iRenderer;
 
     uint32_t iId;
     Mutex iMutex;

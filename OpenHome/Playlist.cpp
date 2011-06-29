@@ -100,13 +100,14 @@ void ProviderPlaylist::Next(TUint aAfterId, TUint& aId, Bwx& aUri)
 {
     iMutex.Wait();
 
-    list<Track*>::const_iterator i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),aId));
+    list<Track*>::const_iterator i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),aAfterId));
 
     if(i == iList.end()) {
         aId = 0;
         aUri.Replace(Brx::Empty());
     }
     else {
+        ++i;
         aId = (*i)->Id();
         aUri.Replace((*i)->Uri());
     }

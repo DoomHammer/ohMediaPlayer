@@ -84,6 +84,7 @@ def build(ctx):
             ,'OpenHome/Standard.cpp'
             ,'OpenHome/Source.cpp'
             ,'OpenHome/SourcePlaylist.cpp'
+            ,'OpenHome/Renderers/Dummy/Dummy.cpp'
             ],
         target      = 'ohMediaPlayer',
         includes    = ctx.env.HeaderPath,

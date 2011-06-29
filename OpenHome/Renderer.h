@@ -10,9 +10,9 @@ class IRendererStatus
 {
 public:
     virtual void Finished(uint32_t aId) = 0;
-    virtual void Next(uint32_t& aId, std::string& aUri, std::string& aProvider) = 0;
+    virtual void Next(uint32_t aAfterId, uint32_t& aId, std::string& aUri, std::string& aProvider) = 0;
     virtual void Buffering(uint32_t aId) = 0;
-    virtual void Started(uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aSampleRate, bool aLossless, std::string aCodecName) = 0;
+    virtual void Started(uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aBitDepth, uint32_t aSampleRate, bool aLossless, std::string aCodecName) = 0;
     virtual void Playing(uint32_t aId, uint32_t aSeconds) = 0;
     virtual void Metatext(uint32_t aId, const std::string& aDidlLite) = 0;
     virtual ~IRendererStatus() {}

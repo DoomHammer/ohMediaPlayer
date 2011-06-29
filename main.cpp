@@ -7,6 +7,7 @@
 #include <OptionParser.h>
 #include "OpenHome/Product.h"
 #include "OpenHome/Playlist.h"
+#include "OpenHome/Renderers/Dummy/Dummy.h"
 
 #ifdef _WIN32
 
@@ -62,7 +63,11 @@ int CDECL main(int aArgc, char* aArgv[])
     SourceIndexHandler* sourceIndexHandler = new SourceIndexHandler();
     StandbyHandler* standbyHandler = new StandbyHandler();
 
-    Player* player = new Player(*device, 
+    Dummy* dummy = new Dummy();
+
+    Player* player = new Player(
+        dummy,
+        *device, 
         *standbyHandler, 
         *sourceIndexHandler, 
         true,

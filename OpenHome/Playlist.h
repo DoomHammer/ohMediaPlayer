@@ -88,7 +88,6 @@ private:
     std::list<Track*> iList;
 
     TUint iId;
-    TUint iIdCounter;
     TUint iToken;
     Bwh iIdArray;
     TUint iTracksMax;

@@ -84,7 +84,9 @@ Player::~Player()
 
 uint32_t Player::AddSource(Source* aSource)
 {
-    return iProduct->AddSource(aSource);
+    uint32_t handle = iProduct->AddSource(aSource);
+    aSource->SetHandle(handle);
+    return handle;
 }
 
 Source& Player::GetSource(uint32_t aIndex)
@@ -92,53 +94,49 @@ Source& Player::GetSource(uint32_t aIndex)
     return iProduct->GetSource(aIndex);
 }
 
-void Player::Finished(uint32_t aId) 
+void Player::Finished(uint32_t aHandle, uint32_t aId) 
 {
     Log::Print("Player::Finished %d\n", aId); 
-    GetSource(0).Finished(aId);
+    GetSource(aHandle).Finished(aId);
 }
 
-void Player::Next(uint32_t aAfterId, uint32_t& aId, std::string& aUri, std::string& aProvider)
+void Player::Next(uint32_t aHandle, uint32_t aAfterId, uint32_t& aId, std::string& aUri)
 {
     Log::Print("Player::Next\n");
     
-    aProvider.reserve(Track::kMaxUriBytes);
-    Bwn provider(aProvider.data(), aProvider.capacity());
-
     aUri.reserve(Track::kMaxUriBytes);
     Bwn uri(aUri.data(), aUri.capacity());
 
-    GetSource(0).Next(aAfterId, aId, uri, provider);
+    GetSource(aHandle).Next(aAfterId, aId, uri);
 }
 
-void Player::Buffering(uint32_t aId)
+void Player::Buffering(uint32_t aHandle, uint32_t aId)
 {
     Log::Print("Player::Buffering\n");
-    GetSource(0).Buffering(aId);
+    GetSource(aHandle).Buffering(aId);
 }
 
-void Player::Started(uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aBitDepth, uint32_t aSampleRate, bool aLossless, std::string aCodecName)
+void Player::Started(uint32_t aHandle, uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aBitDepth, uint32_t aSampleRate, bool aLossless, const char* aCodecName)
 {
     Log::Print("Player::Started %d, Duration: %d, BitRate: %d, BitDepth: %d\n", aId, aDuration, aBitRate, aBitDepth);
 }
 
-void Player::Playing(uint32_t aId, uint32_t aSeconds)
+void Player::Playing(uint32_t aHandle, uint32_t aId, uint32_t aSeconds)
 {
     Log::Print("Player::Playing %d, Second: %d\n", aId, aSeconds);
     GetSource(0).Playing(aId);
 }
 
-void Player::Metatext(uint32_t aId, const std::string& aDidlLite)
+void Player::Metatext(uint32_t aHandle, uint32_t aId, const std::string& aDidlLite)
 {
     Log::Print("Player::Metatext %d\n", aId);
 }
 
-void Player::Play(uint32_t aId, const Brx& aUri, uint32_t aSecond, const Brx& aProvider)  
+void Player::Play(uint32_t aHandle, uint32_t aId, const Brx& aUri, uint32_t aSecond)  
 {
     Log::Print("Player::Play %d\n", aId);
     std::string uri(reinterpret_cast<const char*>(aUri.Ptr()), aUri.Bytes());
-    std::string provider(reinterpret_cast<const char*>(aProvider.Ptr()), aProvider.Bytes());
-    iRenderer->Play(aId, uri, aSecond, provider);
+    iRenderer->Play(aHandle, aId, uri, aSecond);
 }
 
 void Player::Pause()
@@ -162,11 +160,6 @@ void Player::Stop()
 void Player::Deleted(uint32_t aId)
 {
     Log::Print("Player::Deleted: %d\n", aId);
-}
-
-void Player::DeletedAll() 
-{
-    Log::Print("Player::DeletedAll\n");
 }
 
 uint32_t Player::NewId() 

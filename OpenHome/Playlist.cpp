@@ -51,12 +51,12 @@ static const Brn kBuffering("Buffering");
 
 const Brn ProviderPlaylist::kProvider("av.openhome.org/Providers/Playlist");
 
-ProviderPlaylist::ProviderPlaylist(Net::DvDevice& aDevice, TUint aTracksMax, const Brx& aProtocolInfo, IPlayer& aPlayer)
+ProviderPlaylist::ProviderPlaylist(Net::DvDevice& aDevice, TUint aTracksMax, const Brx& aProtocolInfo, Source& aSource)
     : DvProviderAvOpenhomeOrgPlaylist1(aDevice)
     , iToken(0)
     , iIdArray(sizeof(TUint)*aTracksMax)
     , iMutex("Play")
-    , iPlayer(aPlayer)
+    , iSource(aSource)
     , iState(eStopped)
 {
 
@@ -172,12 +172,12 @@ void ProviderPlaylist::Play(Net::IInvocationResponse& aResponse, TUint aVersion)
                             ASSERTS();
                         }
                     }
-                    iPlayer.Play((*i)->Id(), (*i)->Uri(), 0, kProvider);
+                    iSource.Play((*i)->Id(), (*i)->Uri(), 0);
                 }
             }
             break;
         case ePaused:
-            iPlayer.Unpause();
+            iSource.Unpause();
             break;
         default:    
             ASSERTS();
@@ -195,7 +195,7 @@ void ProviderPlaylist::Pause(Net::IInvocationResponse& aResponse, TUint aVersion
 
     switch(iState) {
         case ePlaying:
-            iPlayer.Pause();
+            iSource.Pause();
             break;
         case eStopped:
         case eBuffering:
@@ -219,7 +219,7 @@ void ProviderPlaylist::Stop(Net::IInvocationResponse& aResponse, TUint aVersion)
         case ePlaying:
         case eBuffering:
         case ePaused:
-            iPlayer.Stop();
+            iSource.Stop();
             break;
         case eStopped:
             break;
@@ -276,12 +276,12 @@ void ProviderPlaylist::Next(Net::IInvocationResponse& aResponse, TUint aVersion)
                         }
                         else {
                             //TODO: Pre seek to first track?
-                            iPlayer.Stop();
+                            iSource.Stop();
                             break;
                         }
                     }
                 }
-                iPlayer.Play((*i)->Id(), (*i)->Uri(), 0, kProvider);
+                iSource.Play((*i)->Id(), (*i)->Uri(), 0);
             }
             break;
         default:    
@@ -326,7 +326,7 @@ void ProviderPlaylist::Previous(Net::IInvocationResponse& aResponse, TUint aVers
                         --i;
                     }
                     else {
-                        iPlayer.Stop();
+                        iSource.Stop();
                         break;
                     }
                 }
@@ -345,12 +345,12 @@ void ProviderPlaylist::Previous(Net::IInvocationResponse& aResponse, TUint aVers
                         }
                         else {
                             //TODO: Pre seek to first track?
-                            iPlayer.Stop();
+                            iSource.Stop();
                             break;
                         }
                     }
                 }
-                iPlayer.Play((*i)->Id(), (*i)->Uri(), 0, kProvider);
+                iSource.Play((*i)->Id(), (*i)->Uri(), 0);
             }
             break;
         default:    
@@ -412,7 +412,7 @@ void ProviderPlaylist::SeekSecondAbsolute(Net::IInvocationResponse& aResponse, T
                 ASSERTS();
             }
         }
-        iPlayer.Play((*i)->Id(), (*i)->Uri(), aValue, kProvider);
+        iSource.Play((*i)->Id(), (*i)->Uri(), aValue);
     }
 
     iMutex.Signal();
@@ -438,8 +438,8 @@ void ProviderPlaylist::SeekSecondRelative(Net::IInvocationResponse& aResponse, T
                 ASSERTS();
             }
         }
-        //TODO: iPlayer.PlayRelative required
-        iPlayer.Play((*i)->Id(), (*i)->Uri(), aValue, kProvider);
+        //TODO: iSource.PlayRelative required
+        iSource.Play((*i)->Id(), (*i)->Uri(), aValue);
     }
 
     iMutex.Signal();
@@ -455,7 +455,7 @@ void ProviderPlaylist::SeekId(Net::IInvocationResponse& aResponse, TUint aVersio
     list<Track*>::const_iterator i;
     i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),aValue));
     if(i != iList.end()) {
-        iPlayer.Play((*i)->Id(), (*i)->Uri(), 0, kProvider);
+        iSource.Play((*i)->Id(), (*i)->Uri(), 0);
     }
 
     //Not found, do nothing
@@ -481,7 +481,7 @@ void ProviderPlaylist::SeekIndex(Net::IInvocationResponse& aResponse, TUint aVer
     }
 
     if(hitEnd == false) {
-        iPlayer.Play((*i)->Id(), (*i)->Uri(), 0, kProvider);
+        iSource.Play((*i)->Id(), (*i)->Uri(), 0);
     }
     
     iMutex.Signal();
@@ -625,7 +625,7 @@ void ProviderPlaylist::Insert(Net::IInvocationResponse& aResponse, TUint aVersio
         ++i;  //we insert after the id, not before
     }
 
-    uint32_t id = iPlayer.NewId();
+    uint32_t id = iSource.NewId();
     iList.insert(i, new Track(id, aUri, aMetadata));
     aResponse.Start();
     aNewId.Write(id);

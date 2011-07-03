@@ -8,6 +8,8 @@
 namespace OpenHome {
 namespace MediaPlayer {
 
+class IPlayer;
+
 class Source : public Observable
 {
 public:
@@ -19,15 +21,27 @@ public:
     void SetName(const Brx& aValue);
     void SetVisible(bool aValue);
     void SetHandle(uint32_t aHandle);
-    uint32_t Handle() const;
+
 public:
+    //Requests from Providers to Source.  These call the Player's
+    //implementation with appropriate info filled in.  
+    virtual void Play(uint32_t aId, const Brx& aUri, uint32_t aSecond);
+    virtual void Pause();
+    virtual void Unpause();
+    virtual void Stop();
+    virtual void Deleted(uint32_t aId);
+    virtual uint32_t NewId();
+
+public:
+    //Callbacks from the Renderer via the Player to be implemented by the derived class
     virtual void Finished(uint32_t aId) = 0;
     virtual void Next(uint32_t aAfterId, uint32_t& aNextId, Bwx& aUri) = 0;
     virtual void Buffering(uint32_t aId) = 0;
     virtual void Playing(uint32_t aId) = 0;
 
 protected:
-    Source(const Brx& aSystemName, const Brx& aType, const Brx& aName, bool aVisible);
+    Source(const Brx& aSystemName, const Brx& aType, const Brx& aName, bool aVisible, IPlayer& aPlayer);
+
 
 private:
     friend class ProviderProduct;
@@ -39,6 +53,7 @@ private:
     bool iVisible;
     ILockable* iLockable;
     uint32_t iHandle;
+    IPlayer& iPlayer;
 };
 
 } // namespace MediaPlayer

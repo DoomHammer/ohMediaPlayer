@@ -61,7 +61,7 @@ void Dummy::SetStatusHandler(IRendererStatus& aHandler)
 
 void Dummy::Prefetch()
 {
-    iStatus->Started(iHandle, iId, iDuration, 128000, 24, 44100, false, std::string("mp3"));
+    iStatus->Started(iHandle, iId, iDuration, 128000, 24, 44100, false, "mp3");
     iStatus->Playing(iHandle, iId, iSecond);
     iTickTimer.FireIn(1000);
 }

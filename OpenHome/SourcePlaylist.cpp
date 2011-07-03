@@ -8,10 +8,9 @@ using namespace OpenHome::MediaPlayer;
 static const Brn kProvider("av.openhome.org/Providers/Playlist");
 
 SourcePlaylist::SourcePlaylist(Net::DvDevice& aDevice, uint32_t aTracksMax, const char* aProtocolInfo, Player& aPlayer)
-    : Source(Brn("Playlist"), Brn("Playlist"), Brn("Playlist"), true)
-    , iPlayer(aPlayer)
+    : Source(Brn("Playlist"), Brn("Playlist"), Brn("Playlist"), true, aPlayer)
 {
-    iProviderPlaylist = new ProviderPlaylist(aDevice, aTracksMax, Brn(aProtocolInfo), aPlayer);
+    iProviderPlaylist = new ProviderPlaylist(aDevice, aTracksMax, Brn(aProtocolInfo), *this);
 }
 
 SourcePlaylist::~SourcePlaylist()
@@ -30,7 +29,7 @@ void SourcePlaylist::Finished(uint32_t aId)
         iProviderPlaylist->SetTransportState(ProviderPlaylist::eStopped);
     }
     else {
-        iPlayer.Play(Handle(), nextId, uri, 0);
+        Play(nextId, uri, 0);
     }
 }
 

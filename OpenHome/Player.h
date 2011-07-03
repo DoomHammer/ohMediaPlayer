@@ -34,7 +34,6 @@ public:
     virtual void Unpause() = 0;
     virtual void Stop() = 0;
     virtual void Deleted(uint32_t aId) = 0;
-    virtual void DeletedAll() = 0;
     virtual uint32_t NewId() = 0;
     virtual ~IPlayer() {}
 };

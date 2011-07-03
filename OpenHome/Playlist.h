@@ -46,7 +46,7 @@ public:
         eBuffering = 3
     }; 
 
-	ProviderPlaylist(Net::DvDevice& aDevice, TUint aMaxTracks, const Brx& aProtocolInfo, IPlayer& aPlayer);
+	ProviderPlaylist(Net::DvDevice& aDevice, TUint aMaxTracks, const Brx& aProtocolInfo, Source& aSource); 
 
     void Next(TUint aAfterId, TUint& aSourceId, Bwx& aUri);
     void SetTransportState(ETransportState aState);
@@ -92,8 +92,8 @@ private:
     Bwh iIdArray;
     TUint iTracksMax;
     Mutex iMutex;
-    IPlayer& iPlayer;
     ETransportState iState;
+    Source& iSource;
 };
 
 } // namespace MediaPlayer

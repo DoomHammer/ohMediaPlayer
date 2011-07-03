@@ -84,6 +84,9 @@ private:
 private:
     void UpdateIdArray();
     void SetTransportStateLocked(ETransportState aState);
+    bool IsRepeat();
+    bool IsShuffle(); 
+    TUint GetId();
 
 private:
     std::list<Track*> iList;

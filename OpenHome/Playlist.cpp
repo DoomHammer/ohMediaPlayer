@@ -143,8 +143,7 @@ void ProviderPlaylist::Play(Net::IInvocationResponse& aResponse, TUint aVersion)
             {
                 if(iList.empty() == false) {
                     list<Track*>::const_iterator i;
-                    TUint id;
-                    GetPropertyId(id);
+                    TUint id = GetId();
                     if(id == 0) {
                         i = iList.begin();
                     }
@@ -255,9 +254,7 @@ void ProviderPlaylist::Next(Net::IInvocationResponse& aResponse, TUint aVersion)
                     }
                     ++i;
                     if(i == iList.end()) {
-                        TBool repeat;
-                        GetPropertyRepeat(repeat);
-                        if(repeat) {
+                        if(IsRepeat()) {
                             i = iList.begin();
                         }
                         else {
@@ -307,9 +304,7 @@ void ProviderPlaylist::Previous(Net::IInvocationResponse& aResponse, TUint aVers
 
                 //3) If that id is 0, we play from end
                 if(id == 0) {
-                    TBool repeat;
-                    GetPropertyRepeat(repeat);
-                    if(repeat) {
+                    if(IsRepeat()) {
                         i = iList.end();
                         --i;
                     }
@@ -327,9 +322,7 @@ void ProviderPlaylist::Previous(Net::IInvocationResponse& aResponse, TUint aVers
                         ASSERTS();
                     }
                     if(i == iList.begin()) {
-                        TBool repeat;
-                        GetPropertyRepeat(repeat);
-                        if(repeat) {
+                        if(IsRepeat()) {
                             i = iList.end();
                         }
                         else {
@@ -758,6 +751,27 @@ void ProviderPlaylist::SetTransportStateLocked(ETransportState aState)
                 ASSERTS();
         }
     }
+}
+
+bool ProviderPlaylist::IsRepeat()
+{
+    bool repeat;
+    GetPropertyRepeat(repeat);
+    return repeat;
+}
+
+bool ProviderPlaylist::IsShuffle()
+{
+    bool shuffle;
+    GetPropertyRepeat(shuffle);
+    return shuffle;
+}
+
+TUint ProviderPlaylist::GetId()
+{
+    TUint id;
+    GetPropertyId(id);
+    return id;
 }
 
 

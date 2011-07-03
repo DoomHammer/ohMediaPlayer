@@ -627,25 +627,37 @@ void ProviderPlaylist::Insert(Net::IInvocationResponse& aResponse, TUint aVersio
 void ProviderPlaylist::DeleteId(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
 {
     Log::Print("ProviderPlaylist::DeleteId\n");
+
+    bool deleted = false;
+
     iMutex.Wait();
 
     list<Track*>::iterator i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),aValue));
+
 
     if(i != iList.end()) {
         delete (*i);
         iList.erase(i);
         UpdateIdArray();
+        deleted = true;
     }
 
     iMutex.Signal();
 
     aResponse.Start();
     aResponse.End();
+
+    if(deleted) {
+        iSource.Deleted(aValue);
+    }
 }
 
 void ProviderPlaylist::DeleteAll(Net::IInvocationResponse& aResponse, TUint aVersion)
 {
     Log::Print("ProviderPlaylist::DeleteAll\n");
+
+    bool deleted = false;
+
     iMutex.Wait();
 
     if(iList.size() > 0) {
@@ -656,12 +668,17 @@ void ProviderPlaylist::DeleteAll(Net::IInvocationResponse& aResponse, TUint aVer
 
         iList.clear();
         UpdateIdArray();
+        deleted = true;
     }
 
     iMutex.Signal();
 
     aResponse.Start();
     aResponse.End();
+
+    if(deleted) {
+        iSource.Deleted(0); //Special value of 0 indicates entire playlist was deleted
+    }
 }
 
 void ProviderPlaylist::TracksMax(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)

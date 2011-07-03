@@ -339,6 +339,7 @@ void ProviderPlaylist::Previous(Net::IInvocationResponse& aResponse, TUint aVers
                             break;
                         }
                     }
+                    --i;
                 }
                 iSource.Play((*i)->Id(), (*i)->Uri(), 0);
                 SetTransportStateLocked(eBuffering);

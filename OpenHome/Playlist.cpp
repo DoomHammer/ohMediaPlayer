@@ -118,26 +118,8 @@ void ProviderPlaylist::Next(TUint aAfterId, TUint& aId, Bwx& aUri)
 void ProviderPlaylist::SetTransportState(ETransportState aState)
 {
     iMutex.Wait();
-
-    if(aState != iState) {
-        iState = aState;
-        switch(iState) {
-            case ePlaying:
-                SetPropertyTransportState(kPlaying);
-                break;
-            case ePaused:
-                SetPropertyTransportState(kPaused);
-                break;
-            case eStopped:
-                SetPropertyTransportState(kStopped);
-                break;
-            case eBuffering:
-                SetPropertyTransportState(kBuffering);
-                break;
-            default:    
-                ASSERTS();
-        }
-    }
+    
+    SetTransportStateLocked(aState);
 
     iMutex.Signal();
 }
@@ -173,11 +155,13 @@ void ProviderPlaylist::Play(Net::IInvocationResponse& aResponse, TUint aVersion)
                         }
                     }
                     iSource.Play((*i)->Id(), (*i)->Uri(), 0);
+                    SetTransportStateLocked(eBuffering);
                 }
             }
             break;
         case ePaused:
             iSource.Unpause();
+            SetTransportStateLocked(ePlaying);
             break;
         default:    
             ASSERTS();
@@ -196,6 +180,7 @@ void ProviderPlaylist::Pause(Net::IInvocationResponse& aResponse, TUint aVersion
     switch(iState) {
         case ePlaying:
             iSource.Pause();
+            SetTransportStateLocked(ePaused);
             break;
         case eStopped:
         case eBuffering:
@@ -220,6 +205,7 @@ void ProviderPlaylist::Stop(Net::IInvocationResponse& aResponse, TUint aVersion)
         case eBuffering:
         case ePaused:
             iSource.Stop();
+            SetTransportStateLocked(eStopped);
             break;
         case eStopped:
             break;
@@ -277,11 +263,13 @@ void ProviderPlaylist::Next(Net::IInvocationResponse& aResponse, TUint aVersion)
                         else {
                             //TODO: Pre seek to first track?
                             iSource.Stop();
+                            SetTransportStateLocked(eStopped);
                             break;
                         }
                     }
                 }
                 iSource.Play((*i)->Id(), (*i)->Uri(), 0);
+                SetTransportStateLocked(eBuffering);
             }
             break;
         default:    
@@ -327,6 +315,7 @@ void ProviderPlaylist::Previous(Net::IInvocationResponse& aResponse, TUint aVers
                     }
                     else {
                         iSource.Stop();
+                        SetTransportStateLocked(eStopped);
                         break;
                     }
                 }
@@ -346,11 +335,13 @@ void ProviderPlaylist::Previous(Net::IInvocationResponse& aResponse, TUint aVers
                         else {
                             //TODO: Pre seek to first track?
                             iSource.Stop();
+                            SetTransportStateLocked(eStopped);
                             break;
                         }
                     }
                 }
                 iSource.Play((*i)->Id(), (*i)->Uri(), 0);
+                SetTransportStateLocked(eBuffering);
             }
             break;
         default:    
@@ -413,6 +404,7 @@ void ProviderPlaylist::SeekSecondAbsolute(Net::IInvocationResponse& aResponse, T
             }
         }
         iSource.Play((*i)->Id(), (*i)->Uri(), aValue);
+        SetTransportStateLocked(eBuffering);
     }
 
     iMutex.Signal();
@@ -440,6 +432,7 @@ void ProviderPlaylist::SeekSecondRelative(Net::IInvocationResponse& aResponse, T
         }
         //TODO: iSource.PlayRelative required
         iSource.Play((*i)->Id(), (*i)->Uri(), aValue);
+        SetTransportStateLocked(eBuffering);
     }
 
     iMutex.Signal();
@@ -456,6 +449,7 @@ void ProviderPlaylist::SeekId(Net::IInvocationResponse& aResponse, TUint aVersio
     i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),aValue));
     if(i != iList.end()) {
         iSource.Play((*i)->Id(), (*i)->Uri(), 0);
+        SetTransportStateLocked(eBuffering);
     }
 
     //Not found, do nothing
@@ -482,6 +476,7 @@ void ProviderPlaylist::SeekIndex(Net::IInvocationResponse& aResponse, TUint aVer
 
     if(hitEnd == false) {
         iSource.Play((*i)->Id(), (*i)->Uri(), 0);
+        SetTransportStateLocked(eBuffering);
     }
     
     iMutex.Signal();
@@ -739,6 +734,29 @@ void ProviderPlaylist::UpdateIdArray()
         binary.WriteUint32Be((*i)->Id());
     }
     SetPropertyIdArray(iIdArray);
+}
+
+void ProviderPlaylist::SetTransportStateLocked(ETransportState aState)
+{
+    if(aState != iState) {
+        iState = aState;
+        switch(iState) {
+            case ePlaying:
+                SetPropertyTransportState(kPlaying);
+                break;
+            case ePaused:
+                SetPropertyTransportState(kPaused);
+                break;
+            case eStopped:
+                SetPropertyTransportState(kStopped);
+                break;
+            case eBuffering:
+                SetPropertyTransportState(kBuffering);
+                break;
+            default:    
+                ASSERTS();
+        }
+    }
 }
 
 

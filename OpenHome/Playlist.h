@@ -83,6 +83,7 @@ private:
 
 private:
     void UpdateIdArray();
+    void SetTransportStateLocked(ETransportState aState);
 
 private:
     std::list<Track*> iList;

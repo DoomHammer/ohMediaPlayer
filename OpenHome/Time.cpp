@@ -6,7 +6,7 @@ using namespace OpenHome::MediaPlayer;
 
 ProviderTime::ProviderTime(Net::DvDevice& aDevice)
     : DvProviderAvOpenhomeOrgTime1(aDevice)
-    , iMutex("INFO")
+    , iMutex("TIME")
 {
     EnableActionTime();
 

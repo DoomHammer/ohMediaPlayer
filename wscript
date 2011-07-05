@@ -79,6 +79,8 @@ def build(ctx):
         source      = [
             'main.cpp' 
             ,'OpenHome/Product.cpp' 
+            ,'OpenHome/Info.cpp'
+            ,'OpenHome/Time.cpp'
             ,'OpenHome/Playlist.cpp' 
             ,'OpenHome/Player.cpp'
             ,'OpenHome/Standard.cpp'

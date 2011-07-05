@@ -71,8 +71,8 @@ Player::Player(IRenderer* aRenderer
         aProductUrl,
         aProductImageUri);
 
-    //iInfo = new ProviderInfo();
-    //iTime = new ProviderTime();
+    iInfo = new ProviderInfo(aDevice);
+    iTime = new ProviderTime(aDevice);
 
     iRenderer->SetStatusHandler(*this);
 }
@@ -80,6 +80,7 @@ Player::Player(IRenderer* aRenderer
 Player::~Player()
 {
     delete iRenderer;
+    delete iInfo;
 }
 
 uint32_t Player::AddSource(Source* aSource)
@@ -119,17 +120,22 @@ void Player::Buffering(uint32_t aHandle, uint32_t aId)
 void Player::Started(uint32_t aHandle, uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aBitDepth, uint32_t aSampleRate, bool aLossless, const char* aCodecName)
 {
     Log::Print("Player::Started %d, Duration: %d, BitRate: %d, BitDepth: %d\n", aId, aDuration, aBitRate, aBitDepth);
+    iInfo->SetDetails(aDuration, aBitRate, aBitDepth, aSampleRate, aLossless, Brn(aCodecName));
+    iTime->SetDuration(aDuration);
 }
 
 void Player::Playing(uint32_t aHandle, uint32_t aId, uint32_t aSeconds)
 {
     Log::Print("Player::Playing %d, Second: %d\n", aId, aSeconds);
+    //TODO: Is it really necessary to call this _every_ second tick?
     GetSource(0).Playing(aId);
+    iTime->SetSeconds(aSeconds);
 }
 
 void Player::Metatext(uint32_t aHandle, uint32_t aId, const std::string& aDidlLite)
 {
     Log::Print("Player::Metatext %d\n", aId);
+    iInfo->SetMetatext(Brn((const TByte*)(aDidlLite.data()), aDidlLite.size()));
 }
 
 void Player::Play(uint32_t aHandle, uint32_t aId, const Brx& aUri, uint32_t aSecond)  
@@ -137,6 +143,7 @@ void Player::Play(uint32_t aHandle, uint32_t aId, const Brx& aUri, uint32_t aSec
     Log::Print("Player::Play %d\n", aId);
     std::string uri(reinterpret_cast<const char*>(aUri.Ptr()), aUri.Bytes());
     iRenderer->Play(aHandle, aId, uri, aSecond);
+    iInfo->SetTrack(aUri, Brx::Empty());
 }
 
 void Player::Pause()

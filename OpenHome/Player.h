@@ -8,6 +8,8 @@
 #include "Renderer.h"
 #include "Standard.h"
 #include "Source.h"
+#include "Info.h"
+#include "Time.h"
 
 namespace OpenHome {
 namespace MediaPlayer {
@@ -92,8 +94,8 @@ public:
 
 private:
     ProviderProduct* iProduct;
-    //ProviderInfo* iInfo;
-    //ProviderTime* iTime;
+    ProviderInfo* iInfo;
+    ProviderTime* iTime;
     IRenderer* iRenderer;
 
     uint32_t iId;

@@ -259,8 +259,12 @@ void Player::Play(uint32_t aHandle, int32_t aRelativeIndex)
         PipelineClear();
     }
     const Track* track = GetSource(aHandle).GetTrack(id, aRelativeIndex);
-    PipelineAppend(track);
-    iRenderer->Play(aHandle, track->Id(), track->Uri().Ptr(), track->Uri().Bytes(), 0);
+
+    //If the track to play is 0, ignore the play request and do nothing
+    if(track->Id() != 0) {
+        PipelineAppend(track);
+        iRenderer->Play(aHandle, track->Id(), track->Uri().Ptr(), track->Uri().Bytes(), 0);
+    }
 
     iMutex.Signal();
 }
@@ -269,8 +273,10 @@ void Player::PlaySecondAbsolute(uint32_t aHandle, uint32_t aSecond)
 {
     iMutex.Wait();
 
-    const Track* track = iPipeline.front();
-    iRenderer->Play(aHandle, track->Id(), track->Uri().Ptr(), track->Uri().Bytes(), aSecond);
+    if(!iPipeline.empty()) {
+        const Track* track = iPipeline.front();
+        iRenderer->Play(aHandle, track->Id(), track->Uri().Ptr(), track->Uri().Bytes(), aSecond);
+    }
 
     iMutex.Signal();
 }
@@ -278,6 +284,11 @@ void Player::PlaySecondAbsolute(uint32_t aHandle, uint32_t aSecond)
 void Player::PlaySecondRelative(uint32_t aHandle, int32_t aSecond)
 {
     iMutex.Wait();
+
+    if(iPipeline.empty()) {
+        iMutex.Signal();
+        return;
+    }
 
     const Track* track = iPipeline.front();
     TUint current = iTime->Seconds();

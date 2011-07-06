@@ -8,8 +8,8 @@
 namespace OpenHome {
 namespace MediaPlayer {
 
-class IPlayer;
 class Track;
+class IPlayer;
 
 class Source : public Observable
 {
@@ -28,8 +28,8 @@ public:
     //implementation with appropriate info filled in.  
     virtual void Play(const Track* aTrack, uint32_t aSecond);
     virtual void Play(int32_t aRelativeIndex);
-    virtual void PlayAbsolute(uint32_t aSecond);
-    virtual void PlayRelative(int32_t aSecond);
+    virtual void PlaySecondAbsolute(uint32_t aSecond);
+    virtual void PlaySecondRelative(int32_t aSecond);
     virtual void Pause();
     virtual void Unpause();
     virtual void Stop();
@@ -38,10 +38,10 @@ public:
 
 public:
     //Callbacks from the Renderer via the Player to be implemented by the derived class
-    virtual const Track* Track(uint32_t aId, int32_t aIndex);
-    virtual void Finished(uint32_t aId) = 0;
-    virtual void Next(uint32_t aAfterId, uint32_t& aNextId, Bwx& aUri) = 0;
+    virtual const Track* GetTrack(uint32_t aId, int32_t aIndex) = 0;
     virtual void Buffering(uint32_t aId) = 0;
+    virtual void Stopped(uint32_t aId) = 0;
+    virtual void Paused(uint32_t aId) = 0;
     virtual void Playing(uint32_t aId) = 0;
 
 protected:

@@ -18,6 +18,8 @@ public:
 
     void SetDuration(TUint aDuration);
     void SetSeconds(TUint aSeconds);
+    TUint Seconds();
+    TUint Duration();
     
     //From DvProviderAvOpenhomeOrgTime1 
 private:

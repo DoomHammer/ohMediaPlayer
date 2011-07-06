@@ -69,7 +69,7 @@ ProviderPlaylist::ProviderPlaylist(Net::DvDevice& aDevice, TUint aTracksMax, con
     SetPropertyIdArray(iIdArray);
 }
 
-const Track* ProviderPlaylist::Next(TUint aId, TInt aIndex)
+const Track* ProviderPlaylist::GetTrack(TUint aId, TInt aIndex)
 {
     const Track* track;
 
@@ -430,8 +430,10 @@ void ProviderPlaylist::DeleteId(Net::IInvocationResponse& aResponse, TUint aVers
 
     list<Track*>::iterator i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),aValue));
 
-
+    const Track* replacement = 0;
     if(i != iList.end()) {
+        replacement = *(++i);
+        --i;
         (*i)->DecRef();
         iList.erase(i);
         UpdateIdArray();
@@ -444,7 +446,7 @@ void ProviderPlaylist::DeleteId(Net::IInvocationResponse& aResponse, TUint aVers
     aResponse.End();
 
     if(deleted) {
-        iSource.Deleted(aValue);
+        iSource.Deleted(aValue, replacement);
     }
 }
 
@@ -458,11 +460,13 @@ void ProviderPlaylist::DeleteAll(Net::IInvocationResponse& aResponse, TUint aVer
 
     if(iList.size() > 0) {
         list<Track*>::iterator i = iList.begin();
-        for( ; i != iList.end(); ++i) {
+        for( ; i != iList.end(); ) {
             (*i)->DecRef(); 
+            list<Track*>::iterator j = i;
+            i++;
+            iList.erase(j);
         }
 
-        iList.clear();
         UpdateIdArray();
         deleted = true;
     }
@@ -473,7 +477,7 @@ void ProviderPlaylist::DeleteAll(Net::IInvocationResponse& aResponse, TUint aVer
     aResponse.End();
 
     if(deleted) {
-        iSource.Deleted(0); //Special value of 0 indicates entire playlist was deleted
+        iSource.Deleted(0, Track::Zero()); //Special value of 0 indicates entire playlist was deleted
     }
 }
 

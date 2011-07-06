@@ -34,6 +34,20 @@ void ProviderTime::SetSeconds(TUint aSeconds)
     SetPropertySeconds(aSeconds);
 }
 
+TUint ProviderTime::Seconds()
+{
+    TUint seconds;
+    GetPropertySeconds(seconds);
+    return seconds;
+}
+
+TUint ProviderTime::Duration()
+{
+    TUint duration;
+    GetPropertyDuration(duration);
+    return duration;
+}
+
 //From DvProviderAvOpenhomeOrgTime1
 void ProviderTime::Time(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aTrackCount, Net::IInvocationResponseUint& aDuration, Net::IInvocationResponseUint& aSeconds)
 {

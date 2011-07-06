@@ -1,6 +1,6 @@
+#include <Debug.h>
 #include "Source.h"
 #include "Player.h"
-#include <Debug.h>
 
 using namespace OpenHome;
 using namespace OpenHome::MediaPlayer;
@@ -65,9 +65,24 @@ void Source::SetHandle(uint32_t aHandle)
     iHandle = aHandle;    
 }
 
-void Source::Play(uint32_t aId, const Track* aTrack, uint32_t aSecond)
+void Source::Play(const Track* aTrack, uint32_t aSecond)
 {
     iPlayer.Play(iHandle, aTrack, aSecond);
+}
+
+void Source::Play(int32_t aRelativeIndex)
+{
+    iPlayer.Play(iHandle, aRelativeIndex);
+}
+
+void Source::PlaySecondAbsolute(uint32_t aSecond)
+{
+    iPlayer.PlaySecondAbsolute(iHandle, aSecond);
+}
+
+void Source::PlaySecondRelative(int32_t aSecond)
+{
+    iPlayer.PlaySecondRelative(iHandle, aSecond);
 }
 
 void Source::Pause()

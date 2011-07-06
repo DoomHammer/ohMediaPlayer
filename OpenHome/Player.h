@@ -8,12 +8,15 @@
 #include <RefCounter.h>
 #include "Renderer.h"
 #include "Standard.h"
-#include "Source.h"
 #include "Info.h"
 #include "Time.h"
 
+#include <vector>
+
 namespace OpenHome {
 namespace MediaPlayer {
+
+class Source;
 
 class IStandbyHandler
 {
@@ -55,8 +58,8 @@ class IPlayer
 public:
     virtual void Play(uint32_t aHandle, const Track* aTrack, uint32_t aSecond) = 0;
     virtual void Play(uint32_t aHandle, int32_t aRelativeIndex) = 0;
-    virtual void PlayAbsolute(uint32_t aHandle, uint32_t aSecond) = 0;
-    virtual void PlayRelative(uint32_t aHanlde, int32_t aSecond) = 0;
+    virtual void PlaySecondAbsolute(uint32_t aHandle, uint32_t aSecond) = 0;
+    virtual void PlaySecondRelative(uint32_t aHanlde, int32_t aSecond) = 0;
     virtual void Pause() = 0;
     virtual void Unpause() = 0;
     virtual void Stop() = 0;
@@ -102,23 +105,29 @@ public:
     //from IRendererStatus, to be called by IRenderer implementations
 public:
     virtual void Finished(uint32_t aHandle, uint32_t aId);
-    virtual void Next(uint32_t aHandle, uint32_t aAfterId, uint32_t& aId, std::string& aUri);
+    virtual void Next(uint32_t aHandle, uint32_t aAfterId, uint32_t& aId, uint8_t aUri[], uint32_t& aUriBytes);
     virtual void Buffering(uint32_t aHandle, uint32_t aId);
+    virtual void Stopped(uint32_t aHandle, uint32_t aId);
+    virtual void Paused(uint32_t aHandle, uint32_t aId);
     virtual void Started(uint32_t aHandle, uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aBitDepth, uint32_t aSampleRate, bool aLossless, const char* aCodecName);
     virtual void Playing(uint32_t aHandle, uint32_t aId, uint32_t aSeconds);
-    virtual void Metatext(uint32_t aHandle, uint32_t aId, const std::string& aDidlLite);
+    virtual void Metatext(uint32_t aHandle, uint32_t aId, uint8_t aMetatext[], uint32_t aMetatextBytes);
 
     //from IPlayer, to be called from Source implementations
 public:
     virtual void Play(uint32_t aHandle, const Track* aTrack, uint32_t aSecond);
     virtual void Play(uint32_t aHandle, int32_t aRelativeIndex);
-    virtual void PlayAbsolute(uint32_t aHandle, uint32_t aSecond);
-    virtual void PlayRelative(uint32_t aHanlde, int32_t aSecond);
+    virtual void PlaySecondAbsolute(uint32_t aHandle, uint32_t aSecond);
+    virtual void PlaySecondRelative(uint32_t aHanlde, int32_t aSecond);
     virtual void Pause();
     virtual void Unpause();
     virtual void Stop();
     virtual void Deleted(uint32_t aId, const Track* aReplacement);
     virtual uint32_t NewId();
+
+private:
+    void PipelineClear();
+    void PipelineAppend(const Track* aTrack);
 
 private:
     ProviderProduct* iProduct;
@@ -127,7 +136,18 @@ private:
     IRenderer* iRenderer;
 
     AtomicInt iAtomicInt;
+
+    enum ETransportState
+    {
+        ePlaying = 0,
+        ePaused = 1,
+        eStopped = 2,
+        eBuffering = 3
+    };
+
     Mutex iMutex;
+    std::vector<const Track*> iPipeline;
+    ETransportState iState;
 };
 
 

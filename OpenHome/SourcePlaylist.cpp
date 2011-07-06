@@ -18,29 +18,24 @@ SourcePlaylist::~SourcePlaylist()
     delete iProviderPlaylist;
 }
 
-void SourcePlaylist::Finished(uint32_t aId)
+const Track* SourcePlaylist::GetTrack(uint32_t aId, int32_t aIndex)
 {
-    TUint nextId;
-    Bws<Track::kMaxUriBytes> uri;
-    iProviderPlaylist->Next(aId, nextId, uri);
-
-    if(aId == 0) {
-        iProviderPlaylist->SetId(0);
-        iProviderPlaylist->SetTransportState(ProviderPlaylist::eStopped);
-    }
-    else {
-        Play(nextId, uri, 0);
-    }
-}
-
-void SourcePlaylist::Next(uint32_t aAfterId, uint32_t& aId, Bwx& aUri)
-{
-    iProviderPlaylist->Next(aAfterId, aId, aUri);
+    return iProviderPlaylist->GetTrack(aId, aIndex);
 }
 
 void SourcePlaylist::Buffering(uint32_t aId)
 {
     iProviderPlaylist->SetTransportState(ProviderPlaylist::eBuffering);
+}
+
+void SourcePlaylist::Stopped(uint32_t aId)
+{
+    iProviderPlaylist->SetTransportState(ProviderPlaylist::eStopped);
+}
+
+void SourcePlaylist::Paused(uint32_t aId)
+{
+    iProviderPlaylist->SetTransportState(ProviderPlaylist::ePaused);
 }
 
 void SourcePlaylist::Playing(uint32_t aId)

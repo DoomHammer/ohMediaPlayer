@@ -17,14 +17,14 @@ Dummy::~Dummy()
 {
 }
 
-void Dummy::Play(uint32_t aHandle, uint32_t aId, const std::string& aUri, uint32_t aSecond)
+void Dummy::Play(uint32_t aHandle, uint32_t aId, const uint8_t aUri[], uint32_t aUriBytes, uint32_t aSecond)
 {
-    cout << "Dummy::Play called with id: " << aId << " Uri: " << aUri << endl;
-
     iHandle = aHandle;
     iId = aId;
-    iUri.assign(aUri);
+    iUri.assign((const char*)aUri, aUriBytes);
     iSecond = aSecond;
+
+    cout << "Dummy::Play called with id: " << iId << " Uri: " << iUri << endl;
 
     iDuration = 10; //10 seconds
 

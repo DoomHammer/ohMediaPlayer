@@ -11,12 +11,14 @@
 namespace OpenHome {
 namespace MediaPlayer {
 
+class Track;
+
 class ProviderInfo : public Net::DvProviderAvOpenhomeOrgInfo1
 {
 public:
 	ProviderInfo(Net::DvDevice& aDevice);
 
-    void SetTrack(const Brx& aUri, const Brx& aMetadata);
+    void SetTrack(const class Track& aTrack);
     void SetDetails(TUint aDuration, TUint aBitRate, TUint aBitDepth, TUint aSampleRate, TBool aLossless, const Brx& aCodecName);
     void SetMetatext(const Brx& aMetatext);
     

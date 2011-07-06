@@ -1,5 +1,6 @@
 #include "Info.h"
 #include <Debug.h>
+#include "Player.h"
 
 using namespace OpenHome;
 using namespace OpenHome::MediaPlayer;
@@ -27,12 +28,12 @@ ProviderInfo::ProviderInfo(Net::DvDevice& aDevice)
     SetPropertyMetatext(Brx::Empty());
 }
 
-void ProviderInfo::SetTrack(const Brx& aUri, const Brx& aMetadata)
+void ProviderInfo::SetTrack(const class Track& aTrack)
 {
     iMutex.Wait();
 
-    SetPropertyUri(aUri);
-    SetPropertyMetadata(aMetadata);
+    SetPropertyUri(aTrack.Uri());
+    SetPropertyMetadata(aTrack.Metadata());
 
     TUint trackCount;
     GetPropertyTrackCount(trackCount);
@@ -41,6 +42,13 @@ void ProviderInfo::SetTrack(const Brx& aUri, const Brx& aMetadata)
 
     SetPropertyDetailsCount(0);
     SetPropertyMetatextCount(0);
+    SetPropertyDuration(0);
+    SetPropertyBitRate(0);
+    SetPropertyBitDepth(0);
+    SetPropertySampleRate(0);
+    SetPropertyLossless(false);
+    SetPropertyCodecName(Brx::Empty());
+    SetPropertyMetatext(Brx::Empty());
 
     iMutex.Signal();
 }

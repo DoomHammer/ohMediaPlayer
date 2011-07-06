@@ -18,9 +18,10 @@ public:
 
 //from Source
 public:
-    virtual void Finished(uint32_t aId);
-    virtual void Next(uint32_t aAfterId, uint32_t& aId, Bwx& aUri);
+    virtual const Track* GetTrack(uint32_t aId, int32_t aIndex);
     virtual void Buffering(uint32_t aId);
+    virtual void Stopped(uint32_t aId);
+    virtual void Paused(uint32_t aId);
     virtual void Playing(uint32_t aId);
 
 private:

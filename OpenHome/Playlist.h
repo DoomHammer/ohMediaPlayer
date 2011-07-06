@@ -29,7 +29,7 @@ public:
 
 	ProviderPlaylist(Net::DvDevice& aDevice, TUint aMaxTracks, const Brx& aProtocolInfo, Source& aSource); 
 
-    const Track* Next(TUint aId, TInt aIndex);
+    const Track* GetTrack(TUint aId, TInt aIndex);
     void SetTransportState(ETransportState aState);
     void SetId(TUint aId);
 
@@ -66,8 +66,8 @@ private:
     void UpdateIdArray();
     bool IsRepeat();
     bool IsShuffle(); 
-    const Track* IterateForwards(list<Track*>::const_iterator aIter, uint32_t aCount);
-    const Track* IterateBackwards(list<Track*>::const_iterator aIter, uint32_t aCount);
+    const Track* IterateForwards(std::list<Track*>::const_iterator aIter, uint32_t aCount);
+    const Track* IterateBackwards(std::list<Track*>::const_iterator aIter, uint32_t aCount);
 private:
     std::list<Track*> iList;
 

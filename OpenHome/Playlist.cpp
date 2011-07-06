@@ -81,7 +81,7 @@ const Track* ProviderPlaylist::GetTrack(TUint aId, TInt aIndex)
         return Track::Zero();
     }
 
-    if(aId == 0) {
+    if(aId == 0) {$
         i = iList.begin();        
     }
     else {

@@ -148,6 +148,7 @@ private:
     Mutex iMutex;
     std::list<const Track*> iPipeline;
     ETransportState iState;
+    uint32_t iId;
 };
 
 

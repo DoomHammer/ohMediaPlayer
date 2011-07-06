@@ -60,6 +60,8 @@ Player::Player(IRenderer* aRenderer
 	, const TChar* aProductImageUri)
     : iRenderer(aRenderer)
     , iMutex("PLYR")
+    , iState(eStopped)
+    , iId(0)
 {
     aDevice.SetAttribute("Upnp.Domain", "av.openhome.org");
     aDevice.SetAttribute("Upnp.Type", "av.openhome.org");
@@ -182,7 +184,7 @@ void Player::Stopped(uint32_t aHandle, uint32_t aId)
 
     Log::Print("Player::Stopped\n");
     GetSource(aHandle).Stopped(aId);
-    iState = eBuffering;
+    iState = eStopped;
 
     iMutex.Signal();
 }
@@ -220,8 +222,12 @@ void Player::Playing(uint32_t aHandle, uint32_t aId, uint32_t aSeconds)
     Log::Print("Player::Playing %d, Second: %d\n", aId, aSeconds);
     iTime->SetSeconds(aSeconds);
 
-    if(iState != ePlaying) {
+    //iId is subtly different from iPipeline.front()->Id()
+    //iId is updated when we get a ::Playing back from the renderer
+    //iPipeline.front()->Id() is updated when we call iRenderer->Play()
+    if( (iId != aId) || (iState != ePlaying) ) {
         iState = ePlaying;
+        iId = aId;
         GetSource(aHandle).Playing(aId);
     }
 

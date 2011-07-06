@@ -10,33 +10,6 @@ using namespace OpenHome;
 using namespace OpenHome::MediaPlayer;
 using namespace std;
 
-Track::Track(TUint aId, const Brx& aUri, const Brx& aMetadata)
-    : iId(aId)
-{
-    iUri.Replace(aUri);
-    iMetadata.Replace(aMetadata);
-}
-
-TBool Track::IsId(TUint aId) const
-{
-    return (aId == iId);
-}
-
-TUint Track::Id() const
-{
-    return iId;
-}
-
-const Brx& Track::Uri() const
-{
-    return iUri;
-}
-
-const Brx& Track::Metadata() const
-{
-    return iMetadata;
-}
-
 static const TInt kIdNotFound = 800;
 static const Brn kIdNotFoundMsg("Id not found");
 static const TInt kPlaylistFull = 801;
@@ -96,30 +69,58 @@ ProviderPlaylist::ProviderPlaylist(Net::DvDevice& aDevice, TUint aTracksMax, con
     SetPropertyIdArray(iIdArray);
 }
 
-void ProviderPlaylist::Next(TUint aAfterId, TUint& aId, Bwx& aUri)
+const Track* ProviderPlaylist::Next(TUint aId, TInt aIndex)
 {
+    const Track* track;
+
     iMutex.Wait();
 
-    list<Track*>::const_iterator i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),aAfterId));
-
+    list<Track*>::const_iterator i;
+    i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),aId));
     if(i == iList.end()) {
-        aId = 0;
-        aUri.Replace(Brx::Empty());
+        ASSERTS();
+    }
+    else if(aIndex > 0) {
+        track = IterateForwards(i, aIndex); 
+        track->IncRef();
+    }
+    else if(aIndex < 0) {
+        track = IterateBackwards(i, abs(aIndex)); 
+        track->IncRef();
     }
     else {
-        ++i;
-        aId = (*i)->Id();
-        aUri.Replace((*i)->Uri());
+        track = *i;
+        track->IncRef();
     }
 
     iMutex.Signal();
+
+    return track;
 }
 
 void ProviderPlaylist::SetTransportState(ETransportState aState)
 {
     iMutex.Wait();
     
-    SetTransportStateLocked(aState);
+    if(aState != iState) {
+        iState = aState;
+        switch(iState) {
+            case ePlaying:
+                SetPropertyTransportState(kPlaying);
+                break;
+            case ePaused:
+                SetPropertyTransportState(kPaused);
+                break;
+            case eStopped:
+                SetPropertyTransportState(kStopped);
+                break;
+            case eBuffering:
+                SetPropertyTransportState(kBuffering);
+                break;
+            default:    
+                ASSERTS();
+        }
+    }
 
     iMutex.Signal();
 }
@@ -134,62 +135,15 @@ void ProviderPlaylist::Play(Net::IInvocationResponse& aResponse, TUint aVersion)
     aResponse.Start();
     aResponse.End();
 
-    iMutex.Wait();
-
-    switch(iState) {
-        case ePlaying:
-        case eStopped:
-        case eBuffering: 
-            {
-                if(iList.empty() == false) {
-                    list<Track*>::const_iterator i;
-                    TUint id = GetId();
-                    if(id == 0) {
-                        i = iList.begin();
-                    }
-                    else {
-                        i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),id));
-                        if(i == iList.end()) {
-                            ASSERTS();
-                        }
-                    }
-                    iSource.Play((*i)->Id(), (*i)->Uri(), 0);
-                    SetTransportStateLocked(eBuffering);
-                }
-            }
-            break;
-        case ePaused:
-            iSource.Unpause();
-            SetTransportStateLocked(ePlaying);
-            break;
-        default:    
-            ASSERTS();
-    }
-
-    iMutex.Signal();
+    iSource.Play(0);
 }
 
 void ProviderPlaylist::Pause(Net::IInvocationResponse& aResponse, TUint aVersion)
 {
     aResponse.Start();
     aResponse.End();
-
-    iMutex.Wait();
-
-    switch(iState) {
-        case ePlaying:
-            iSource.Pause();
-            SetTransportStateLocked(ePaused);
-            break;
-        case eStopped:
-        case eBuffering:
-        case ePaused:
-            break;
-        default:    
-            ASSERTS();
-    }
-
-    iMutex.Signal();
+    
+    iSource.Pause();
 }
 
 void ProviderPlaylist::Stop(Net::IInvocationResponse& aResponse, TUint aVersion)
@@ -197,22 +151,7 @@ void ProviderPlaylist::Stop(Net::IInvocationResponse& aResponse, TUint aVersion)
     aResponse.Start();
     aResponse.End();
 
-    iMutex.Wait();
-
-    switch(iState) {
-        case ePlaying:
-        case eBuffering:
-        case ePaused:
-            iSource.Stop();
-            SetTransportStateLocked(eStopped);
-            break;
-        case eStopped:
-            break;
-        default:    
-            ASSERTS();
-    }
-
-    iMutex.Signal();
+    iSource.Stop();
 }
 
 void ProviderPlaylist::Next(Net::IInvocationResponse& aResponse, TUint aVersion)
@@ -220,60 +159,7 @@ void ProviderPlaylist::Next(Net::IInvocationResponse& aResponse, TUint aVersion)
     aResponse.Start();
     aResponse.End();
 
-    iMutex.Wait();
-
-    if(iList.empty()) {
-        iMutex.Signal();
-        return;
-    }
-
-    switch(iState) {
-        case ePlaying:
-        case eBuffering:
-        case ePaused:
-        case eStopped:
-            {
-                //1) There's something in the list
-
-                TUint id;
-                //2) Get the current id
-                GetPropertyId(id);
-
-                list<Track*>::const_iterator i;
-
-                //3) If that id is 0, we play from beginning
-                if(id == 0) {
-                    i = iList.begin();    
-                }
-                //4) If it's not 0, we find the id and play the following track, if it exists
-                else {
-                    i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),id));
-                    if(i == iList.end()) {
-                        //Id doesn't exist in list, something wacky
-                        ASSERTS();
-                    }
-                    ++i;
-                    if(i == iList.end()) {
-                        if(IsRepeat()) {
-                            i = iList.begin();
-                        }
-                        else {
-                            //TODO: Pre seek to first track?
-                            iSource.Stop();
-                            SetTransportStateLocked(eStopped);
-                            break;
-                        }
-                    }
-                }
-                iSource.Play((*i)->Id(), (*i)->Uri(), 0);
-                SetTransportStateLocked(eBuffering);
-            }
-            break;
-        default:    
-            ASSERTS();
-    }
-
-    iMutex.Signal();
+    iSource.Play(1);
 }
 
 void ProviderPlaylist::Previous(Net::IInvocationResponse& aResponse, TUint aVersion)
@@ -281,68 +167,7 @@ void ProviderPlaylist::Previous(Net::IInvocationResponse& aResponse, TUint aVers
     aResponse.Start();
     aResponse.End();
 
-    iMutex.Wait();
-
-    if(iList.empty()) {
-        iMutex.Signal();
-        return;
-    }
-
-    switch(iState) {
-        case ePlaying:
-        case eBuffering:
-        case ePaused:
-        case eStopped:
-            {
-                //1) There's something in the list
-
-                TUint id;
-                //2) Get the current id
-                GetPropertyId(id);
-
-                list<Track*>::const_iterator i;
-
-                //3) If that id is 0, we play from end
-                if(id == 0) {
-                    if(IsRepeat()) {
-                        i = iList.end();
-                        --i;
-                    }
-                    else {
-                        iSource.Stop();
-                        SetTransportStateLocked(eStopped);
-                        break;
-                    }
-                }
-                //4) If it's not 0, we find the id and play the previous track, if it exists
-                else {
-                    i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),id));
-                    if(i == iList.end()) {
-                        //Id doesn't exist in list, something wacky
-                        ASSERTS();
-                    }
-                    if(i == iList.begin()) {
-                        if(IsRepeat()) {
-                            i = iList.end();
-                        }
-                        else {
-                            //TODO: Pre seek to first track?
-                            iSource.Stop();
-                            SetTransportStateLocked(eStopped);
-                            break;
-                        }
-                    }
-                    --i;
-                }
-                iSource.Play((*i)->Id(), (*i)->Uri(), 0);
-                SetTransportStateLocked(eBuffering);
-            }
-            break;
-        default:    
-            ASSERTS();
-    }
-
-    iMutex.Signal();
+    iSource.Play(-1);
 }
 
 void ProviderPlaylist::SetRepeat(Net::IInvocationResponse& aResponse, TUint aVersion, TBool aValue)
@@ -382,26 +207,7 @@ void ProviderPlaylist::SeekSecondAbsolute(Net::IInvocationResponse& aResponse, T
     aResponse.Start();
     aResponse.End();
 
-    iMutex.Wait();
-
-    if(iList.empty() == false) {
-        list<Track*>::const_iterator i;
-        TUint id;
-        GetPropertyId(id);
-        if(id == 0) {
-            i = iList.begin();
-        }
-        else {
-            i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),id));
-            if(i == iList.end()) {
-                ASSERTS();
-            }
-        }
-        iSource.Play((*i)->Id(), (*i)->Uri(), aValue);
-        SetTransportStateLocked(eBuffering);
-    }
-
-    iMutex.Signal();
+    iSource.PlaySecondAbsolute(aValue);
 }
 
 void ProviderPlaylist::SeekSecondRelative(Net::IInvocationResponse& aResponse, TUint aVersion, TInt aValue)
@@ -409,27 +215,7 @@ void ProviderPlaylist::SeekSecondRelative(Net::IInvocationResponse& aResponse, T
     aResponse.Start();
     aResponse.End();
 
-    iMutex.Wait();
-
-    if(iList.empty() == false) {
-        list<Track*>::const_iterator i;
-        TUint id;
-        GetPropertyId(id);
-        if(id == 0) {
-            i = iList.begin();
-        }
-        else {
-            i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),id));
-            if(i == iList.end()) {
-                ASSERTS();
-            }
-        }
-        //TODO: iSource.PlayRelative required
-        iSource.Play((*i)->Id(), (*i)->Uri(), aValue);
-        SetTransportStateLocked(eBuffering);
-    }
-
-    iMutex.Signal();
+    iSource.PlaySecondRelative(aValue);
 }
 
 void ProviderPlaylist::SeekId(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
@@ -437,18 +223,22 @@ void ProviderPlaylist::SeekId(Net::IInvocationResponse& aResponse, TUint aVersio
     aResponse.Start();
     aResponse.End();
 
+    const Track* track = 0;
+
     iMutex.Wait();
 
     list<Track*>::const_iterator i;
     i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),aValue));
     if(i != iList.end()) {
-        iSource.Play((*i)->Id(), (*i)->Uri(), 0);
-        SetTransportStateLocked(eBuffering);
+        track = (*i);
+        track->IncRef();
     }
 
-    //Not found, do nothing
-
     iMutex.Signal();
+
+    if(track) {
+        iSource.Play(track, 0);
+    }
 }
 
 void ProviderPlaylist::SeekIndex(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
@@ -456,24 +246,30 @@ void ProviderPlaylist::SeekIndex(Net::IInvocationResponse& aResponse, TUint aVer
     aResponse.Start();
     aResponse.End();
 
+    const Track* track = 0;
+
     iMutex.Wait();
 
     list<Track*>::const_iterator i = iList.begin();
 
-    bool hitEnd = false;
-    for(TUint j=0; j < aValue; j++, i++) {
-        if(i == iList.end()) {
-            hitEnd = true;
+    bool found = false;
+    for(TUint j=0; i != iList.end(); j++, i++) {
+        if(j == aValue) {
+            found = true;
             break;
         }
     }
 
-    if(hitEnd == false) {
-        iSource.Play((*i)->Id(), (*i)->Uri(), 0);
-        SetTransportStateLocked(eBuffering);
+    if(found == true) {
+        track = (*i);
+        track->IncRef();
     }
     
     iMutex.Signal();
+
+    if(track) {
+        iSource.Play(track, 0);
+    }
 }
 
 void ProviderPlaylist::TransportState(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue)
@@ -636,7 +432,7 @@ void ProviderPlaylist::DeleteId(Net::IInvocationResponse& aResponse, TUint aVers
 
 
     if(i != iList.end()) {
-        delete (*i);
+        (*i)->DecRef();
         iList.erase(i);
         UpdateIdArray();
         deleted = true;
@@ -663,7 +459,7 @@ void ProviderPlaylist::DeleteAll(Net::IInvocationResponse& aResponse, TUint aVer
     if(iList.size() > 0) {
         list<Track*>::iterator i = iList.begin();
         for( ; i != iList.end(); ++i) {
-            delete *i; 
+            (*i)->DecRef(); 
         }
 
         iList.clear();
@@ -747,29 +543,6 @@ void ProviderPlaylist::UpdateIdArray()
     SetPropertyIdArray(iIdArray);
 }
 
-void ProviderPlaylist::SetTransportStateLocked(ETransportState aState)
-{
-    if(aState != iState) {
-        iState = aState;
-        switch(iState) {
-            case ePlaying:
-                SetPropertyTransportState(kPlaying);
-                break;
-            case ePaused:
-                SetPropertyTransportState(kPaused);
-                break;
-            case eStopped:
-                SetPropertyTransportState(kStopped);
-                break;
-            case eBuffering:
-                SetPropertyTransportState(kBuffering);
-                break;
-            default:    
-                ASSERTS();
-        }
-    }
-}
-
 bool ProviderPlaylist::IsRepeat()
 {
     bool repeat;
@@ -784,11 +557,34 @@ bool ProviderPlaylist::IsShuffle()
     return shuffle;
 }
 
-TUint ProviderPlaylist::GetId()
+const Track* ProviderPlaylist::IterateForwards(list<Track*>::const_iterator aIter, uint32_t aCount)
 {
-    TUint id;
-    GetPropertyId(id);
-    return id;
+    while( (aCount--) > 0) {
+        if(++aIter == iList.end()) {
+            if(IsRepeat()) {
+                aIter = iList.begin();
+            }
+            else {
+                return Track::Zero();
+            }
+        }
+    }
+    return *aIter;
+}
+
+const Track* ProviderPlaylist::IterateBackwards(list<Track*>::const_iterator aIter, uint32_t aCount)
+{
+    while( (aCount--) > 0) {
+        if(--aIter == iList.begin()) {
+            if(IsRepeat()) {
+                aIter = iList.end();
+            }
+            else {
+                return Track::Zero();
+            }
+        }
+    }
+    return *aIter;
 }
 
 

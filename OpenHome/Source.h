@@ -9,6 +9,7 @@ namespace OpenHome {
 namespace MediaPlayer {
 
 class IPlayer;
+class Track;
 
 class Source : public Observable
 {
@@ -25,15 +26,19 @@ public:
 public:
     //Requests from Providers to Source.  These call the Player's
     //implementation with appropriate info filled in.  
-    virtual void Play(uint32_t aId, const Brx& aUri, uint32_t aSecond);
+    virtual void Play(const Track* aTrack, uint32_t aSecond);
+    virtual void Play(int32_t aRelativeIndex);
+    virtual void PlayAbsolute(uint32_t aSecond);
+    virtual void PlayRelative(int32_t aSecond);
     virtual void Pause();
     virtual void Unpause();
     virtual void Stop();
-    virtual void Deleted(uint32_t aId);
+    virtual void Deleted(uint32_t aId, const Track* aReplacement);
     virtual uint32_t NewId();
 
 public:
     //Callbacks from the Renderer via the Player to be implemented by the derived class
+    virtual const Track* Track(uint32_t aId, int32_t aIndex);
     virtual void Finished(uint32_t aId) = 0;
     virtual void Next(uint32_t aAfterId, uint32_t& aNextId, Bwx& aUri) = 0;
     virtual void Buffering(uint32_t aId) = 0;

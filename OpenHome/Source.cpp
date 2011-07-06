@@ -65,9 +65,9 @@ void Source::SetHandle(uint32_t aHandle)
     iHandle = aHandle;    
 }
 
-void Source::Play(uint32_t aId, const Brx& aUri, uint32_t aSecond)
+void Source::Play(uint32_t aId, const Track* aTrack, uint32_t aSecond)
 {
-    iPlayer.Play(iHandle, aId, aUri, aSecond);
+    iPlayer.Play(iHandle, aTrack, aSecond);
 }
 
 void Source::Pause()
@@ -85,9 +85,9 @@ void Source::Stop()
     iPlayer.Stop();
 }
 
-void Source::Deleted(uint32_t aId)
+void Source::Deleted(uint32_t aId, const Track* aReplacement)
 {
-    iPlayer.Deleted(aId);
+    iPlayer.Deleted(aId, aReplacement);
 }
 
 uint32_t Source::NewId()

@@ -14,25 +14,6 @@
 namespace OpenHome {
 namespace MediaPlayer {
 
-class Track
-{
-public:
-    static const TUint kMaxUriBytes = 1024;
-    static const TUint kMaxMetadataBytes = 5 * 1024;
-
-public:
-    Track(TUint aId, const Brx& aUri, const Brx& aMetadata);
-    TBool IsId(TUint aId) const;
-    TUint Id() const;
-    const Brx& Uri() const;
-    const Brx& Metadata() const;
-
-private:
-    TUint iId;
-    Bws<kMaxUriBytes> iUri;
-    Bws<kMaxMetadataBytes> iMetadata;
-};
-
 class ProviderPlaylist : public Net::DvProviderAvOpenhomeOrgPlaylist1
 {
 public:
@@ -48,7 +29,7 @@ public:
 
 	ProviderPlaylist(Net::DvDevice& aDevice, TUint aMaxTracks, const Brx& aProtocolInfo, Source& aSource); 
 
-    void Next(TUint aAfterId, TUint& aSourceId, Bwx& aUri);
+    const Track* Next(TUint aId, TInt aIndex);
     void SetTransportState(ETransportState aState);
     void SetId(TUint aId);
 
@@ -83,11 +64,10 @@ private:
 
 private:
     void UpdateIdArray();
-    void SetTransportStateLocked(ETransportState aState);
     bool IsRepeat();
     bool IsShuffle(); 
-    TUint GetId();
-
+    const Track* IterateForwards(list<Track*>::const_iterator aIter, uint32_t aCount);
+    const Track* IterateBackwards(list<Track*>::const_iterator aIter, uint32_t aCount);
 private:
     std::list<Track*> iList;
 

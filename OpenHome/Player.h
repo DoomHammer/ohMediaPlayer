@@ -5,6 +5,7 @@
 #include <Core/DvDevice.h>
 #include <Thread.h>
 #include <Buffer.h>
+#include <RefCounter.h>
 #include "Renderer.h"
 #include "Standard.h"
 #include "Source.h"
@@ -28,14 +29,38 @@ public:
     virtual ~ISourceIndexHandler() {}
 };
 
+class Track : public RefCounter
+{
+public:
+    static const TUint kMaxUriBytes = 1024;
+    static const TUint kMaxMetadataBytes = 5 * 1024;
+
+public:
+    Track(TUint aId, const Brx& aUri, const Brx& aMetadata);
+    TBool IsId(TUint aId) const;
+    TUint Id() const;
+    const Brx& Uri() const;
+    const Brx& Metadata() const;
+    static const Track* Zero() {return iZero;}
+
+private:
+    TUint iId;
+    Bws<kMaxUriBytes> iUri;
+    Bws<kMaxMetadataBytes> iMetadata;
+    static const Track* iZero;
+};
+
 class IPlayer
 {
 public:
-    virtual void Play(uint32_t aHandle, uint32_t aId, const Brx& aUri, uint32_t aSecond) = 0;
+    virtual void Play(uint32_t aHandle, const Track* aTrack, uint32_t aSecond) = 0;
+    virtual void Play(uint32_t aHandle, int32_t aRelativeIndex) = 0;
+    virtual void PlayAbsolute(uint32_t aHandle, uint32_t aSecond) = 0;
+    virtual void PlayRelative(uint32_t aHanlde, int32_t aSecond) = 0;
     virtual void Pause() = 0;
     virtual void Unpause() = 0;
     virtual void Stop() = 0;
-    virtual void Deleted(uint32_t aId) = 0;
+    virtual void Deleted(uint32_t aId, const Track* aReplacement) = 0;
     virtual uint32_t NewId() = 0;
     virtual ~IPlayer() {}
 };
@@ -85,11 +110,14 @@ public:
 
     //from IPlayer, to be called from Source implementations
 public:
-    virtual void Play(uint32_t aHandle, uint32_t aId, const Brx& aUri, uint32_t aSecond);
+    virtual void Play(uint32_t aHandle, const Track* aTrack, uint32_t aSecond);
+    virtual void Play(uint32_t aHandle, int32_t aRelativeIndex);
+    virtual void PlayAbsolute(uint32_t aHandle, uint32_t aSecond);
+    virtual void PlayRelative(uint32_t aHanlde, int32_t aSecond);
     virtual void Pause();
     virtual void Unpause();
     virtual void Stop();
-    virtual void Deleted(uint32_t aId);
+    virtual void Deleted(uint32_t aId, const Track* aReplacement);
     virtual uint32_t NewId();
 
 private:
@@ -98,7 +126,7 @@ private:
     ProviderTime* iTime;
     IRenderer* iRenderer;
 
-    uint32_t iId;
+    AtomicInt iAtomicInt;
     Mutex iMutex;
 };
 

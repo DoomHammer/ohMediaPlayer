@@ -6,7 +6,38 @@
 using namespace OpenHome;
 using namespace OpenHome::MediaPlayer;
 
-// Product
+// Track
+
+Track::iZero = new Track(0, Brx::Empty(), Brx::Empty());
+
+Track::Track(TUint aId, const Brx& aUri, const Brx& aMetadata)
+    : iId(aId)
+{
+    iUri.Replace(aUri);
+    iMetadata.Replace(aMetadata);
+}
+
+TBool Track::IsId(TUint aId) const
+{
+    return (aId == iId);
+}
+
+TUint Track::Id() const
+{
+    return iId;
+}
+
+const Brx& Track::Uri() const
+{
+    return iUri;
+}
+
+const Brx& Track::Metadata() const
+{
+    return iMetadata;
+}
+
+// Player
 
 Player::Player(IRenderer* aRenderer
     , Net::DvDevice& aDevice
@@ -28,7 +59,6 @@ Player::Player(IRenderer* aRenderer
 	, const TChar* aProductUrl
 	, const TChar* aProductImageUri)
     : iRenderer(aRenderer)
-    , iId(0)
     , iMutex("PLYR")
 {
     aDevice.SetAttribute("Upnp.Domain", "av.openhome.org");
@@ -138,12 +168,40 @@ void Player::Metatext(uint32_t aHandle, uint32_t aId, const std::string& aDidlLi
     iInfo->SetMetatext(Brn((const TByte*)(aDidlLite.data()), aDidlLite.size()));
 }
 
-void Player::Play(uint32_t aHandle, uint32_t aId, const Brx& aUri, uint32_t aSecond)  
+void Player::Play(uint32_t aHandle, const Track* aTrack, uint32_t aSecond)  
 {
-    Log::Print("Player::Play %d\n", aId);
-    std::string uri(reinterpret_cast<const char*>(aUri.Ptr()), aUri.Bytes());
-    iRenderer->Play(aHandle, aId, uri, aSecond);
-    iInfo->SetTrack(aUri, Brx::Empty());
+    Log::Print("Player::Play %d\n", aTrack->Id());
+    std::string uri(reinterpret_cast<const char*>(aTrack->Uri().Ptr()), aTrack->Uri().Bytes());
+    iRenderer->Play(aHandle, aTrack->Id(), uri, aSecond);
+    iInfo->SetTrack(aTrack->Uri(), aTrack->Metadata());
+    aTrack->DecRef();
+}
+
+void Player::Play(uint32_t aHandle, int32_t aRelativeIndex)
+{
+    const Track* track = GetSource(aHandle).Next(iId, aRelativeIndex);
+    std::string uri(reinterpret_cast<const char*>(aTrack->Uri().Ptr()), aTrack->Uri().Bytes());
+    iRenderer->Play(aHandle, aTrack->Id(), uri, aSecond);
+    iInfo->SetTrack(aTrack->Uri(), aTrack->Metadata());
+    track->DecRef();
+}
+
+void Player::PlayAbsolute(uint32_t aHandle, uint32_t aSecond)
+{
+    const Track* track = GetSource(aHandle).Next(iId, 0);
+    std::string uri(reinterpret_cast<const char*>(aTrack->Uri().Ptr()), aTrack->Uri().Bytes());
+    iRenderer->Play(aHandle, aTrack->Id(), uri, aSecond);
+    iInfo->SetTrack(aTrack->Uri(), aTrack->Metadata());
+    track->DecRef();
+}
+
+void Player::PlayRelative(uint32_t aHanlde, int32_t aSecond)
+{
+    const Track* track = GetSource(aHandle).Next(iId, 0);
+    std::string uri(reinterpret_cast<const char*>(aTrack->Uri().Ptr()), aTrack->Uri().Bytes());
+    iRenderer->Play(aHandle, aTrack->Id(), uri, aSecond);
+    iInfo->SetTrack(aTrack->Uri(), aTrack->Metadata());
+    track->DecRef();
 }
 
 void Player::Pause()
@@ -164,16 +222,13 @@ void Player::Stop()
     iRenderer->Stop();
 }
 
-void Player::Deleted(uint32_t aId)
+void Player::Deleted(uint32_t aId, const Track* aReplacement)
 {
     Log::Print("Player::Deleted: %d\n", aId);
+    aReplacement->DecRef();
 }
 
 uint32_t Player::NewId() 
 {
-    uint32_t id;
-    iMutex.Wait();
-    id = ++iId;
-    iMutex.Signal();
-    return id;
+    return iAtomic.Inc();
 }

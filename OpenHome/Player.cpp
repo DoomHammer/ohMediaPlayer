@@ -250,8 +250,14 @@ void Player::Play(uint32_t aHandle, int32_t aRelativeIndex)
 {
     iMutex.Wait();
 
-    uint32_t id = (iPipeline.front())->Id();
-    PipelineClear();
+    uint32_t id;
+    if(iPipeline.empty()) {
+        id = 0;
+    } 
+    else {
+        id = (iPipeline.front())->Id();
+        PipelineClear();
+    }
     const Track* track = GetSource(aHandle).GetTrack(id, aRelativeIndex);
     PipelineAppend(track);
     iRenderer->Play(aHandle, track->Id(), track->Uri().Ptr(), track->Uri().Bytes(), 0);
@@ -328,10 +334,10 @@ uint32_t Player::NewId()
 void Player::PipelineClear()
 {
     if(iPipeline.size() > 0) {
-        std::vector<const Track*>::iterator i = iPipeline.begin();
+        std::list<const Track*>::iterator i = iPipeline.begin();
         for( ; i != iPipeline.end(); ) {
             (*i)->DecRef();
-            std::vector<const Track*>::iterator j = i;
+            std::list<const Track*>::iterator j = i;
             i++;
             iPipeline.erase(j);
         }

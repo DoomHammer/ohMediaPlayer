@@ -11,7 +11,7 @@
 #include "Info.h"
 #include "Time.h"
 
-#include <vector>
+#include <list>
 
 namespace OpenHome {
 namespace MediaPlayer {
@@ -146,7 +146,7 @@ private:
     };
 
     Mutex iMutex;
-    std::vector<const Track*> iPipeline;
+    std::list<const Track*> iPipeline;
     ETransportState iState;
 };
 

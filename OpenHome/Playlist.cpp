@@ -72,15 +72,25 @@ ProviderPlaylist::ProviderPlaylist(Net::DvDevice& aDevice, TUint aTracksMax, con
 const Track* ProviderPlaylist::GetTrack(TUint aId, TInt aIndex)
 {
     const Track* track;
+    list<Track*>::const_iterator i;
 
     iMutex.Wait();
 
-    list<Track*>::const_iterator i;
-    i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),aId));
-    if(i == iList.end()) {
-        ASSERTS();
+    if(iList.empty()) {
+        iMutex.Signal();
+        return Track::Zero();
     }
-    else if(aIndex > 0) {
+
+    if(aId == 0) {
+        i = iList.begin();        
+    }
+    else {
+        i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),aId));
+        if(i == iList.end()) {
+            ASSERTS();
+        }
+    }
+    if(aIndex > 0) {
         track = IterateForwards(i, aIndex); 
         track->IncRef();
     }
@@ -579,7 +589,7 @@ const Track* ProviderPlaylist::IterateForwards(list<Track*>::const_iterator aIte
 const Track* ProviderPlaylist::IterateBackwards(list<Track*>::const_iterator aIter, uint32_t aCount)
 {
     while( (aCount--) > 0) {
-        if(--aIter == iList.begin()) {
+        if(aIter == iList.begin()) {
             if(IsRepeat()) {
                 aIter = iList.end();
             }
@@ -587,6 +597,7 @@ const Track* ProviderPlaylist::IterateBackwards(list<Track*>::const_iterator aIt
                 return Track::Zero();
             }
         }
+        --aIter;
     }
     return *aIter;
 }

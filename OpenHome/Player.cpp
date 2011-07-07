@@ -185,6 +185,7 @@ void Player::Stopped(uint32_t aHandle, uint32_t aId)
     Log::Print("Player::Stopped\n");
     GetSource(aHandle).Stopped(aId);
     iState = eStopped;
+    PipelineClear();
 
     iMutex.Signal();
 }

@@ -128,6 +128,7 @@ public:
 private:
     void PipelineClear();
     void PipelineAppend(const Track* aTrack);
+    void PlayLocked(uint32_t aHandle, const Track* aTrack, uint32_t aSecond);
 
 private:
     ProviderProduct* iProduct;

@@ -35,6 +35,7 @@ void Dummy::Pause()
 {
     cout << "Dummy::Pause called" << endl;
     iTickTimer.Cancel();
+    iStatus->Paused(iHandle, iId);
 }
 
 void Dummy::Unpause()
@@ -47,6 +48,7 @@ void Dummy::Stop()
 {
     cout << "Dummy::Stop called" << endl;
     iTickTimer.Cancel();
+    iStatus->Stopped(iHandle, iId);
 }
 
 void Dummy::Invalidate(uint32_t aIdFinal)

@@ -244,10 +244,7 @@ void Player::Play(uint32_t aHandle, const Track* aTrack, uint32_t aSecond)
 {
     iMutex.Wait();
 
-    PipelineClear();
-    PipelineAppend(aTrack);
-    Log::Print("Player::Play %d\n", aTrack->Id());
-    iRenderer->Play(aHandle, aTrack->Id(), aTrack->Uri().Ptr(), aTrack->Uri().Bytes(), aSecond);
+    PlayLocked(aHandle, aTrack, aSecond);
 
     iMutex.Signal();
 }
@@ -256,33 +253,56 @@ void Player::Play(uint32_t aHandle, int32_t aRelativeIndex)
 {
     iMutex.Wait();
 
+    Log::Print("Player::Play with RelativeIndex: %d\n", aRelativeIndex);
+
+    //If we're paused and no skip is requested, then this command is an Unpause
+    if(aRelativeIndex == 0 && iState == ePaused) {
+        iMutex.Signal();
+        Unpause();
+        return;
+    }
+
+    //Else, 2 options:
     uint32_t id;
     if(iPipeline.empty()) {
+        //Nothing in pipeline -> interpret aRelativeIndex from id 0
         id = 0;
     } 
     else {
+        //Something in pipeline -> interpret aRelativeIndex from that id
         id = (iPipeline.front())->Id();
-        PipelineClear();
     }
     const Track* track = GetSource(aHandle).GetTrack(id, aRelativeIndex);
 
-    //If the track to play is 0, ignore the play request and do nothing
-    if(track->Id() != 0) {
-        PipelineAppend(track);
-        iRenderer->Play(aHandle, track->Id(), track->Uri().Ptr(), track->Uri().Bytes(), 0);
-    }
+    //If after all that, the track returned from GetTrack is 0 (ie off the end
+    //of the playlist), then we Stop the renderer
+    if(track->Id() == 0) {
+        iMutex.Signal();
 
-    iMutex.Signal();
+        track->DecRef();
+        iRenderer->Stop();
+    }
+    else {
+        PlayLocked(aHandle, track, 0);
+        iMutex.Signal();
+    }
 }
 
 void Player::PlaySecondAbsolute(uint32_t aHandle, uint32_t aSecond)
 {
+    const Track* track;
+
     iMutex.Wait();
 
-    if(!iPipeline.empty()) {
-        const Track* track = iPipeline.front();
-        iRenderer->Play(aHandle, track->Id(), track->Uri().Ptr(), track->Uri().Bytes(), aSecond);
+    if(iPipeline.empty()) {
+        track = GetSource(aHandle).GetTrack(0, 0);
     }
+    else {
+        track = iPipeline.front();
+        track->IncRef();
+    }
+
+    PlayLocked(aHandle, track, aSecond);
 
     iMutex.Signal();
 }
@@ -297,6 +317,7 @@ void Player::PlaySecondRelative(uint32_t aHandle, int32_t aSecond)
     }
 
     const Track* track = iPipeline.front();
+    track->IncRef();
     TUint current = iTime->Seconds();
     TUint duration = iTime->Duration();
 
@@ -314,7 +335,8 @@ void Player::PlaySecondRelative(uint32_t aHandle, int32_t aSecond)
     if(request > duration) {
         request = duration;
     }
-    iRenderer->Play(aHandle, track->Id(), track->Uri().Ptr(), track->Uri().Bytes(), request);
+
+    PlayLocked(aHandle, track, request);
 
     iMutex.Signal();
 }
@@ -364,4 +386,14 @@ void Player::PipelineClear()
 void Player::PipelineAppend(const Track* aTrack)
 {
     iPipeline.push_back(aTrack);
+}
+
+void Player::PlayLocked(uint32_t aHandle, const Track* aTrack, uint32_t aSecond)
+{
+    Log::Print("Player::PlayLocked %d, Second: %d\n", aTrack->Id(), aSecond);
+
+    PipelineClear();
+    PipelineAppend(aTrack);
+
+    iRenderer->Play(aHandle, aTrack->Id(), aTrack->Uri().Ptr(), aTrack->Uri().Bytes(), aSecond);
 }

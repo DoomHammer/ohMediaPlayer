@@ -44,7 +44,7 @@ public:
     TUint Id() const;
     const Brx& Uri() const;
     const Brx& Metadata() const;
-    static const Track* Zero() {return iZero;}
+    static const Track* Zero(); 
 
 private:
     TUint iId;

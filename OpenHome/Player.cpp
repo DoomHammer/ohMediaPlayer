@@ -37,6 +37,12 @@ const Brx& Track::Metadata() const
     return iMetadata;
 }
 
+const Track* Track::Zero()
+{
+    iZero->IncRef();
+    return iZero;
+}
+
 // Player
 
 Player::Player(IRenderer* aRenderer
@@ -278,10 +284,19 @@ void Player::Play(uint32_t aHandle, int32_t aRelativeIndex)
     //If after all that, the track returned from GetTrack is 0 (ie off the end
     //of the playlist), then we Stop the renderer
     if(track->Id() == 0) {
+        track->DecRef();
+
+        TBool stop = false;
+        if(iState != eStopped) {
+            stop = true;
+        }
         iMutex.Signal();
 
-        track->DecRef();
-        iRenderer->Stop();
+        //Calling Stop when no play has been called, means there's no handle
+        //for the renderer to call us back with.  Don't do that!
+        if(stop) {
+            iRenderer->Stop();
+        }
     }
     else {
         PlayLocked(aHandle, track, 0);

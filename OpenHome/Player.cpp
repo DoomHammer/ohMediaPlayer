@@ -8,23 +8,33 @@ using namespace OpenHome::MediaPlayer;
 
 // Track
 
-const Track* Track::iZero = new Track(0, Brn(""), Brn(""));
-
-Track::Track(TUint aId, const Brx& aUri, const Brx& aMetadata)
+Track::Track(uint32_t aId, const Brx& aUri, const Brx& aMetadata)
     : iId(aId)
 {
     iUri.Replace(aUri);
     iMetadata.Replace(aMetadata);
 }
 
-TBool Track::IsId(TUint aId) const
+bool Track::IsId(TUint aId) const
 {
     return (aId == iId);
 }
 
-TUint Track::Id() const
+uint32_t Track::Id() const
 {
     return iId;
+}
+
+void Track::Uri(const uint8_t aUri[], uint32_t& aBytes) const
+{
+    aUri = (const uint8_t*)(iUri.Ptr());
+    aBytes = iUri.Bytes();
+}
+
+void Track::Metadata(const uint8_t aMetadata[], uint32_t& aBytes) const
+{
+    aMetadata = (const uint8_t*)(iMetadata.Ptr());
+    aBytes = iMetadata.Bytes();
 }
 
 const Brx& Track::Uri() const
@@ -37,11 +47,6 @@ const Brx& Track::Metadata() const
     return iMetadata;
 }
 
-const Track* Track::Zero()
-{
-    iZero->IncRef();
-    return iZero;
-}
 
 // Player
 
@@ -143,7 +148,7 @@ void Player::Finished(uint32_t aHandle, uint32_t aId)
     ASSERT(finished->Id() == aId);
 
     const Track* next = GetSource(aHandle).GetTrack(aId, 1);
-    if(next->Id() != 0) {
+    if(next) {
         PlayLocked(aHandle, next, 0);
         iMutex.Signal();
     }
@@ -156,21 +161,24 @@ void Player::Finished(uint32_t aHandle, uint32_t aId)
     }
 }
 
-void Player::Next(uint32_t aHandle, uint32_t aAfterId, uint32_t& aId, uint8_t aUri[], uint32_t& aUriBytes)
+const ITrack* Player::Next(uint32_t aHandle, uint32_t aAfterId)
 {
     iMutex.Wait();
 
     Log::Print("Player::Next\n");
     
     const Track* track = GetSource(aHandle).GetTrack(aAfterId, 1);
-    aId = track->Id();
-    ASSERT(aUriBytes >= Track::kMaxUriBytes);
-    memcpy(aUri, track->Uri().Ptr(), track->Uri().Bytes());
-    aUriBytes = track->Uri().Bytes();
+    if(track) {
+        //track reference already incremented by GetSource.  This reference is
+        //"owned" by PipelineAppend
+        PipelineAppend(track);
 
-    PipelineAppend(track);
-
+        //But increment it again for return to Renderer
+        track->IncRef();
+    }
     iMutex.Signal();
+
+    return track;
 }
 
 void Player::Buffering(uint32_t aHandle, uint32_t aId)
@@ -281,11 +289,13 @@ void Player::Play(uint32_t aHandle, int32_t aRelativeIndex)
     }
     const Track* track = GetSource(aHandle).GetTrack(id, aRelativeIndex);
 
+    if(track) {
+        PlayLocked(aHandle, track, 0);
+        iMutex.Signal();
+    }
     //If after all that, the track returned from GetTrack is 0 (ie off the end
     //of the playlist), then we Stop the renderer
-    if(track->Id() == 0) {
-        track->DecRef();
-
+    else {
         TBool stop = false;
         if(iState != eStopped) {
             stop = true;
@@ -297,10 +307,6 @@ void Player::Play(uint32_t aHandle, int32_t aRelativeIndex)
         if(stop) {
             iRenderer->Stop();
         }
-    }
-    else {
-        PlayLocked(aHandle, track, 0);
-        iMutex.Signal();
     }
 }
 
@@ -318,7 +324,9 @@ void Player::PlaySecondAbsolute(uint32_t aHandle, uint32_t aSecond)
         track->IncRef();
     }
 
-    PlayLocked(aHandle, track, aSecond);
+    if(track) {
+        PlayLocked(aHandle, track, aSecond);
+    }
 
     iMutex.Signal();
 }

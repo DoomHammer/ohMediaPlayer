@@ -4,11 +4,13 @@
 namespace OpenHome {
 namespace MediaPlayer {
 
+class Track;
+
 class IRendererStatus
 {
 public:
     virtual void Finished(uint32_t aHandle, uint32_t aId) = 0;
-    virtual void Next(uint32_t aHandle, uint32_t aAfterId, uint32_t& aId, uint8_t aUri[], uint32_t& aUriBytes) = 0;
+    virtual const class ITrack* Next(uint32_t aHandle, uint32_t aAfterId) = 0;
     virtual void Buffering(uint32_t aHandle, uint32_t aId) = 0;
     virtual void Stopped(uint32_t aHandle, uint32_t aId) = 0;
     virtual void Paused(uint32_t aHandle, uint32_t aId) = 0;

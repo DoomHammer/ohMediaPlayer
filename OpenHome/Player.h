@@ -32,25 +32,32 @@ public:
     virtual ~ISourceIndexHandler() {}
 };
 
-class Track : public RefCounter
+class ITrack 
+{
+public:
+    virtual uint32_t Id() const = 0;
+    virtual void Uri(const uint8_t aUri[], uint32_t& aBytes) const = 0;
+    virtual void Metadata(const uint8_t aMetadata[], uint32_t& aBytes) const = 0;
+};
+
+class Track : public RefCounter, public ITrack
 {
 public:
     static const TUint kMaxUriBytes = 1024;
     static const TUint kMaxMetadataBytes = 5 * 1024;
-
 public:
     Track(TUint aId, const Brx& aUri, const Brx& aMetadata);
-    TBool IsId(TUint aId) const;
-    TUint Id() const;
+    bool IsId(TUint aId) const;
+    virtual uint32_t Id() const;
+    virtual void Uri(const uint8_t aUri[], uint32_t& aBytes) const;
+    virtual void Metadata(const uint8_t aMetadata[], uint32_t& aBytes) const;
     const Brx& Uri() const;
     const Brx& Metadata() const;
-    static const Track* Zero(); 
 
 private:
     TUint iId;
     Bws<kMaxUriBytes> iUri;
     Bws<kMaxMetadataBytes> iMetadata;
-    static const Track* iZero;
 };
 
 class IPlayer
@@ -105,7 +112,7 @@ public:
     //from IRendererStatus, to be called by IRenderer implementations
 public:
     virtual void Finished(uint32_t aHandle, uint32_t aId);
-    virtual void Next(uint32_t aHandle, uint32_t aAfterId, uint32_t& aId, uint8_t aUri[], uint32_t& aUriBytes);
+    virtual const ITrack* Next(uint32_t aHandle, uint32_t aAfterId);
     virtual void Buffering(uint32_t aHandle, uint32_t aId);
     virtual void Stopped(uint32_t aHandle, uint32_t aId);
     virtual void Paused(uint32_t aHandle, uint32_t aId);

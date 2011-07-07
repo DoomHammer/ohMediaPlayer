@@ -78,7 +78,7 @@ const Track* ProviderPlaylist::GetTrack(TUint aId, TInt aIndex)
 
     if(iList.empty()) {
         iMutex.Signal();
-        return Track::Zero();
+        return 0;
     }
 
     if(aId == 0) {
@@ -487,7 +487,7 @@ void ProviderPlaylist::DeleteAll(Net::IInvocationResponse& aResponse, TUint aVer
     aResponse.End();
 
     if(deleted) {
-        iSource.Deleted(0, Track::Zero()); //Special value of 0 indicates entire playlist was deleted
+        iSource.Deleted(0, 0); //Special value of 0 indicates entire playlist was deleted
     }
 }
 
@@ -579,7 +579,7 @@ const Track* ProviderPlaylist::IterateForwards(list<Track*>::const_iterator aIte
                 aIter = iList.begin();
             }
             else {
-                return Track::Zero();
+                return 0;
             }
         }
     }
@@ -594,7 +594,7 @@ const Track* ProviderPlaylist::IterateBackwards(list<Track*>::const_iterator aIt
                 aIter = iList.end();
             }
             else {
-                return Track::Zero();
+                return 0;
             }
         }
         --aIter;

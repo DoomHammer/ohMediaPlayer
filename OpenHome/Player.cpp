@@ -137,17 +137,17 @@ void Player::Finished(uint32_t aHandle, uint32_t aId)
     ASSERT(finished->Id() == aId);
 
     const Track* next = GetSource(aHandle).GetTrack(aId, 1);
-    PipelineClear();
     if(next->Id() != 0) {
-        PipelineAppend(next);
-        
-        iRenderer->Play(aHandle, next->Id(), next->Uri().Ptr(), next->Uri().Bytes(), 0);
+        PlayLocked(aHandle, next, 0);
+        iMutex.Signal();
     }
     else {
-        next->DecRef();
-    }
+        PipelineClear();
+        iMutex.Signal();
 
-    iMutex.Signal();
+        next->DecRef();
+        iRenderer->Stop();
+    }
 }
 
 void Player::Next(uint32_t aHandle, uint32_t aAfterId, uint32_t& aId, uint8_t aUri[], uint32_t& aUriBytes)

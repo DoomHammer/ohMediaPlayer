@@ -92,14 +92,15 @@ const Track* ProviderPlaylist::GetTrack(TUint aId, TInt aIndex)
     }
     if(aIndex > 0) {
         track = IterateForwards(i, aIndex); 
-        track->IncRef();
     }
     else if(aIndex < 0) {
         track = IterateBackwards(i, abs(aIndex)); 
-        track->IncRef();
     }
     else {
         track = *i;
+    }
+
+    if(track) {
         track->IncRef();
     }
 

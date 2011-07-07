@@ -156,7 +156,6 @@ void Player::Finished(uint32_t aHandle, uint32_t aId)
         PipelineClear();
         iMutex.Signal();
 
-        next->DecRef();
         iRenderer->Stop();
     }
 }

@@ -443,10 +443,12 @@ void ProviderPlaylist::DeleteId(Net::IInvocationResponse& aResponse, TUint aVers
 
     const Track* replacement = 0;
     if(i != iList.end()) {
-        replacement = *(++i);
-        --i;
+        replacement = IterateForwards(i, 1);
+        replacement->IncRef();
+
         (*i)->DecRef();
         iList.erase(i);
+
         UpdateIdArray();
         deleted = true;
     }

@@ -32,14 +32,15 @@ void ProviderInfo::SetTrack(const class Track& aTrack)
 {
     iMutex.Wait();
 
-    SetPropertyUri(aTrack.Uri());
-    SetPropertyMetadata(aTrack.Metadata());
 
     TUint trackCount;
     GetPropertyTrackCount(trackCount);
     trackCount++;
-    SetPropertyTrackCount(trackCount);
 
+    PropertiesLock();
+    SetPropertyTrackCount(trackCount);
+    SetPropertyUri(aTrack.Uri());
+    SetPropertyMetadata(aTrack.Metadata());
     SetPropertyDetailsCount(0);
     SetPropertyMetatextCount(0);
     SetPropertyDuration(0);
@@ -49,6 +50,7 @@ void ProviderInfo::SetTrack(const class Track& aTrack)
     SetPropertyLossless(false);
     SetPropertyCodecName(Brx::Empty());
     SetPropertyMetatext(Brx::Empty());
+    PropertiesUnlock();
 
     iMutex.Signal();
 }
@@ -57,17 +59,19 @@ void ProviderInfo::SetDetails(TUint aDuration, TUint aBitRate, TUint aBitDepth, 
 {
     iMutex.Wait();
     
+    TUint detailsCount;
+    GetPropertyDetailsCount(detailsCount);
+    detailsCount++;
+
+    PropertiesLock();
+    SetPropertyDetailsCount(detailsCount);
     SetPropertyDuration(aDuration);
     SetPropertyBitRate(aBitRate);
     SetPropertyBitDepth(aBitDepth);
     SetPropertySampleRate(aSampleRate);
     SetPropertyLossless(aLossless);
     SetPropertyCodecName(aCodecName);
-
-    TUint detailsCount;
-    GetPropertyDetailsCount(detailsCount);
-    detailsCount++;
-    SetPropertyDetailsCount(detailsCount);
+    PropertiesUnlock();
 
     iMutex.Signal();
 }
@@ -76,12 +80,14 @@ void ProviderInfo::SetMetatext(const Brx& aMetatext)
 {
     iMutex.Wait();
 
-    SetPropertyMetatext(aMetatext);    
-
     TUint metatextCount;
     GetPropertyMetatextCount(metatextCount);
     metatextCount++;
+
+    PropertiesLock();
     SetPropertyMetatextCount(metatextCount);
+    SetPropertyMetatext(aMetatext);    
+    PropertiesUnlock();
 
     iMutex.Signal();
 }

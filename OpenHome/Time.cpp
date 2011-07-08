@@ -19,12 +19,14 @@ void ProviderTime::SetDuration(TUint aDuration)
 {
     iMutex.Wait();
 
-    SetPropertyDuration(aDuration);
-
     TUint trackCount;
     GetPropertyTrackCount(trackCount);
     trackCount++;
+
+    PropertiesLock();
+    SetPropertyDuration(aDuration);
     SetPropertyTrackCount(trackCount);
+    PropertiesUnlock();
 
     iMutex.Signal();
 }

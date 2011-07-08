@@ -25,13 +25,13 @@ uint32_t Track::Id() const
     return iId;
 }
 
-void Track::Uri(const uint8_t aUri[], uint32_t& aBytes) const
+void Track::Uri(const uint8_t*& aUri, uint32_t& aBytes) const
 {
     aUri = (const uint8_t*)(iUri.Ptr());
     aBytes = iUri.Bytes();
 }
 
-void Track::Metadata(const uint8_t aMetadata[], uint32_t& aBytes) const
+void Track::Metadata(const uint8_t*& aMetadata, uint32_t& aBytes) const
 {
     aMetadata = (const uint8_t*)(iMetadata.Ptr());
     aBytes = iMetadata.Bytes();
@@ -418,5 +418,5 @@ void Player::PlayLocked(uint32_t aHandle, const Track* aTrack, uint32_t aSecond)
     PipelineClear();
     PipelineAppend(aTrack);
 
-    iRenderer->Play(aHandle, aTrack->Id(), aTrack->Uri().Ptr(), aTrack->Uri().Bytes(), aSecond);
+    iRenderer->Play(aHandle, aTrack, aSecond);
 }

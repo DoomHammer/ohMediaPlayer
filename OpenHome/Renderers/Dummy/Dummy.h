@@ -10,12 +10,14 @@
 namespace OpenHome {
 namespace MediaPlayer {
 
+class ITrack;
+
 class Dummy : public IRenderer
 {
 public:
     Dummy();
     ~Dummy();
-    virtual void Play(uint32_t aHandle, uint32_t aId, const uint8_t aUri[], uint32_t aUriBytes, uint32_t aSecond);
+    virtual void Play(uint32_t aHandle, const ITrack* aTrack, uint32_t aSecond);
     virtual void Pause();
     virtual void Unpause();
     virtual void Stop();

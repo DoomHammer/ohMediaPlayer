@@ -1,5 +1,6 @@
 #include "Dummy.h"
 #include <Debug.h>
+#include "..\..\Player.h"
 
 using namespace OpenHome;
 using namespace OpenHome::MediaPlayer;
@@ -17,11 +18,14 @@ Dummy::~Dummy()
 {
 }
 
-void Dummy::Play(uint32_t aHandle, uint32_t aId, const uint8_t aUri[], uint32_t aUriBytes, uint32_t aSecond)
+void Dummy::Play(uint32_t aHandle, const class ITrack* aTrack, uint32_t aSecond)
 {
     iHandle = aHandle;
-    iId = aId;
-    iUri.assign((const char*)aUri, aUriBytes);
+    iId = aTrack->Id();
+    const uint8_t* uri;
+    uint32_t bytes;
+    aTrack->Uri(uri, bytes);
+    iUri.assign((const char*)uri, bytes);
     iSecond = aSecond;
 
     cout << "Dummy::Play called with id: " << iId << " Uri: " << iUri << endl;

@@ -1,10 +1,12 @@
 #ifndef HEADER_OPENHOME_MEDIAPLAYER_RENDERER
 #define HEADER_OPENHOME_MEDIAPLAYER_RENDERER
 
+#include <ohNetTypes.h>
+
 namespace OpenHome {
 namespace MediaPlayer {
 
-class Track;
+class ITrack;
 
 class IRendererStatus
 {
@@ -23,7 +25,7 @@ public:
 class IRenderer
 {
 public:
-    virtual void Play(uint32_t aHandle, uint32_t aId, const uint8_t aUri[], uint32_t aUriBytes, uint32_t aSecond) = 0;
+    virtual void Play(uint32_t aHandle, const class ITrack* aTrack, uint32_t aSecond) = 0;
     virtual void Pause() = 0;
     virtual void Unpause() = 0;
     virtual void Stop() = 0;

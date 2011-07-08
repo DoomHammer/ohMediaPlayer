@@ -36,8 +36,8 @@ class ITrack
 {
 public:
     virtual uint32_t Id() const = 0;
-    virtual void Uri(const uint8_t aUri[], uint32_t& aBytes) const = 0;
-    virtual void Metadata(const uint8_t aMetadata[], uint32_t& aBytes) const = 0;
+    virtual void Uri(const uint8_t*& aUri, uint32_t& aBytes) const = 0;
+    virtual void Metadata(const uint8_t*& aMetadata, uint32_t& aBytes) const = 0;
 };
 
 class Track : public RefCounter, public ITrack
@@ -49,8 +49,8 @@ public:
     Track(TUint aId, const Brx& aUri, const Brx& aMetadata);
     bool IsId(TUint aId) const;
     virtual uint32_t Id() const;
-    virtual void Uri(const uint8_t aUri[], uint32_t& aBytes) const;
-    virtual void Metadata(const uint8_t aMetadata[], uint32_t& aBytes) const;
+    virtual void Uri(const uint8_t*& aUri, uint32_t& aBytes) const;
+    virtual void Metadata(const uint8_t*& aMetadata, uint32_t& aBytes) const;
     const Brx& Uri() const;
     const Brx& Metadata() const;
 

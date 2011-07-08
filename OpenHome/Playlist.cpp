@@ -320,13 +320,18 @@ void ProviderPlaylist::Read(Net::IInvocationResponse& aResponse, TUint aVersion,
         aResponse.Error(kIdNotFound, kIdNotFoundMsg);
     }
     else {
+        const Track* track = *i;
+        track->IncRef();
+        iMutex.Signal();
+
         aResponse.Start();
-        aUri.Write((*i)->Uri());
+        aUri.Write(track->Uri());
         aUri.WriteFlush();
-        aMetadata.Write((*i)->Metadata());
+        aMetadata.Write(track->Metadata());
         aMetadata.WriteFlush();
         aResponse.End();
-        iMutex.Signal();
+
+        track->DecRef();
     }
 }
 
@@ -368,10 +373,17 @@ void ProviderPlaylist::ReadList(Net::IInvocationResponse& aResponse, TUint aVers
 
     for( vector<uint32_t>::const_iterator id=v.begin(); id!= v.end(); id++) {
 
+        const Track* track = 0;
+
         iMutex.Wait();
         list<Track*>::const_iterator i = find_if(iList.begin(), iList.end(), bind2nd(mem_fun(&Track::IsId),*id));
-
         if(i != iList.end()) {
+            track = *i;
+            track->IncRef();
+        }   
+        iMutex.Signal();
+
+        if(track) {
             aTrackList.Write(entryStart);
 
             aTrackList.Write(idStart);
@@ -379,16 +391,17 @@ void ProviderPlaylist::ReadList(Net::IInvocationResponse& aResponse, TUint aVers
             aTrackList.Write(idEnd);
 
             aTrackList.Write(uriStart);
-            Converter::ToXmlEscaped(aTrackList, (*i)->Uri());
+            Converter::ToXmlEscaped(aTrackList, track->Uri());
             aTrackList.Write(uriEnd);
 
             aTrackList.Write(metaStart);
-            Converter::ToXmlEscaped(aTrackList, (*i)->Metadata());
+            Converter::ToXmlEscaped(aTrackList, track->Metadata());
             aTrackList.Write(metaEnd);
 
             aTrackList.Write(entryEnd);
+
+            track->DecRef();
         }
-        iMutex.Signal();
     }
 
     aTrackList.Write(Brn("</TrackList>"));

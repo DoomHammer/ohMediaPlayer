@@ -26,11 +26,13 @@ const Track* SourcePlaylist::GetTrack(uint32_t aId, int32_t aIndex)
 void SourcePlaylist::Buffering(uint32_t aId)
 {
     iProviderPlaylist->SetTransportState(ProviderPlaylist::eBuffering);
+    iProviderPlaylist->SetId(aId);
 }
 
 void SourcePlaylist::Stopped(uint32_t aId)
 {
     iProviderPlaylist->SetTransportState(ProviderPlaylist::eStopped);
+    iProviderPlaylist->SetId(aId);
 }
 
 void SourcePlaylist::Paused(uint32_t aId)
@@ -40,6 +42,5 @@ void SourcePlaylist::Paused(uint32_t aId)
 
 void SourcePlaylist::Playing(uint32_t aId)
 {
-    iProviderPlaylist->SetId(aId);
     iProviderPlaylist->SetTransportState(ProviderPlaylist::ePlaying);
 }

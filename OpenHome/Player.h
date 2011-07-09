@@ -67,9 +67,8 @@ public:
     virtual void Play(uint32_t aHandle, int32_t aRelativeIndex) = 0;
     virtual void PlaySecondAbsolute(uint32_t aHandle, uint32_t aSecond) = 0;
     virtual void PlaySecondRelative(uint32_t aHanlde, int32_t aSecond) = 0;
-    virtual void Pause() = 0;
-    virtual void Unpause() = 0;
-    virtual void Stop() = 0;
+    virtual void Pause(uint32_t aHandle) = 0;
+    virtual void Stop(uint32_t aHandle) = 0;
     virtual void Deleted(uint32_t aId, const Track* aReplacement) = 0;
     virtual uint32_t NewId() = 0;
     virtual ~IPlayer() {}
@@ -114,10 +113,8 @@ public:
     virtual void Finished(uint32_t aHandle, uint32_t aId);
     virtual const ITrack* Next(uint32_t aHandle, uint32_t aAfterId);
     virtual void Buffering(uint32_t aHandle, uint32_t aId);
-    virtual void Stopped(uint32_t aHandle, uint32_t aId);
-    virtual void Paused(uint32_t aHandle, uint32_t aId);
-    virtual void Started(uint32_t aHandle, uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aBitDepth, uint32_t aSampleRate, bool aLossless, const char* aCodecName);
-    virtual void Playing(uint32_t aHandle, uint32_t aId, uint32_t aSeconds);
+    virtual void Playing(uint32_t aHandle, uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aBitDepth, uint32_t aSampleRate, bool aLossless, const char* aCodecName);
+    virtual void Time(uint32_t aHandle, uint32_t aId, uint32_t aSeconds);
     virtual void Metatext(uint32_t aHandle, uint32_t aId, uint8_t aMetatext[], uint32_t aMetatextBytes);
 
     //from IPlayer, to be called from Source implementations
@@ -126,9 +123,8 @@ public:
     virtual void Play(uint32_t aHandle, int32_t aRelativeIndex);
     virtual void PlaySecondAbsolute(uint32_t aHandle, uint32_t aSecond);
     virtual void PlaySecondRelative(uint32_t aHanlde, int32_t aSecond);
-    virtual void Pause();
-    virtual void Unpause();
-    virtual void Stop();
+    virtual void Pause(uint32_t aHandle);
+    virtual void Stop(uint32_t aHandle);
     virtual void Deleted(uint32_t aId, const Track* aReplacement);
     virtual uint32_t NewId();
 
@@ -136,6 +132,7 @@ private:
     void PipelineClear();
     void PipelineAppend(const Track* aTrack);
     void PlayLocked(uint32_t aHandle, const Track* aTrack, uint32_t aSecond);
+    void StopLocked(uint32_t aHandle);
 
 private:
     ProviderProduct* iProduct;
@@ -156,7 +153,6 @@ private:
     Mutex iMutex;
     std::list<const Track*> iPipeline;
     ETransportState iState;
-    uint32_t iId;
 };
 
 

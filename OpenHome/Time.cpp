@@ -24,8 +24,9 @@ void ProviderTime::SetDuration(TUint aDuration)
     trackCount++;
 
     PropertiesLock();
-    SetPropertyDuration(aDuration);
     SetPropertyTrackCount(trackCount);
+    SetPropertyDuration(aDuration);
+    SetPropertySeconds(0);
     PropertiesUnlock();
 
     iMutex.Signal();

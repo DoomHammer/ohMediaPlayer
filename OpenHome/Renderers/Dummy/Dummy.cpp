@@ -39,7 +39,6 @@ void Dummy::Pause()
 {
     cout << "Dummy::Pause called" << endl;
     iTickTimer.Cancel();
-    iStatus->Paused(iHandle, iId);
 }
 
 void Dummy::Unpause()
@@ -52,7 +51,6 @@ void Dummy::Stop()
 {
     cout << "Dummy::Stop called" << endl;
     iTickTimer.Cancel();
-    iStatus->Stopped(iHandle, iId);
 }
 
 void Dummy::Invalidate(uint32_t aIdFinal)
@@ -67,15 +65,14 @@ void Dummy::SetStatusHandler(IRendererStatus& aHandler)
 
 void Dummy::Prefetch()
 {
-    iStatus->Started(iHandle, iId, iDuration, 128000, 24, 44100, false, "mp3");
-    iStatus->Playing(iHandle, iId, iSecond);
+    iStatus->Playing(iHandle, iId, iDuration, 128000, 24, 44100, false, "mp3");
     iTickTimer.FireIn(1000);
 }
 
 void Dummy::Tick()
 {
     ++iSecond;
-    iStatus->Playing(iHandle, iId, iSecond);
+    iStatus->Time(iHandle, iId, iSecond);
     if(iSecond == iDuration) {
         iStatus->Finished(iHandle, iId); 
     }

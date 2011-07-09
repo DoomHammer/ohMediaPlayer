@@ -31,7 +31,6 @@ public:
     virtual void PlaySecondAbsolute(uint32_t aSecond);
     virtual void PlaySecondRelative(int32_t aSecond);
     virtual void Pause();
-    virtual void Unpause();
     virtual void Stop();
     virtual void Deleted(uint32_t aId, const Track* aReplacement);
     virtual uint32_t NewId();

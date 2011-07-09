@@ -72,7 +72,6 @@ Player::Player(IRenderer* aRenderer
     : iRenderer(aRenderer)
     , iMutex("PLYR")
     , iState(eStopped)
-    , iId(0)
 {
     aDevice.SetAttribute("Upnp.Domain", "av.openhome.org");
     aDevice.SetAttribute("Upnp.Type", "av.openhome.org");
@@ -150,14 +149,12 @@ void Player::Finished(uint32_t aHandle, uint32_t aId)
     const Track* next = GetSource(aHandle).GetTrack(aId, 1);
     if(next) {
         PlayLocked(aHandle, next, 0);
-        iMutex.Signal();
     }
     else {
         PipelineClear();
-        iMutex.Signal();
-
-        iRenderer->Stop();
+        StopLocked(aHandle);
     }
+    iMutex.Signal();
 }
 
 const ITrack* Player::Next(uint32_t aHandle, uint32_t aAfterId)
@@ -191,30 +188,7 @@ void Player::Buffering(uint32_t aHandle, uint32_t aId)
     iMutex.Signal();
 }
 
-void Player::Stopped(uint32_t aHandle, uint32_t aId)
-{
-    iMutex.Wait();
-
-    Log::Print("Player::Stopped\n");
-    GetSource(aHandle).Stopped(aId);
-    iState = eStopped;
-    PipelineClear();
-
-    iMutex.Signal();
-}
-
-void Player::Paused(uint32_t aHandle, uint32_t aId)
-{
-    iMutex.Wait();
-
-    Log::Print("Player::Paused\n");
-    GetSource(aHandle).Paused(aId);
-    iState = ePaused;
-
-    iMutex.Signal();
-}
-
-void Player::Started(uint32_t aHandle, uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aBitDepth, uint32_t aSampleRate, bool aLossless, const char* aCodecName)
+void Player::Playing(uint32_t aHandle, uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aBitDepth, uint32_t aSampleRate, bool aLossless, const char* aCodecName)
 {
     iMutex.Wait();
 
@@ -226,26 +200,16 @@ void Player::Started(uint32_t aHandle, uint32_t aId, uint32_t aDuration, uint32_
     iInfo->SetDetails(aDuration, aBitRate, aBitDepth, aSampleRate, aLossless, Brn(aCodecName));
     iTime->SetDuration(aDuration);
 
+    iState = ePlaying;
+    GetSource(aHandle).Playing(aId);
+
     iMutex.Signal();
 }
 
-void Player::Playing(uint32_t aHandle, uint32_t aId, uint32_t aSeconds)
+void Player::Time(uint32_t aHandle, uint32_t aId, uint32_t aSeconds) 
 {
-    iMutex.Wait();
-
-    Log::Print("Player::Playing %d, Second: %d\n", aId, aSeconds);
+    Log::Print("Player::Time %d, Second: %d\n", aId, aSeconds);
     iTime->SetSeconds(aSeconds);
-
-    //iId is subtly different from iPipeline.front()->Id()
-    //iId is updated when we get a ::Playing back from the renderer
-    //iPipeline.front()->Id() is updated when we call iRenderer->Play()
-    if( (iId != aId) || (iState != ePlaying) ) {
-        iState = ePlaying;
-        iId = aId;
-        GetSource(aHandle).Playing(aId);
-    }
-
-    iMutex.Signal();
 }
 
 void Player::Metatext(uint32_t aHandle, uint32_t aId, uint8_t aMetatext[], uint32_t aMetatextBytes)
@@ -271,8 +235,12 @@ void Player::Play(uint32_t aHandle, int32_t aRelativeIndex)
 
     //If we're paused and no skip is requested, then this command is an Unpause
     if(aRelativeIndex == 0 && iState == ePaused) {
+        iState = ePlaying;
+        ASSERT(!iPipeline.empty());
+        GetSource(aHandle).Playing(iPipeline.front()->Id());
+        iRenderer->Unpause();
+
         iMutex.Signal();
-        Unpause();
         return;
     }
 
@@ -290,23 +258,14 @@ void Player::Play(uint32_t aHandle, int32_t aRelativeIndex)
 
     if(track) {
         PlayLocked(aHandle, track, 0);
-        iMutex.Signal();
     }
     //If after all that, the track returned from GetTrack is 0 (ie off the end
     //of the playlist), then we Stop the renderer
     else {
-        TBool stop = false;
-        if(iState != eStopped) {
-            stop = true;
-        }
-        iMutex.Signal();
-
-        //Calling Stop when no play has been called, means there's no handle
-        //for the renderer to call us back with.  Don't do that!
-        if(stop) {
-            iRenderer->Stop();
-        }
+        PipelineClear();
+        StopLocked(aHandle);
     }
+    iMutex.Signal();
 }
 
 void Player::PlaySecondAbsolute(uint32_t aHandle, uint32_t aSecond)
@@ -364,22 +323,28 @@ void Player::PlaySecondRelative(uint32_t aHandle, int32_t aSecond)
     iMutex.Signal();
 }
 
-void Player::Pause()
+void Player::Pause(uint32_t aHandle)
 {
+    iMutex.Wait();
     Log::Print("Player::Pause\n");
-    iRenderer->Pause();
+
+    if(iState == ePlaying) {
+        GetSource(aHandle).Paused(iPipeline.front()->Id());
+        iState = ePaused;
+        iRenderer->Pause();
+    }
+
+    iMutex.Signal();
 }
 
-void Player::Unpause()
+void Player::Stop(uint32_t aHandle)
 {
-    Log::Print("Player::Unpause\n");
-    iRenderer->Unpause();
-}
-
-void Player::Stop()
-{
+    iMutex.Wait();
     Log::Print("Player::Stop\n");
-    iRenderer->Stop();
+
+    StopLocked(aHandle);
+        
+    iMutex.Signal();
 }
 
 void Player::Deleted(uint32_t aId, const Track* aReplacement)
@@ -418,5 +383,21 @@ void Player::PlayLocked(uint32_t aHandle, const Track* aTrack, uint32_t aSecond)
     PipelineClear();
     PipelineAppend(aTrack);
 
+    GetSource(aHandle).Buffering(aTrack->Id());
+    iState = eBuffering;
+
     iRenderer->Play(aHandle, aTrack, aSecond);
+}
+
+void Player::StopLocked(uint32_t aHandle) 
+{
+    if(iState != eStopped) {
+        uint32_t id = 0;
+        if(!iPipeline.empty()) {
+            id = iPipeline.front()->Id(); 
+        }
+        GetSource(aHandle).Stopped(id);
+        iState = eStopped;
+        iRenderer->Stop();
+    }
 }

@@ -87,17 +87,12 @@ void Source::PlaySecondRelative(int32_t aSecond)
 
 void Source::Pause()
 {
-    iPlayer.Pause();
-}
-
-void Source::Unpause()
-{
-    iPlayer.Unpause();
+    iPlayer.Pause(iHandle);
 }
 
 void Source::Stop()
 {
-    iPlayer.Stop();
+    iPlayer.Stop(iHandle);
 }
 
 void Source::Deleted(uint32_t aId, const Track* aReplacement)

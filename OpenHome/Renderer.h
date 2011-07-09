@@ -14,10 +14,8 @@ public:
     virtual void Finished(uint32_t aHandle, uint32_t aId) = 0;
     virtual const class ITrack* Next(uint32_t aHandle, uint32_t aAfterId) = 0;
     virtual void Buffering(uint32_t aHandle, uint32_t aId) = 0;
-    virtual void Stopped(uint32_t aHandle, uint32_t aId) = 0;
-    virtual void Paused(uint32_t aHandle, uint32_t aId) = 0;
-    virtual void Started(uint32_t aHandle, uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aBitDepth, uint32_t aSampleRate, bool aLossless, const char* aCodecName) = 0;
-    virtual void Playing(uint32_t aHandle, uint32_t aId, uint32_t aSeconds) = 0;
+    virtual void Playing(uint32_t aHandle, uint32_t aId, uint32_t aDuration, uint32_t aBitRate, uint32_t aBitDepth, uint32_t aSampleRate, bool aLossless, const char* aCodecName) = 0;
+    virtual void Time(uint32_t aHandle, uint32_t aId, uint32_t aSeconds) = 0;
     virtual void Metatext(uint32_t aHandle, uint32_t aId, uint8_t aDidlLite[], uint32_t aBytes) = 0;
     virtual ~IRendererStatus() {}
 };

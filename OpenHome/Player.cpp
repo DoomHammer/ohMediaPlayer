@@ -3,6 +3,9 @@
 #include "Product.h"
 #include "Playlist.h"
 
+#include <algorithm>
+#include <functional>
+
 using namespace OpenHome;
 using namespace OpenHome::MediaPlayer;
 
@@ -347,10 +350,68 @@ void Player::Stop(uint32_t aHandle)
     iMutex.Signal();
 }
 
-void Player::Deleted(uint32_t aId, const Track* aReplacement)
+void Player::Deleted(uint32_t aHandle, uint32_t aId, const Track* aReplacement)
 {
+    iMutex.Wait();
+
     Log::Print("Player::Deleted: %d\n", aId);
-    aReplacement->DecRef();
+
+    if(iPipeline.empty()) {
+        //Nothing in pipeline, so deletion doesn't affect anything
+        iMutex.Signal();
+        if(aReplacement) {
+            aReplacement->DecRef();
+        }
+        return;
+    }
+
+    if(aId == 0) {
+        //Entire playlist deleted, no matter what state clear pipeline and stop
+        PipelineClear();
+        StopLocked(aHandle);
+
+        iMutex.Signal();
+        if(aReplacement) {
+            aReplacement->DecRef();
+        }
+        return;
+    }
+
+    if(aId == iPipeline.front()->Id()) {
+        //Deleted id is current one.
+        if(aReplacement) {
+            if(iState == ePlaying) {
+                PlayLocked(aHandle, aReplacement, 0);
+            }
+            else {
+                //replacement available, but we're not to play.
+                PipelineClear();
+                PipelineAppend(aReplacement);
+                StopLocked(aHandle);
+            }
+        }
+        else {
+            //No replacement, clear pipeline and stop
+            PipelineClear();
+            StopLocked(aHandle);
+        }
+    }
+    else if(iPipeline.size() > 1) {
+        //Check if deleted id is in pipeline
+        std::list<const Track*>::iterator i = iPipeline.begin();
+        i++;
+        i = std::find_if(i, iPipeline.end(), std::bind2nd(std::mem_fun(&Track::IsId),aId));
+
+        if(i != iPipeline.end()) {
+            Log::Print("Player::Deleted id: %d, found in Pipeline, finishing id: %d first\n", aId, iPipeline.front()->Id());
+            iRenderer->FinishAfter(iPipeline.front()->Id());
+        }
+        if(aReplacement) {
+            aReplacement->DecRef();
+        }
+    }
+
+    iMutex.Signal();
 }
 
 uint32_t Player::NewId() 

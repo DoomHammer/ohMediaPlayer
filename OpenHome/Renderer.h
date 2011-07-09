@@ -27,7 +27,7 @@ public:
     virtual void Pause() = 0;
     virtual void Unpause() = 0;
     virtual void Stop() = 0;
-    virtual void Invalidate(uint32_t aIdFinal) = 0;
+    virtual void FinishAfter(uint32_t aId) = 0;
     virtual void SetStatusHandler(IRendererStatus& aHandler) = 0;
     virtual ~IRenderer() {}
 };

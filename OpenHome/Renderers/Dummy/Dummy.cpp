@@ -53,9 +53,9 @@ void Dummy::Stop()
     iTickTimer.Cancel();
 }
 
-void Dummy::Invalidate(uint32_t aIdFinal)
+void Dummy::FinishAfter(uint32_t aId)
 {
-    cout << "Dummy::Invalidate(" << aIdFinal << ")" << endl;
+    cout << "Dummy::FinishAfter(" << aId << ")" << endl;
 }
 
 void Dummy::SetStatusHandler(IRendererStatus& aHandler) 

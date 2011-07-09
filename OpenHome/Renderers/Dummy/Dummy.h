@@ -10,8 +10,6 @@
 namespace OpenHome {
 namespace MediaPlayer {
 
-class ITrack;
-
 class Dummy : public IRenderer
 {
 public:
@@ -21,7 +19,7 @@ public:
     virtual void Pause();
     virtual void Unpause();
     virtual void Stop();
-    virtual void Invalidate(uint32_t aIdFinal);
+    virtual void FinishAfter(uint32_t aId);
     virtual void SetStatusHandler(IRendererStatus& aStatus);
 private:
     void Tick();

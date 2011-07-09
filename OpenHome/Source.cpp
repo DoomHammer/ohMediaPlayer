@@ -97,7 +97,7 @@ void Source::Stop()
 
 void Source::Deleted(uint32_t aId, const Track* aReplacement)
 {
-    iPlayer.Deleted(aId, aReplacement);
+    iPlayer.Deleted(iHandle, aId, aReplacement);
 }
 
 uint32_t Source::NewId()

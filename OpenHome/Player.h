@@ -69,7 +69,7 @@ public:
     virtual void PlaySecondRelative(uint32_t aHanlde, int32_t aSecond) = 0;
     virtual void Pause(uint32_t aHandle) = 0;
     virtual void Stop(uint32_t aHandle) = 0;
-    virtual void Deleted(uint32_t aId, const Track* aReplacement) = 0;
+    virtual void Deleted(uint32_t aHandle, uint32_t aId, const Track* aReplacement) = 0;
     virtual uint32_t NewId() = 0;
     virtual ~IPlayer() {}
 };
@@ -125,7 +125,7 @@ public:
     virtual void PlaySecondRelative(uint32_t aHanlde, int32_t aSecond);
     virtual void Pause(uint32_t aHandle);
     virtual void Stop(uint32_t aHandle);
-    virtual void Deleted(uint32_t aId, const Track* aReplacement);
+    virtual void Deleted(uint32_t aHandle, uint32_t aId, const Track* aReplacement);
     virtual uint32_t NewId();
 
 private:

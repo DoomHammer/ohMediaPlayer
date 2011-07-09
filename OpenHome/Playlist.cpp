@@ -457,7 +457,9 @@ void ProviderPlaylist::DeleteId(Net::IInvocationResponse& aResponse, TUint aVers
     const Track* replacement = 0;
     if(i != iList.end()) {
         replacement = IterateForwards(i, 1);
-        replacement->IncRef();
+        if(replacement) {
+            replacement->IncRef();
+        }
 
         (*i)->DecRef();
         iList.erase(i);

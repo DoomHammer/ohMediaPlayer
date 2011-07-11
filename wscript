@@ -11,6 +11,7 @@ def options(ctx):
     ctx.load('compiler_cxx')
     ctx.add_option('--ohNetHeaders', action='store', default='../ohNet/Upnp/Build/Include', help='Path to root of ohNet header files')
     ctx.add_option('--ohNetLibraries', action='store', default='../ohNet/Upnp/Build/Obj', help='Path to root of ohNet library binaries')
+    ctx.add_option('--vlcHeaders', action='store', default='../vlc-1.1.10/include', help='Path to root of vlc header files')
     ctx.add_option('--debug', action='store', default='true', help='Generate and use binaries with debugging support')
 
 def configure(ctx):
@@ -21,14 +22,21 @@ def configure(ctx):
         ctx.load('compiler_cxx')
 
     #Arrange include paths and store in ctx.env.HeaderPath
-    hpath = ctx.path.find_node(ctx.options.ohNetHeaders)
-    hpath = hpath.abspath()
-    hpath = [hpath, hpath + os.path.sep + 'Cpp']
-    ctx.env.HeaderPath = hpath
+    ohNetHeaders = ctx.path.find_node(ctx.options.ohNetHeaders)
+    ohNetHeaders = ohNetHeaders.abspath()
+   
+    vlcHeaders = ctx.path.find_node(ctx.options.vlcHeaders)
+    vlcHeaders = vlcHeaders.abspath()
+
+    hpath = [ohNetHeaders, ohNetHeaders + os.path.sep + 'Cpp', vlcHeaders]
+    ctx.env.INCLUDES_MEDIA = hpath
 
     #Arrange library paths and store in ctx.env.LibraryPath
-    lpath = ctx.path.find_node(ctx.options.ohNetLibraries)
-    lpath = lpath.abspath()
+    ohNetLibraries = ctx.path.find_node(ctx.options.ohNetLibraries)
+    ohNetLibraries = ohNetLibraries.abspath()
+
+    vlcLibraries = ctx.path.find_node('./OpenHome/Renderers/Vlc')
+    vlcLibraries = vlcLibraries.abspath()
 
     if(ctx.options.debug == 'true'):
         debug = True
@@ -36,65 +44,81 @@ def configure(ctx):
         debug = False
 
     if sys.platform == 'win32':
-        lpath = lpath + os.sep + 'Windows'
-        ctx.env.Libraries = ['Ws2_32', 'Iphlpapi']
-        ctx.env.Defines = ['DllExport=__declspec(dllexport)', 'DllExportClass=']
-        ctx.env.CxxFlags = ['/EHsc', '/FR', '/Gz']
+        ohNetLibraries = ohNetLibraries + os.sep + 'Windows'
+        ctx.env.LIB_MEDIA = ['Ws2_32', 'Iphlpapi', 'libvlc']
+        ctx.env.DEFINES_MEDIA = ['DllExport=__declspec(dllexport)', 'DllExportClass=']
+        ctx.env.CXXFLAGS_MEDIA = ['/EHsc', '/FR', '/Gd']
         if(debug):
-            ctx.env.CxxFlags += ['/MTd', '/Od', '/Zi']
-            ctx.env.LinkFlags += ['/debug']
+            ctx.env.CXXFLAGS_MEDIA += ['/MTd', '/Od', '/Zi']
+            ctx.env.LINKFLAGS_MEDIA += ['/debug']
         else:
-            ctx.env.CxxFlags += ['/MT', '/Ox']
+            ctx.env.CXXFLAGS_MEDIA += ['/MT', '/Ox']
 
     elif sys.platform == 'linux2':
-        lpath = lpath + os.sep + 'Posix'
-        ctx.env.Libraries = ['pthread']
-        ctx.env.Defines = ['DllExport=__attribute__ ((visibility(\"default\")))', 'DllExportClass=__attribute__ ((visibility(\"default\")))']
-        ctx.env.CxxFlags += ['-Wall', '-Werror', '-pipe', '-fexceptions']
+        ohNetLibaries = ohNetLibaries + os.sep + 'Posix'
+        ctx.env.LIB_MEDIA = ['pthread', 'vlc']
+        ctx.env.DEFINES_MEDIA = ['DllExport=__attribute__ ((visibility(\"default\")))', 'DllExportClass=__attribute__ ((visibility(\"default\")))']
+        ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-Werror', '-pipe', '-fexceptions']
         if(debug):
-            ctx.env.CxxFlags += ['-g']
+            ctx.env.CXXFLAGS_MEDIA += ['-g']
     else:
         ctx.fatal("Unsupported build platform {0}".format(os.sys.platform))
 
         
     if(debug): 
-        lpath = lpath + os.sep + 'Debug'
+        ohNetLibraries = ohNetLibraries + os.sep + 'Debug'
     else:
-        lpath = lpath + os.sep + 'Release'
+        ohNetLibraries = ohNetLibraries + os.sep + 'Release'
 
-    ctx.env.LibraryPath = lpath
+    ctx.env.LIBPATH_MEDIA = [ohNetLibraries, vlcLibraries]
 
     #Let user know about selected paths
-    print 'HeaderPath: {0}'.format(ctx.env.HeaderPath)
-    print 'LibraryPath: {0}'.format(ctx.env.LibraryPath)
+    print 'INCLUDES: {0}'.format(ctx.env.INCLUDES_MEDIA)
+    print 'LIBPATH: {0}'.format(ctx.env.LIBPATH_MEDIA)
 
     #Ensure those directories actually exist
-    ctx.find_file('.', ctx.env.HeaderPath)
-    ctx.find_file('.', ctx.env.LibraryPath)
+    ctx.find_file('.', ctx.env.INCLUDES_MEDIA)
+    ctx.find_file('.', ctx.env.LIBPATH_MEDIA)
 
 
 
 def build(ctx):
+    ctx.stlib(
+        source = [
+            'OpenHome/Product.cpp', 
+            'OpenHome/Info.cpp',
+            'OpenHome/Time.cpp',
+            'OpenHome/Playlist.cpp',
+            'OpenHome/Player.cpp',
+            'OpenHome/Standard.cpp',
+            'OpenHome/Source.cpp',
+            'OpenHome/SourcePlaylist.cpp'
+        ],
+        target = 'ohMedia',
+        use    = 'MEDIA',
+        includes = ctx.env.INCLUDES_MEDIA
+        )
+
     ctx.program(
         source      = [
-            'main.cpp' 
-            ,'OpenHome/Product.cpp' 
-            ,'OpenHome/Info.cpp'
-            ,'OpenHome/Time.cpp'
-            ,'OpenHome/Playlist.cpp' 
-            ,'OpenHome/Player.cpp'
-            ,'OpenHome/Standard.cpp'
-            ,'OpenHome/Source.cpp'
-            ,'OpenHome/SourcePlaylist.cpp'
-            ,'OpenHome/Renderers/Dummy/Dummy.cpp'
+            'OpenHome/Renderers/Dummy/main.cpp',
+            'OpenHome/Renderers/Dummy/Dummy.cpp'
             ],
-        target      = 'ohMediaPlayer',
-        includes    = ctx.env.HeaderPath,
-        defines     = ctx.env.Defines,
+        includes    = ctx.env.INCLUDES_MEDIA,
+        target      = 'ohMediaPlayerDummy',
         stlib       = ['ohNetCore', 'ohNetDevices', 'TestFramework'],
-        stlibpath   = ctx.env.LibraryPath,
-        lib         = ctx.env.Libraries,
-        cxxflags    = ctx.env.CxxFlags,
-        linkflags   = ctx.env.LinkFlags
+        use         = ['MEDIA', 'ohMedia']
         )
+
+    ctx.program(
+        source      = [
+            'OpenHome/Renderers/Vlc/main.cpp',
+            'OpenHome/Renderers/Vlc/Vlc.cpp'
+            ],
+        includes    = ctx.env.INCLUDES_MEDIA,
+        target      = 'ohMediaPlayerVlc',
+        stlib       = ['ohNetCore', 'ohNetDevices', 'TestFramework'],
+        use         = ['MEDIA', 'ohMedia']
+        )
+
 

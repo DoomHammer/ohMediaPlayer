@@ -5,9 +5,9 @@
 #include <Stack.h>
 #include <Maths.h>
 #include <OptionParser.h>
-#include "OpenHome/Product.h"
-#include "OpenHome/Playlist.h"
-#include "OpenHome/Renderers/Dummy/Dummy.h"
+#include "../../Product.h"
+#include "../../Playlist.h"
+#include "Vlc.h"
 
 #ifdef _WIN32
 
@@ -63,10 +63,10 @@ int CDECL main(int aArgc, char* aArgv[])
     SourceIndexHandler* sourceIndexHandler = new SourceIndexHandler();
     StandbyHandler* standbyHandler = new StandbyHandler();
 
-    Dummy* dummy = new Dummy();
+    Vlc* vlc = new Vlc();
 
     Player* player = new Player(
-        dummy,
+        vlc,
         *device, 
         *standbyHandler, 
         *sourceIndexHandler, 

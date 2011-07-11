@@ -447,7 +447,7 @@ void Player::PlayLocked(uint32_t aHandle, const Track* aTrack, uint32_t aSecond)
     GetSource(aHandle).Buffering(aTrack->Id());
     iState = eBuffering;
 
-    iRenderer->Play(aHandle, aTrack, aSecond);
+    iRenderer->Play(aHandle, *aTrack, aSecond);
 }
 
 void Player::StopLocked(uint32_t aHandle) 

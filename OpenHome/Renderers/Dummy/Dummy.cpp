@@ -18,13 +18,13 @@ Dummy::~Dummy()
 {
 }
 
-void Dummy::Play(uint32_t aHandle, const class ITrack* aTrack, uint32_t aSecond)
+void Dummy::Play(uint32_t aHandle, const class ITrack& aTrack, uint32_t aSecond)
 {
     iHandle = aHandle;
-    iId = aTrack->Id();
+    iId = aTrack.Id();
     const uint8_t* uri;
     uint32_t bytes;
-    aTrack->Uri(uri, bytes);
+    aTrack.Uri(uri, bytes);
     iUri.assign((const char*)uri, bytes);
     iSecond = aSecond;
 

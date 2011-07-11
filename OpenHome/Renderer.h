@@ -23,7 +23,7 @@ public:
 class IRenderer
 {
 public:
-    virtual void Play(uint32_t aHandle, const class ITrack* aTrack, uint32_t aSecond) = 0;
+    virtual void Play(uint32_t aHandle, const class ITrack& aTrack, uint32_t aSecond) = 0;
     virtual void Pause() = 0;
     virtual void Unpause() = 0;
     virtual void Stop() = 0;

@@ -16,7 +16,7 @@ class Vlc : public IRenderer
 public:
     Vlc();
     ~Vlc();
-    virtual void Play(uint32_t aHandle, const ITrack* aTrack, uint32_t aSecond);
+    virtual void Play(uint32_t aHandle, const ITrack& aTrack, uint32_t aSecond);
     virtual void Pause();
     virtual void Unpause();
     virtual void Stop();

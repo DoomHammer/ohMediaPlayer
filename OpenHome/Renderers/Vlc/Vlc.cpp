@@ -59,9 +59,10 @@ Vlc::~Vlc()
 {
     libvlc_log_close(iVlcLog);
     libvlc_release(iVlc);
+    delete iTimerFinished;
 }
 
-void Vlc::Play(uint32_t aHandle, const class ITrack* aTrack, uint32_t aSecond)
+void Vlc::Play(uint32_t aHandle, const class ITrack& aTrack, uint32_t aSecond)
 {
     if(iMedia) {
         libvlc_event_manager_t* mediaEvent = libvlc_media_event_manager(iMedia);
@@ -84,10 +85,10 @@ void Vlc::Play(uint32_t aHandle, const class ITrack* aTrack, uint32_t aSecond)
 
     const uint8_t* uri;
     uint32_t bytes;
-    aTrack->Uri(uri, bytes);
+    aTrack.Uri(uri, bytes);
     iUri.assign((const char*)uri, bytes);
     iHandle = aHandle;
-    iId = aTrack->Id();
+    iId = aTrack.Id();
     iSeconds = aSecond;
     iDuration = -1;
 

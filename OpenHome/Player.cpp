@@ -80,10 +80,11 @@ Player::Player(IRenderer* aRenderer
     aDevice.SetAttribute("Upnp.Type", "av.openhome.org");
     aDevice.SetAttribute("Upnp.Version", "1");
 
-    Bwh tmp(strlen(aProductName) + strlen(aProductRoom) + 1);
+    Bwh tmp(strlen(aProductName) + strlen(aProductRoom) + 2);
     tmp.Append(aProductRoom);
     tmp.Append(':');
     tmp.Append(aProductName);
+    tmp.Append('\0');
     Brhz friendlyName;
     tmp.TransferTo(friendlyName);
     aDevice.SetAttribute("Upnp.FriendlyName", friendlyName.CString());

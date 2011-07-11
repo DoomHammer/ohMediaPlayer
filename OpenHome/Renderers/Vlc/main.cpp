@@ -24,7 +24,43 @@ using namespace OpenHome::MediaPlayer;
 using namespace OpenHome::TestFramework;
 
 static const TUint kTracksMax = 1000;
-static const char* kProtocolInfo = "http-get:*:audio/x-flac:*,http-get:*:audio/wav:*,http-get:*:audio/wave:*,http-get:*:audio/x-wav:*,http-get:*:audio/mpeg:*,http-get:*:audio/x-mpeg:*,http-get:*:audio/mp1:*,http-get:*:audio/aiff:*,http-get:*:audio/x-aiff:*,http-get:*:audio/x-m4a:*,http-get:*:audio/x-ms-wma:*,rtsp-rtp-udp:*:audio/x-ms-wma:*,http-get:*:audio/x-scpls:*,http-get:*:audio/x-mpegurl:*,http-get:*:audio/x-ms-asf:*,http-get:*:audio/x-ms-wax:*,http-get:*:audio/x-ms-wvx:*,http-get:*:video/x-ms-asf:*,http-get:*:video/x-ms-wax:*,http-get:*:video/x-ms-wvx:*,http-get:*:text/xml:*,http-get:*:audio/aac:*,http-get:*:audio/aacp:*,http-get:*:audio/mp4:*,http-get:*:audio/ogg:*,http-get:*:audio/x-ogg:*,http-get:*:application/ogg:*";
+static const char* kProtocolInfo = 
+"http-get:*:audio/x-flac:*,"
+"http-get:*:audio/wav:*,"
+"http-get:*:audio/wave:*,"
+"http-get:*:audio/x-wav:*,"
+"http-get:*:audio/mpeg:*,"
+"http-get:*:audio/x-mpeg:*,"
+"http-get:*:audio/mp1:*,"
+"http-get:*:audio/aiff:*,"
+"http-get:*:audio/x-aiff:*,"
+"http-get:*:audio/x-m4a:*,"
+"http-get:*:audio/x-ms-wma:*,"
+"rtsp-rtp-udp:*:audio/x-ms-wma:*,"
+"http-get:*:audio/x-scpls:*,"
+"http-get:*:audio/x-mpegurl:*,"
+"http-get:*:audio/x-ms-asf:*,"
+"http-get:*:audio/x-ms-wax:*,"
+"http-get:*:audio/x-ms-wvx:*,"
+"http-get:*:text/xml:*,"
+"http-get:*:audio/aac:*,"
+"http-get:*:audio/aacp:*,"
+"http-get:*:audio/mp4:*,"
+"http-get:*:audio/ogg:*,"
+"http-get:*:audio/x-ogg:*,"
+"http-get:*:application/ogg:*,"
+"http-get:*:video/mpeg:*,"
+"http-get:*:video/mp4:*,"
+"http-get:*:video/quicktime:*,"
+"http-get:*:video/webm:*,"
+"http-get:*:video/x-ms-wmv:*,"
+"http-get:*:video/x-ms-asf:*,"
+"http-get:*:video/x-msvideo:*,"
+"http-get:*:video/x-ms-wax:*,"
+"http-get:*:video/x-ms-wvx:*,"
+"http-get:*:video/x-m4v:*,"
+"http-get:*:video/x-matroska:*"
+;
 
 class StandbyHandler : public IStandbyHandler
 {

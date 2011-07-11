@@ -92,7 +92,7 @@ void Vlc::Play(uint32_t aHandle, const class ITrack& aTrack, uint32_t aSecond)
     iSeconds = aSecond;
     iDuration = -1;
 
-    iMedia = libvlc_media_new_location(iVlc, (const char*)uri);
+    iMedia = libvlc_media_new_location(iVlc, iUri.c_str());
     iPlayer = libvlc_media_player_new_from_media(iMedia);
 
     libvlc_event_manager_t* mediaEvent = libvlc_media_event_manager(iMedia);

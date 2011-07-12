@@ -47,12 +47,17 @@ Vlc::Vlc()
     , iPlayer(0)
     , iMedia(0)
     , iStatus(0)
+    , iMutex("VLC")
+    , iInitialised(false)
 {
+    Debug::SetLevel(Debug::kMedia);
     iVlc = libvlc_new (0, NULL);
     libvlc_set_log_verbosity(iVlc, 3);
     iVlcLog = libvlc_log_open(iVlc);
     iTimerFinishedFunctor = MakeFunctor(*this, &Vlc::TimerFinishedExpired);
     iTimerFinished = new Timer(iTimerFinishedFunctor);
+    iTimerPlayFunctor = MakeFunctor(*this, &Vlc::TimerPlayExpired);
+    iTimerPlay = new Timer(iTimerPlayFunctor);
 }
 
 Vlc::~Vlc()
@@ -64,24 +69,7 @@ Vlc::~Vlc()
 
 void Vlc::Play(uint32_t aHandle, const class ITrack& aTrack, uint32_t aSecond)
 {
-    if(iMedia) {
-        libvlc_event_manager_t* mediaEvent = libvlc_media_event_manager(iMedia);
-        libvlc_event_detach(mediaEvent, libvlc_MediaDurationChanged, ::DurationChanged, this);
-        libvlc_event_detach(mediaEvent, libvlc_MediaParsedChanged, ::ParsedChanged, this);
-        libvlc_event_detach(mediaEvent, libvlc_MediaStateChanged, ::StateChanged, this);
-        libvlc_media_release(iMedia);
-        iMedia = 0;
-    }
-    if(iPlayer) {
-        libvlc_event_manager_t* playerEvent = libvlc_media_player_event_manager(iPlayer);
-        libvlc_event_detach(playerEvent, libvlc_MediaPlayerPlaying, ::Playing, this);
-        libvlc_event_detach(playerEvent, libvlc_MediaPlayerEndReached, ::EndReached, this);
-        libvlc_event_detach(playerEvent, libvlc_MediaPlayerEncounteredError, ::EncounteredError, this);
-        libvlc_event_detach(playerEvent, libvlc_MediaPlayerTimeChanged, ::TimeChanged, this);
-        libvlc_media_player_stop(iPlayer);
-        libvlc_media_player_release(iPlayer); 
-        iPlayer = 0;
-    }
+    iMutex.Wait();
 
     const uint8_t* uri;
     uint32_t bytes;
@@ -91,6 +79,17 @@ void Vlc::Play(uint32_t aHandle, const class ITrack& aTrack, uint32_t aSecond)
     iId = aTrack.Id();
     iSeconds = aSecond;
     iDuration = -1;
+
+    iMutex.Signal();
+
+    iTimerPlay->FireIn(0);
+}
+
+void Vlc::TimerPlayExpired()
+{
+    iMutex.Wait();
+
+    CleanupLocked();
 
     iMedia = libvlc_media_new_location(iVlc, iUri.c_str());
     iPlayer = libvlc_media_player_new_from_media(iMedia);
@@ -115,36 +114,50 @@ void Vlc::Play(uint32_t aHandle, const class ITrack& aTrack, uint32_t aSecond)
     ASSERT(ret == 0);
 
     libvlc_media_player_play(iPlayer);
+
+    iInitialised = true;
+
+    iMutex.Signal();
 }
 
 void Vlc::Pause()
 {
+    iMutex.Wait();
     libvlc_media_player_pause(iPlayer);
+    iMutex.Signal();
 }
 
 void Vlc::Unpause()
 {
+    iMutex.Wait();
     libvlc_media_player_pause(iPlayer);
+    iMutex.Signal();
 }
 
 void Vlc::Stop()
 {
-    libvlc_media_player_stop(iPlayer);
+    iMutex.Wait();
+    CleanupLocked();
+    iMutex.Signal();
 }
 
 void Vlc::FinishAfter(uint32_t aId)
 {
-    cout << "Vlc::FinishAfter(" << aId << ")" << endl;
+    ASSERTS();
 }
 
 void Vlc::SetStatusHandler(IRendererStatus& aHandler) 
 {
+    iMutex.Wait();
     iStatus = &aHandler;
+    iMutex.Signal();
 }
 
 void Vlc::DurationChanged(const struct libvlc_event_t* aEvent)
 {
+    iMutex.Wait();
     iDuration = (uint32_t)(aEvent->u.media_duration_changed.new_duration/1000);
+    iMutex.Signal();
 }
 
 void Vlc::ParsedChanged(const struct libvlc_event_t* aEvent)
@@ -159,8 +172,14 @@ void Vlc::StateChanged(const struct libvlc_event_t* aEvent)
 
 void Vlc::Playing(const struct libvlc_event_t* aEvent)
 {
+    iMutex.Wait();
     Log::Print("Vlc::Playing\n");
-    iStatus->Playing(iHandle, iId, iDuration, 128000, 24, 44100, false, "mp3");
+    uint32_t handle = iHandle;
+    uint32_t id = iId;
+    uint32_t duration = iDuration;
+    iMutex.Signal();
+
+    iStatus->Playing(handle, id, duration, 128000, 24, 44100, false, "mp3");
 }
 
 void Vlc::EndReached(const struct libvlc_event_t* aEvent)
@@ -184,15 +203,57 @@ void Vlc::TimeChanged(const struct libvlc_event_t* aEvent)
     uint64_t ms = aEvent->u.media_player_time_changed.new_time;
     uint32_t sec = ms / 1000;
 
+    bool changed = false;
+
+    iMutex.Wait();
+
+    uint32_t handle = iHandle;
+    uint32_t id = iId;
+
     if(sec > iSeconds) {
         iSeconds = sec;
-        iStatus->Time(iHandle, iId, iSeconds);
+        changed = true;
+    }
+    iMutex.Signal();
+
+    if(changed) {
+        iStatus->Time(handle, id, sec);
     }
 }
 
 void Vlc::TimerFinishedExpired()
 {
-    Log::Print("Vlc::TimerFinishedExpired\n");
-    iStatus->Finished(iHandle, iId);
+    iMutex.Wait();
+    CleanupLocked();
+    uint32_t handle = iHandle;
+    uint32_t id = iId;
+    iMutex.Signal();
+
+    iStatus->Finished(handle, id);
 }
 
+void Vlc::CleanupLocked()
+{
+    if(iInitialised) {
+        libvlc_event_manager_t* mediaEvent = libvlc_media_event_manager(iMedia);
+        libvlc_event_detach(mediaEvent, libvlc_MediaDurationChanged, ::DurationChanged, this);
+        libvlc_event_detach(mediaEvent, libvlc_MediaParsedChanged, ::ParsedChanged, this);
+        libvlc_event_detach(mediaEvent, libvlc_MediaStateChanged, ::StateChanged, this);
+
+        libvlc_event_manager_t* playerEvent = libvlc_media_player_event_manager(iPlayer);
+        libvlc_event_detach(playerEvent, libvlc_MediaPlayerPlaying, ::Playing, this);
+        libvlc_event_detach(playerEvent, libvlc_MediaPlayerEndReached, ::EndReached, this);
+        libvlc_event_detach(playerEvent, libvlc_MediaPlayerEncounteredError, ::EncounteredError, this);
+        libvlc_event_detach(playerEvent, libvlc_MediaPlayerTimeChanged, ::TimeChanged, this);
+
+        libvlc_media_player_stop(iPlayer);
+
+        libvlc_media_release(iMedia);
+        iMedia = 0;
+
+        libvlc_media_player_release(iPlayer); 
+        iPlayer = 0;
+
+        iInitialised = false;
+    }
+}

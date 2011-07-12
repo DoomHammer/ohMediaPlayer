@@ -34,6 +34,8 @@ public:
 
 private:
     void TimerFinishedExpired();
+    void TimerPlayExpired();
+    void CleanupLocked();
     
 private:
     uint32_t iHandle;
@@ -43,6 +45,10 @@ private:
     uint32_t iDuration;
     Functor iTimerFinishedFunctor;
     Timer* iTimerFinished;
+    Functor iTimerPlayFunctor;
+    Timer* iTimerPlay;
+    Mutex iMutex;
+    bool iInitialised;
 private:
     libvlc_instance_t* iVlc;
     libvlc_log_t* iVlcLog;

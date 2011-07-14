@@ -33,6 +33,7 @@ public:
     void EndReached(const struct libvlc_event_t* aEvent);
     void EncounteredError(const struct libvlc_event_t* aEvent);
     void TimeChanged(const struct libvlc_event_t* aEvent);
+    void SeekableChanged(const struct libvlc_event_t* aEvent);
 
 private:
     void TimerFinishedExpired();
@@ -45,6 +46,12 @@ private:
     std::string iUri;
     uint32_t iSeconds;
     uint32_t iDuration;
+    uint32_t iSeekToSecond;
+    bool iPendingVolume;
+    uint32_t iPendingVolumeValue;
+    bool iPendingMute;
+    bool iPendingMuteValue;
+    uint32_t iPendingSeek;
     Functor iTimerFinishedFunctor;
     Timer* iTimerFinished;
     Functor iTimerPlayFunctor;

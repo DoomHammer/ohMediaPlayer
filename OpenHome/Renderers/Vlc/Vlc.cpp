@@ -41,6 +41,11 @@ void TimeChanged(const struct libvlc_event_t* aEvent, void* aContext)
     ((Vlc*)aContext)->TimeChanged(aEvent);
 }
 
+void SeekableChanged(const struct libvlc_event_t* aEvent, void* aContext)
+{
+    ((Vlc*)aContext)->SeekableChanged(aEvent);
+}
+
 Vlc::Vlc()
     : iVlc(0)
     , iVlcLog(0)
@@ -49,6 +54,8 @@ Vlc::Vlc()
     , iStatus(0)
     , iMutex("VLC")
     , iInitialised(false)
+    , iPendingVolume(false)
+    , iPendingMute(false)
 {
     Debug::SetLevel(Debug::kMedia);
     iVlc = libvlc_new (0, NULL);
@@ -77,7 +84,8 @@ void Vlc::Play(uint32_t aHandle, const class ITrack& aTrack, uint32_t aSecond)
     iUri.assign((const char*)uri, bytes);
     iHandle = aHandle;
     iId = aTrack.Id();
-    iSeconds = aSecond;
+    iSeconds = 0;
+    iPendingSeek = aSecond;
     iDuration = -1;
 
     iMutex.Signal();
@@ -93,6 +101,15 @@ void Vlc::TimerPlayExpired()
 
     iMedia = libvlc_media_new_location(iVlc, iUri.c_str());
     iPlayer = libvlc_media_player_new_from_media(iMedia);
+
+    if(iPendingVolume) {
+        libvlc_audio_set_volume(iPlayer, iPendingVolumeValue);
+        iPendingVolume = false;
+    }
+    if(iPendingMute) {
+        libvlc_audio_set_mute(iPlayer, iPendingMuteValue);
+        iPendingMute = false;
+    }
 
     libvlc_event_manager_t* mediaEvent = libvlc_media_event_manager(iMedia);
     libvlc_event_manager_t* playerEvent = libvlc_media_player_event_manager(iPlayer);
@@ -112,6 +129,8 @@ void Vlc::TimerPlayExpired()
     ASSERT(ret == 0);
     ret = libvlc_event_attach(playerEvent, libvlc_MediaPlayerTimeChanged, ::TimeChanged, this);
     ASSERT(ret == 0);
+    ret = libvlc_event_attach(playerEvent, libvlc_MediaPlayerSeekableChanged, ::SeekableChanged, this);
+    ASSERT(ret == 0);
 
     libvlc_media_player_play(iPlayer);
 
@@ -123,6 +142,9 @@ void Vlc::TimerPlayExpired()
 void Vlc::Pause()
 {
     iMutex.Wait();
+    //Player interface guarantees to only call pause if something is playing.
+    //Therefore, iPlayer will always be valid
+    ASSERT(iPlayer); 
     libvlc_media_player_pause(iPlayer);
     iMutex.Signal();
 }
@@ -130,6 +152,9 @@ void Vlc::Pause()
 void Vlc::Unpause()
 {
     iMutex.Wait();
+    //Player interface guarantees to only call unpause if something is paused.
+    //Therefore, iPlayer will always be valid
+    ASSERT(iPlayer);
     libvlc_media_player_pause(iPlayer);
     iMutex.Signal();
 }
@@ -149,14 +174,32 @@ void Vlc::FinishAfter(uint32_t aId)
 void Vlc::SetVolume(uint32_t aValue)
 {
     iMutex.Wait();
-    libvlc_audio_set_volume(iPlayer, aValue);
+    if(iInitialised) {
+        //libvlc only lets you change volume on an valid iPlayer
+        libvlc_audio_set_volume(iPlayer, aValue);
+    }
+    else {
+        //But OpenHome lets you change it any time, so save the value and
+        //apply it when we're initialised
+        iPendingVolume = true;
+        iPendingVolumeValue = aValue;
+    }
     iMutex.Signal();
 }
 
 void Vlc::SetMute(bool aValue)
 {
     iMutex.Wait();
-    libvlc_audio_set_mute(iPlayer, aValue);
+    if(iInitialised) {
+        //libvlc only lets you change mute on an valid iPlayer
+        libvlc_audio_set_mute(iPlayer, aValue);
+    }
+    else {
+        //But OpenHome lets you change it any time, so save the value and
+        //apply it when we're initialised
+        iPendingMute = true;
+        iPendingMuteValue = aValue;
+    }
     iMutex.Signal();
 }
 
@@ -176,7 +219,9 @@ void Vlc::DurationChanged(const struct libvlc_event_t* aEvent)
 
 void Vlc::ParsedChanged(const struct libvlc_event_t* aEvent)
 {
+    iMutex.Wait();
     Log::Print("Vlc::ParsedChanged(%d)\n", aEvent->u.media_parsed_changed.new_status);
+    iMutex.Signal();
 }
 
 void Vlc::StateChanged(const struct libvlc_event_t* aEvent)
@@ -233,6 +278,23 @@ void Vlc::TimeChanged(const struct libvlc_event_t* aEvent)
     if(changed) {
         iStatus->Time(handle, id, sec);
     }
+}
+
+void Vlc::SeekableChanged(const struct libvlc_event_t* aEvent)
+{
+    iMutex.Wait();    
+
+    Log::Print("Vlc::SeekableChanged\n");
+
+    uint32_t seekable = aEvent->u.media_player_seekable_changed.new_seekable;
+    ASSERT(seekable == 1); //We only support moving from not seekable to seekable
+
+    if(iPendingSeek > 0) {
+        libvlc_media_player_set_time(iPlayer, iPendingSeek*1000);
+        iPendingSeek = 0;
+    }
+
+    iMutex.Signal();
 }
 
 void Vlc::TimerFinishedExpired()

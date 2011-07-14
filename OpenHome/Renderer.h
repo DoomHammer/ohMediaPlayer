@@ -28,6 +28,8 @@ public:
     virtual void Unpause() = 0;
     virtual void Stop() = 0;
     virtual void FinishAfter(uint32_t aId) = 0;
+    virtual void SetVolume(uint32_t aValue) = 0;
+    virtual void SetMute(bool aValue) = 0;
     virtual void SetStatusHandler(IRendererStatus& aHandler) = 0;
     virtual ~IRenderer() {}
 };

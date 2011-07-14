@@ -1,12 +1,16 @@
 #include "Volume.h"
 
+#include "Player.h"
+
 using namespace OpenHome;
 using namespace OpenHome::MediaPlayer;
 
-ProviderVolume::ProviderVolume(Net::DvDevice& aDevice)
+ProviderVolume::ProviderVolume(Net::DvDevice& aDevice, IVolume& aVolume)
     : DvProviderAvOpenhomeOrgVolume1(aDevice)
     , iMutex("VOLU")
+    , iVolume(aVolume)
 {
+    PropertiesLock();
     SetPropertyVolume(50);
     SetPropertyMute(false);
     SetPropertyBalance(0);
@@ -15,121 +19,147 @@ ProviderVolume::ProviderVolume(Net::DvDevice& aDevice)
     SetPropertyVolumeMax(100);
     SetPropertyVolumeUnity(80);
     SetPropertyVolumeSteps(100);
-    SetPropertyVolumeMillDbPerStep(1024);
-    SetPropertyBalanceMax(15);
+    SetPropertyVolumeMilliDbPerStep(1024);
+    SetPropertyBalanceMax(0);
     SetPropertyFadeMax(0);
+    PropertiesUnlock();
     
     EnableActionCharacteristics();
     EnableActionSetVolume();
     EnableActionVolumeInc();
     EnableActionVolumeDec();
     EnableActionVolume();
-    EnableActionSetBalance();
-    EnableActionBalanceInc();
-    EnableActionBalanceDec();
-    EnableActionBalance();
-    EnableActionSetFade();
-    EnableActionFadeInc();
-    EnableActionFadeDec();
-    EnableActionFade();
     EnableActionSetMute();
     EnableActionMute();
     EnableActionVolumeLimit();
 }
 
 //From DvProviderAvOpenhomeOrgVolume1
-void ProviderVolume::Characteristics(IInvocationResponse& aResponse, TUint aVersion, IInvocationResponseUint& aVolumeMax, IInvocationResponseUint& aVolumeUnity, IInvocationResponseUint& aVolumeSteps, IInvocationResponseUint& aVolumeMilliDbPerStep, IInvocationResponseUint& aBalanceMax, IInvocationResponseUint& aFadeMax)
+void ProviderVolume::Characteristics(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aVolumeMax, Net::IInvocationResponseUint& aVolumeUnity, Net::IInvocationResponseUint& aVolumeSteps, Net::IInvocationResponseUint& aVolumeMilliDbPerStep, Net::IInvocationResponseUint& aBalanceMax, Net::IInvocationResponseUint& aFadeMax)
 {
+    //All the characteristics are readonly, therefore no mutex
+    uint32_t max;
+    GetPropertyVolumeMax(max);
+
+    uint32_t unity;
+    GetPropertyVolumeUnity(unity);
+
+    uint32_t steps;
+    GetPropertyVolumeSteps(steps);
+
+    uint32_t milliDb;
+    GetPropertyVolumeMilliDbPerStep(milliDb);
+
+    uint32_t balanceMax;
+    GetPropertyBalanceMax(balanceMax);
+
+    uint32_t fadeMax;
+    GetPropertyFadeMax(fadeMax);
+
     aResponse.Start();
-    aResponse.Stop();
+    aVolumeMax.Write(max);
+    aVolumeUnity.Write(unity);
+    aVolumeSteps.Write(steps);
+    aVolumeMilliDbPerStep.Write(milliDb);
+    aBalanceMax.Write(balanceMax);
+    aFadeMax.Write(fadeMax);
+    aResponse.End();
 }
 
-void ProviderVolume::SetVolume(IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
+void ProviderVolume::SetVolume(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
 {
     aResponse.Start();
-    aResponse.Stop();
+    aResponse.End();
+
+    iMutex.Wait();
+    SetVolumeLocked(aValue);
+    iMutex.Signal();
 }
 
-void ProviderVolume::VolumeInc(IInvocationResponse& aResponse, TUint aVersion)
+void ProviderVolume::SetVolumeLocked(TUint aValue)
 {
-    aResponse.Start();
-    aResponse.Stop();
+    uint32_t limit;
+    GetPropertyVolumeLimit(limit);
+
+    if(aValue > limit) {
+        aValue = limit;
+    }
+    SetPropertyVolume(aValue);
+    iVolume.SetVolume(aValue);
 }
 
-void ProviderVolume::VolumeDec(IInvocationResponse& aResponse, TUint aVersion)
+void ProviderVolume::VolumeInc(Net::IInvocationResponse& aResponse, TUint aVersion)
 {
     aResponse.Start();
-    aResponse.Stop();
+    aResponse.End();
+
+    iMutex.Wait();
+    uint32_t volume;
+    GetPropertyVolume(volume);
+    SetVolumeLocked(++volume);
+    iMutex.Signal();
 }
 
-void ProviderVolume::Volume(IInvocationResponse& aResponse, TUint aVersion, IInvocationResponseUint& aValue)
+void ProviderVolume::VolumeDec(Net::IInvocationResponse& aResponse, TUint aVersion)
 {
     aResponse.Start();
-    aResponse.Stop();
+    aResponse.End();
+
+    iMutex.Wait();
+    uint32_t volume;
+    GetPropertyVolume(volume);
+    SetVolumeLocked(--volume);
+    iMutex.Signal();
 }
 
-void ProviderVolume::SetBalance(IInvocationResponse& aResponse, TUint aVersion, TInt aValue)
+void ProviderVolume::Volume(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
 {
+    iMutex.Wait();
+
+    uint32_t volume;
+    GetPropertyVolume(volume);
+
+    iMutex.Signal();
+
     aResponse.Start();
-    aResponse.Stop();
+    aValue.Write(volume);
+    aResponse.End();
 }
 
-void ProviderVolume::BalanceInc(IInvocationResponse& aResponse, TUint aVersion)
+void ProviderVolume::SetMute(Net::IInvocationResponse& aResponse, TUint aVersion, TBool aValue)
 {
     aResponse.Start();
-    aResponse.Stop();
+    aResponse.End();
+
+    iMutex.Wait();
+
+    SetPropertyMute(aValue);
+    iVolume.SetMute(aValue);
+
+    iMutex.Signal();
 }
 
-void ProviderVolume::BalanceDec(IInvocationResponse& aResponse, TUint aVersion)
+void ProviderVolume::Mute(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseBool& aValue)
 {
+    iMutex.Wait();
+
+    bool mute;
+    GetPropertyMute(mute);
+
+    iMutex.Signal();
+
     aResponse.Start();
-    aResponse.Stop();
+    aValue.Write(mute);
+    aResponse.End();
 }
 
-void ProviderVolume::Balance(IInvocationResponse& aResponse, TUint aVersion, IInvocationResponseInt& aValue)
+void ProviderVolume::VolumeLimit(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
 {
-    aResponse.Start();
-    aResponse.Stop();
-}
+    //Limit is readonly, therefore no mutex
+    uint32_t limit;
+    GetPropertyVolumeLimit(limit);
 
-void ProviderVolume::SetFade(IInvocationResponse& aResponse, TUint aVersion, TInt aValue)
-{
     aResponse.Start();
-    aResponse.Stop();
-}
-
-void ProviderVolume::FadeInc(IInvocationResponse& aResponse, TUint aVersion)
-{
-    aResponse.Start();
-    aResponse.Stop();
-}
-
-void ProviderVolume::FadeDec(IInvocationResponse& aResponse, TUint aVersion)
-{
-    aResponse.Start();
-    aResponse.Stop();
-}
-
-void ProviderVolume::Fade(IInvocationResponse& aResponse, TUint aVersion, IInvocationResponseInt& aValue)
-{
-    aResponse.Start();
-    aResponse.Stop();
-}
-
-void ProviderVolume::SetMute(IInvocationResponse& aResponse, TUint aVersion, TBool aValue)
-{
-    aResponse.Start();
-    aResponse.Stop();
-}
-
-void ProviderVolume::Mute(IInvocationResponse& aResponse, TUint aVersion, IInvocationResponseBool& aValue)
-{
-    aResponse.Start();
-    aResponse.Stop();
-}
-
-void ProviderVolume::VolumeLimit(IInvocationResponse& aResponse, TUint aVersion, IInvocationResponseUint& aValue)
-{
-    aResponse.Start();
-    aResponse.Stop();
+    aValue.Write(limit);
+    aResponse.End();
 }

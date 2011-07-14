@@ -58,6 +58,16 @@ void Dummy::FinishAfter(uint32_t aId)
     cout << "Dummy::FinishAfter(" << aId << ")" << endl;
 }
 
+void Dummy::SetVolume(uint32_t aValue)
+{
+    cout << "Dummy::SetVolume(" << aValue << ")" << endl;
+}
+
+void Dummy::SetMute(bool aValue)
+{
+    cout << "Dummy::SetMute(" << aValue << ")" << endl;
+}
+
 void Dummy::SetStatusHandler(IRendererStatus& aHandler) 
 {
     iStatus = &aHandler;

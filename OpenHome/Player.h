@@ -10,6 +10,7 @@
 #include "Standard.h"
 #include "Info.h"
 #include "Time.h"
+#include "Volume.h"
 
 #include <list>
 
@@ -74,11 +75,19 @@ public:
     virtual ~IPlayer() {}
 };
 
+class IVolume
+{
+public:
+    virtual void SetVolume(uint32_t aValue) = 0;
+    virtual void SetMute(bool aValue) = 0;
+    virtual ~IVolume() {}
+};
+
 class ProviderProduct;
 class ProviderTime;
 class ProviderInfo;
 
-class Player : public IRendererStatus, public IPlayer
+class Player : public IRendererStatus, public IPlayer, public IVolume
 {
 //External Api
 public:
@@ -128,6 +137,11 @@ public:
     virtual void Deleted(uint32_t aHandle, uint32_t aId, const Track* aReplacement);
     virtual uint32_t NewId();
 
+    //from IVolume, to be called from Provider Volume
+public:
+    virtual void SetVolume(uint32_t aValue);
+    virtual void SetMute(bool aValue);
+
 private:
     void PipelineClear();
     void PipelineAppend(const Track* aTrack);
@@ -138,6 +152,7 @@ private:
     ProviderProduct* iProduct;
     ProviderInfo* iInfo;
     ProviderTime* iTime;
+    ProviderVolume* iVolume;
     IRenderer* iRenderer;
 
     AtomicInt iAtomicInt;

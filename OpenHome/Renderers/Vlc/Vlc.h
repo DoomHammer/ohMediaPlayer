@@ -21,6 +21,8 @@ public:
     virtual void Unpause();
     virtual void Stop();
     virtual void FinishAfter(uint32_t aId);
+    virtual void SetVolume(uint32_t aValue);
+    virtual void SetMute(bool aValue);
     virtual void SetStatusHandler(IRendererStatus& aStatus);
 
 public:

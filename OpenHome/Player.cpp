@@ -119,6 +119,7 @@ Player::Player(IRenderer* aRenderer
 
     iInfo = new ProviderInfo(aDevice);
     iTime = new ProviderTime(aDevice);
+    iVolume = new ProviderVolume(aDevice, *this);
 
     iRenderer->SetStatusHandler(*this);
 }
@@ -127,6 +128,9 @@ Player::~Player()
 {
     delete iRenderer;
     delete iInfo;
+    delete iTime;
+    delete iVolume;
+    delete iProduct;
 }
 
 uint32_t Player::AddSource(Source* aSource)
@@ -418,6 +422,20 @@ void Player::Deleted(uint32_t aHandle, uint32_t aId, const Track* aReplacement)
 uint32_t Player::NewId() 
 {
     return iAtomicInt.Inc();
+}
+
+void Player::SetVolume(uint32_t aValue)
+{
+    iMutex.Wait();
+    iRenderer->SetVolume(aValue);
+    iMutex.Signal();
+}
+
+void Player::SetMute(bool aValue)
+{
+    iMutex.Wait();
+    iRenderer->SetMute(aValue);
+    iMutex.Signal();
 }
 
 void Player::PipelineClear()

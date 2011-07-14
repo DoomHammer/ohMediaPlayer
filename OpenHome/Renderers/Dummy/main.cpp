@@ -71,7 +71,7 @@ int CDECL main(int aArgc, char* aArgv[])
         *standbyHandler, 
         *sourceIndexHandler, 
         true,
-        "",
+        "Info Time Volume",
         "OpenHome",
         "OpenHome Consortium",
         "http://openhome.org",

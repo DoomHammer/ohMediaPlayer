@@ -88,6 +88,7 @@ def build(ctx):
             'OpenHome/Product.cpp', 
             'OpenHome/Info.cpp',
             'OpenHome/Time.cpp',
+            'OpenHome/Volume.cpp',
             'OpenHome/Playlist.cpp',
             'OpenHome/Player.cpp',
             'OpenHome/Standard.cpp',

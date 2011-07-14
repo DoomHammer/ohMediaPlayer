@@ -146,6 +146,20 @@ void Vlc::FinishAfter(uint32_t aId)
     ASSERTS();
 }
 
+void Vlc::SetVolume(uint32_t aValue)
+{
+    iMutex.Wait();
+    libvlc_audio_set_volume(iPlayer, aValue);
+    iMutex.Signal();
+}
+
+void Vlc::SetMute(bool aValue)
+{
+    iMutex.Wait();
+    libvlc_audio_set_mute(iPlayer, aValue);
+    iMutex.Signal();
+}
+
 void Vlc::SetStatusHandler(IRendererStatus& aHandler) 
 {
     iMutex.Wait();

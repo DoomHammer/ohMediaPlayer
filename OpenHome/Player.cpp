@@ -299,15 +299,17 @@ void Player::PlaySecondAbsolute(uint32_t aHandle, uint32_t aSecond)
 
 void Player::PlaySecondRelative(uint32_t aHandle, int32_t aSecond)
 {
+    const Track* track;
+
     iMutex.Wait();
 
     if(iPipeline.empty()) {
-        iMutex.Signal();
-        return;
+        track = GetSource(aHandle).GetTrack(0, 0);
     }
-
-    const Track* track = iPipeline.front();
-    track->IncRef();
+    else {
+        track = iPipeline.front();
+        track->IncRef();
+    }
     TUint current = iTime->Seconds();
     TUint duration = iTime->Duration();
 
@@ -316,6 +318,9 @@ void Player::PlaySecondRelative(uint32_t aHandle, int32_t aSecond)
         if( (current + aSecond) > current) {
             //overflow -> seeked backwards past 0, set to 0
             request = 0;
+        }
+        else {
+            request = current + aSecond;
         }
     }
     else {
@@ -467,6 +472,11 @@ void Player::PlayLocked(uint32_t aHandle, const Track* aTrack, uint32_t aSecond)
     iState = eBuffering;
 
     iRenderer->Play(aHandle, *aTrack, aSecond);
+
+    //Preadvance time to target, means UI will update quickly and all future
+    //seeks will happen relative to here.
+    iTime->SetSeconds(aSecond);
+
 }
 
 void Player::StopLocked(uint32_t aHandle) 

@@ -84,7 +84,7 @@ void Vlc::Play(uint32_t aHandle, const class ITrack& aTrack, uint32_t aSecond)
     iUri.assign((const char*)uri, bytes);
     iHandle = aHandle;
     iId = aTrack.Id();
-    iSeconds = 0;
+    iSeconds = aSecond;
     iPendingSeek = aSecond;
     iDuration = -1;
 

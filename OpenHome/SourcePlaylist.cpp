@@ -18,9 +18,9 @@ SourcePlaylist::~SourcePlaylist()
     delete iProviderPlaylist;
 }
 
-const Track* SourcePlaylist::GetTrack(uint32_t aId, int32_t aIndex)
+const Track* SourcePlaylist::GetTrack(uint32_t aId, int32_t aOffset)
 {
-    return iProviderPlaylist->GetTrack(aId, aIndex);
+    return iProviderPlaylist->GetTrack(aId, aOffset);
 }
 
 void SourcePlaylist::Buffering(uint32_t aId)

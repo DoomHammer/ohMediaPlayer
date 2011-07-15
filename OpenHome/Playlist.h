@@ -29,7 +29,7 @@ public:
 
 	ProviderPlaylist(Net::DvDevice& aDevice, TUint aMaxTracks, const Brx& aProtocolInfo, Source& aSource); 
 
-    const Track* GetTrack(TUint aId, TInt aIndex);
+    const Track* GetTrack(TUint aId, TInt aOffset);
     void SetTransportState(ETransportState aState);
     void SetId(TUint aId);
 

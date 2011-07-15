@@ -37,7 +37,7 @@ public:
 
 public:
     //Callbacks from the Renderer via the Player to be implemented by the derived class
-    virtual const Track* GetTrack(uint32_t aId, int32_t aIndex) = 0;
+    virtual const Track* GetTrack(uint32_t aId, int32_t aOffset) = 0;
     virtual void Buffering(uint32_t aId) = 0;
     virtual void Stopped(uint32_t aId) = 0;
     virtual void Paused(uint32_t aId) = 0;

@@ -69,7 +69,7 @@ ProviderPlaylist::ProviderPlaylist(Net::DvDevice& aDevice, TUint aTracksMax, con
     SetPropertyIdArray(iIdArray);
 }
 
-const Track* ProviderPlaylist::GetTrack(TUint aId, TInt aIndex)
+const Track* ProviderPlaylist::GetTrack(TUint aId, TInt aOffset)
 {
     const Track* track;
     list<Track*>::const_iterator i;
@@ -90,11 +90,11 @@ const Track* ProviderPlaylist::GetTrack(TUint aId, TInt aIndex)
             ASSERTS();
         }
     }
-    if(aIndex > 0) {
-        track = IterateForwards(i, aIndex); 
+    if(aOffset > 0) {
+        track = IterateForwards(i, aOffset);
     }
-    else if(aIndex < 0) {
-        track = IterateBackwards(i, abs(aIndex)); 
+    else if(aOffset < 0) {
+        track = IterateBackwards(i, abs(aOffset));
     }
     else {
         track = *i;

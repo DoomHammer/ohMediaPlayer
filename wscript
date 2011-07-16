@@ -35,8 +35,7 @@ def configure(ctx):
     ohNetLibraries = ctx.path.find_node(ctx.options.ohNetLibraries)
     ohNetLibraries = ohNetLibraries.abspath()
 
-    vlcLibraries = ctx.path.find_node('./OpenHome/Renderers/Vlc')
-    vlcLibraries = vlcLibraries.abspath()
+    vlcLibraries = None
 
     if(ctx.options.debug == 'true'):
         debug = True
@@ -45,6 +44,8 @@ def configure(ctx):
 
     if sys.platform == 'win32':
         ohNetLibraries = ohNetLibraries + os.sep + 'Windows'
+        vlcLibraries = ctx.path.find_node('./OpenHome/Renderers/Vlc')
+        vlcLibraries = vlcLibraries.abspath()
         ctx.env.LIB_MEDIA = ['Ws2_32', 'Iphlpapi', 'libvlc']
         ctx.env.DEFINES_MEDIA = ['DllExport=__declspec(dllexport)', 'DllExportClass=']
         ctx.env.CXXFLAGS_MEDIA = ['/EHsc', '/FR', '/Gd']
@@ -55,10 +56,22 @@ def configure(ctx):
             ctx.env.CXXFLAGS_MEDIA += ['/MT', '/Ox']
 
     elif sys.platform == 'linux2':
-        ohNetLibaries = ohNetLibaries + os.sep + 'Posix'
+        ohNetLibraries = ohNetLibraries + os.sep + 'Posix'
         ctx.env.LIB_MEDIA = ['pthread', 'vlc']
         ctx.env.DEFINES_MEDIA = ['DllExport=__attribute__ ((visibility(\"default\")))', 'DllExportClass=__attribute__ ((visibility(\"default\")))']
         ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-Werror', '-pipe', '-fexceptions']
+        if(debug):
+            ctx.env.CXXFLAGS_MEDIA += ['-g']
+
+    elif sys.platform == 'darwin':
+        ohNetLibraries = ohNetLibraries + os.sep + 'Mac'
+        vlcLibraries = ctx.path.find_node('../../../Applications/VLC.app/Contents/MacOS/lib')
+	print vlcLibraries
+	vlcLibraries = vlcLibraries.abspath()
+	print vlcLibraries
+        ctx.env.LIB_MEDIA = ['pthread', 'vlc']
+        ctx.env.DEFINES_MEDIA = ['DllExport=__attribute__ ((visibility(\"default\")))', 'DllExportClass=__attribute__ ((visibility(\"default\")))']
+        ctx.env.CXXFLAGS_MEDIA += ['-Werror', '-pipe', '-fexceptions']
         if(debug):
             ctx.env.CXXFLAGS_MEDIA += ['-g']
     else:

@@ -1,6 +1,6 @@
 #include "Dummy.h"
 #include <Debug.h>
-#include "..\..\Player.h"
+#include "../../Player.h"
 
 using namespace OpenHome;
 using namespace OpenHome::MediaPlayer;

@@ -1,6 +1,6 @@
 #include "Vlc.h"
 #include <Debug.h>
-#include "..\..\Player.h"
+#include "../../Player.h"
 
 using namespace OpenHome;
 using namespace OpenHome::MediaPlayer;
@@ -46,9 +46,13 @@ void SeekableChanged(const struct libvlc_event_t* aEvent, void* aContext)
     ((Vlc*)aContext)->SeekableChanged(aEvent);
 }
 
+const char* kVlcArgs[] = {
+    "--extraintf=logger",
+    "--verbose=2"
+    };
+
 Vlc::Vlc()
     : iVlc(0)
-    , iVlcLog(0)
     , iPlayer(0)
     , iMedia(0)
     , iStatus(0)
@@ -58,18 +62,28 @@ Vlc::Vlc()
     , iPendingMute(false)
 {
     Debug::SetLevel(Debug::kMedia);
-    iVlc = libvlc_new (0, NULL);
-    libvlc_set_log_verbosity(iVlc, 3);
-    iVlcLog = libvlc_log_open(iVlc);
+    iVlc = libvlc_new (sizeof(kVlcArgs) / sizeof(kVlcArgs[0]), kVlcArgs);
+    libvlc_set_log_verbosity(iVlc, 2);
+    libvlc_log_t* log = libvlc_log_open(iVlc);
+    libvlc_log_close(log);
     iTimerFinishedFunctor = MakeFunctor(*this, &Vlc::TimerFinishedExpired);
     iTimerFinished = new Timer(iTimerFinishedFunctor);
     iTimerPlayFunctor = MakeFunctor(*this, &Vlc::TimerPlayExpired);
     iTimerPlay = new Timer(iTimerPlayFunctor);
+
+    libvlc_audio_output_t* outputs = libvlc_audio_output_list_get(iVlc);
+    libvlc_audio_output_t* ptr = outputs;
+    uint32_t i=0;
+    while(ptr != 0) {
+        Log::Print("Output: %d, Name: %s, Desc: %s\n", i, ptr->psz_name, ptr->psz_description);
+        ptr = ptr->p_next;
+        i++;
+    }
+    libvlc_audio_output_list_release(outputs);
 }
 
 Vlc::~Vlc()
 {
-    libvlc_log_close(iVlcLog);
     libvlc_release(iVlc);
     delete iTimerFinished;
 }
@@ -101,7 +115,7 @@ void Vlc::TimerPlayExpired()
 
     iMedia = libvlc_media_new_location(iVlc, iUri.c_str());
     iPlayer = libvlc_media_player_new_from_media(iMedia);
-
+    
     if(iPendingVolume) {
         libvlc_audio_set_volume(iPlayer, iPendingVolumeValue);
         iPendingVolume = false;

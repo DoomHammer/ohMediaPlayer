@@ -2,7 +2,7 @@
 #define HEADER_OPENHOME_MEDIAPLAYER_RENDERERS_VLC
 
 #include <OhNetTypes.h>
-#include "..\..\Renderer.h"
+#include "../../Renderer.h"
 #include <iostream>
 #include <string>
 #include <vlc/vlc.h>
@@ -60,7 +60,6 @@ private:
     bool iInitialised;
 private:
     libvlc_instance_t* iVlc;
-    libvlc_log_t* iVlcLog;
     libvlc_media_player_t* iPlayer;
     libvlc_media_t* iMedia;
     IRendererStatus* iStatus;

@@ -2,7 +2,7 @@
 #define HEADER_OPENHOME_MEDIAPLAYER_RENDERERS_DUMMY
 
 #include <OhNetTypes.h>
-#include "..\..\Renderer.h"
+#include "../../Renderer.h"
 #include <Timer.h>
 #include <iostream>
 #include <string>

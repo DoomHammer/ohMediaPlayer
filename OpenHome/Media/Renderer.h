@@ -1,7 +1,7 @@
 #ifndef HEADER_OPENHOME_MEDIA_RENDERER
 #define HEADER_OPENHOME_MEDIA_RENDERER
 
-#include <ohNetTypes.h>
+#include <OpenHome/OhNetTypes.h>
 
 namespace OpenHome {
 namespace Media {

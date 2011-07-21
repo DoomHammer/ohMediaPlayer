@@ -1,5 +1,5 @@
 #include <OpenHome/Media/Player.h>
-#include <OpenHome/Priavte/Debug.h>
+#include <OpenHome/Private/Debug.h>
 #include <OpenHome/Media/Product.h>
 #include <OpenHome/Media/Playlist.h>
 

@@ -1,16 +1,16 @@
 #ifndef HEADER_OPENHOME_MEDIA_PRODUCT
 #define HEADER_OPENHOME_MEDIA_PRODUCT
 
-#include <OhNetTypes.h>
-#include <Buffer.h>
-#include <Core/DvDevice.h>
-#include <Thread.h>
-#include <Timer.h>
+#include <OpenHome/OhNetTypes.h>
+#include <OpenHome/Buffer.h>
+#include <OpenHome/Net/Core/DvDevice.h>
+#include <OpenHome/Private/Thread.h>
+#include <OpenHome/Private/Timer.h>
 
-#include <Core/DvAvOpenhomeOrgProduct1.h>
+#include <OpenHome/Net/Core/DvAvOpenhomeOrgProduct1.h>
 
-#include "Source.h"
-#include "Player.h"
+#include <OpenHome/Media/Source.h>
+#include <OpenHome/Media/Player.h>
 
 namespace OpenHome {
 namespace Media {

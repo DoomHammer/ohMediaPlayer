@@ -9,8 +9,8 @@ out = 'build' + os.sep + sys.platform
 
 def options(ctx):
     ctx.load('compiler_cxx')
-    ctx.add_option('--ohNetHeaders', action='store', default='../ohNet/Upnp/Build/Include', help='Path to root of ohNet header files')
-    ctx.add_option('--ohNetLibraries', action='store', default='../ohNet/Upnp/Build/Obj', help='Path to root of ohNet library binaries')
+    ctx.add_option('--ohNetHeaders', action='store', default='../ohNet/Build/Include', help='Path to root of ohNet header files')
+    ctx.add_option('--ohNetLibraries', action='store', default='../ohNet/Build/Obj', help='Path to root of ohNet library binaries')
     ctx.add_option('--vlcHeaders', action='store', default='../vlc-1.1.10/include', help='Path to root of vlc header files')
     ctx.add_option('--debug', action='store', default='true', help='Generate and use binaries with debugging support')
 
@@ -28,7 +28,10 @@ def configure(ctx):
     vlcHeaders = ctx.path.find_node(ctx.options.vlcHeaders)
     vlcHeaders = vlcHeaders.abspath()
 
-    hpath = [ohNetHeaders, ohNetHeaders + os.path.sep + 'Cpp', vlcHeaders]
+    curpath = ctx.path.find_node('.')
+    curpath = curpath.abspath()
+
+    hpath = [ohNetHeaders, curpath, vlcHeaders]
     ctx.env.INCLUDES_MEDIA = hpath
 
     #Arrange library paths and store in ctx.env.LibraryPath
@@ -47,7 +50,6 @@ def configure(ctx):
         vlcLibraries = ctx.path.find_node('./OpenHome/Renderers/Vlc')
         vlcLibraries = vlcLibraries.abspath()
         ctx.env.LIB_MEDIA = ['Ws2_32', 'Iphlpapi', 'libvlc']
-        ctx.env.DEFINES_MEDIA = ['DllExport=__declspec(dllexport)', 'DllExportClass=']
         ctx.env.CXXFLAGS_MEDIA = ['/EHsc', '/FR', '/Gd']
         if(debug):
             ctx.env.CXXFLAGS_MEDIA += ['/MTd', '/Od', '/Zi']
@@ -58,7 +60,6 @@ def configure(ctx):
     elif sys.platform == 'linux2':
         ohNetLibraries = ohNetLibraries + os.sep + 'Posix'
         ctx.env.LIB_MEDIA = ['pthread', 'vlc']
-        ctx.env.DEFINES_MEDIA = ['DllExport=__attribute__ ((visibility(\"default\")))', 'DllExportClass=__attribute__ ((visibility(\"default\")))']
         ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-Werror', '-pipe', '-fexceptions']
         if(debug):
             ctx.env.CXXFLAGS_MEDIA += ['-g']
@@ -70,7 +71,6 @@ def configure(ctx):
 	vlcLibraries = vlcLibraries.abspath()
 	print vlcLibraries
         ctx.env.LIB_MEDIA = ['pthread', 'vlc']
-        ctx.env.DEFINES_MEDIA = ['DllExport=__attribute__ ((visibility(\"default\")))', 'DllExportClass=__attribute__ ((visibility(\"default\")))']
         ctx.env.CXXFLAGS_MEDIA += ['-Werror', '-pipe', '-fexceptions']
         if(debug):
             ctx.env.CXXFLAGS_MEDIA += ['-g']
@@ -98,15 +98,15 @@ def configure(ctx):
 def build(ctx):
     ctx.stlib(
         source = [
-            'OpenHome/Product.cpp', 
-            'OpenHome/Info.cpp',
-            'OpenHome/Time.cpp',
-            'OpenHome/Volume.cpp',
-            'OpenHome/Playlist.cpp',
-            'OpenHome/Player.cpp',
-            'OpenHome/Standard.cpp',
-            'OpenHome/Source.cpp',
-            'OpenHome/SourcePlaylist.cpp'
+            'OpenHome/Media/Product.cpp', 
+            'OpenHome/Media/Info.cpp',
+            'OpenHome/Media/Time.cpp',
+            'OpenHome/Media/Volume.cpp',
+            'OpenHome/Media/Playlist.cpp',
+            'OpenHome/Media/Player.cpp',
+            'OpenHome/Media/Standard.cpp',
+            'OpenHome/Media/Source.cpp',
+            'OpenHome/Media/SourcePlaylist.cpp'
         ],
         target = 'ohMedia',
         use    = 'MEDIA',

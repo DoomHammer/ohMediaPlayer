@@ -1,12 +1,12 @@
-#include <OhNetTypes.h>
-#include <Core/DvDevice.h>
-#include <OhNet.h>
-#include <Ascii.h>
-#include <Stack.h>
-#include <Maths.h>
-#include <OptionParser.h>
-#include "../../Product.h"
-#include "../../Playlist.h"
+#include <OpenHome/OhNetTypes.h>
+#include <OpenHome/Net/Core/DvDevice.h>
+#include <OpenHome/Net/Core/OhNet.h>
+#include <OpenHome/Private/Ascii.h>
+#include <OpenHome/Net/Private/Stack.h>
+#include <OpenHome/Private/Maths.h>
+#include <OpenHome/Private/OptionParser.h>
+#include <OpenHome/Media/Product.h>
+#include <OpenHome/Media/Playlist.h>
 #include "Dummy.h"
 
 #ifdef _WIN32
@@ -20,7 +20,7 @@
 #endif
 
 using namespace OpenHome;
-using namespace OpenHome::MediaPlayer;
+using namespace OpenHome::Media;
 using namespace OpenHome::TestFramework;
 
 static const TUint kTracksMax = 1000;

@@ -1,15 +1,15 @@
 #ifndef HEADER_OPENHOME_MEDIA_PLAYLIST
 #define HEADER_OPENHOME_MEDIA_PLAYLIST
 
-#include <OhNetTypes.h>
-#include <Buffer.h>
-#include <Core/DvDevice.h>
-#include <Thread.h>
-#include <Timer.h>
+#include <OpenHome/OhNetTypes.h>
+#include <OpenHome/Buffer.h>
+#include <OpenHome/Net/Core/DvDevice.h>
+#include <OpenHome/Private/Thread.h>
+#include <OpenHome/Private/Timer.h>
 
-#include <Core/DvAvOpenhomeOrgPlaylist1.h>
+#include <OpenHome/Net/Core/DvAvOpenhomeOrgPlaylist1.h>
 
-#include "SourcePlaylist.h"
+#include <OpenHome/Media/SourcePlaylist.h>
 
 namespace OpenHome {
 namespace Media {

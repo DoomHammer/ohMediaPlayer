@@ -1,6 +1,6 @@
-#include "Volume.h"
+#include <OpenHome/Media/Volume.h>
 
-#include "Player.h"
+#include <OpenHome/Media/Player.h>
 
 using namespace OpenHome;
 using namespace OpenHome::Media;

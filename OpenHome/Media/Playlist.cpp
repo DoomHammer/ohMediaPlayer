@@ -1,10 +1,10 @@
-#include <Debug.h>
-#include "Playlist.h"
+#include <OpenHome/Private/Debug.h>
+#include <OpenHome/Media/Playlist.h>
 #include <functional>
 #include <algorithm>
-#include <Parser.h>
-#include <Ascii.h>
-#include <Converter.h>
+#include <OpenHome/Private/Parser.h>
+#include <OpenHome/Private/Ascii.h>
+#include <OpenHome/Private/Converter.h>
 
 using namespace OpenHome;
 using namespace OpenHome::Media;

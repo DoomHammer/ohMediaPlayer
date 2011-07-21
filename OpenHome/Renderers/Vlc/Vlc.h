@@ -1,15 +1,15 @@
-#ifndef HEADER_OPENHOME_MEDIAPLAYER_RENDERERS_VLC
-#define HEADER_OPENHOME_MEDIAPLAYER_RENDERERS_VLC
+#ifndef HEADER_OPENHOME_MEDIA_RENDERERS_VLC
+#define HEADER_OPENHOME_MEDIA_RENDERERS_VLC
 
-#include <OhNetTypes.h>
-#include "../../Renderer.h"
+#include <OpenHome/OhNetTypes.h>
+#include <OpenHome/Media/Renderer.h>
 #include <iostream>
 #include <string>
 #include <vlc/vlc.h>
-#include <Timer.h>
+#include <OpenHome/Private/Timer.h>
 
 namespace OpenHome {
-namespace MediaPlayer {
+namespace Media {
 
 class Vlc : public IRenderer
 {
@@ -65,8 +65,8 @@ private:
     IRendererStatus* iStatus;
 };
 
-} // namespace MediaPlayer
+} // namespace Media
 } // namespace OpenHome
 
-#endif // HEADER_OPENHOME_MEDIAPLAYER_RENDERERS_VLC
+#endif // HEADER_OPENHOME_MEDIA_RENDERERS_VLC
 

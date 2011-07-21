@@ -1,9 +1,9 @@
 #include "Vlc.h"
-#include <Debug.h>
-#include "../../Player.h"
+#include <OpenHome/Private/Debug.h>
+#include <OpenHome/Media/Player.h>
 
 using namespace OpenHome;
-using namespace OpenHome::MediaPlayer;
+using namespace OpenHome::Media;
 using namespace std;
 
 void DurationChanged(const struct libvlc_event_t* aEvent, void* aContext)

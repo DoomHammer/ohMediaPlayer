@@ -1,12 +1,12 @@
 #ifndef HEADER_OPENHOME_MEDIA_TIME
 #define HEADER_OPENHOME_MEDIA_TIME
 
-#include <OhNetTypes.h>
-#include <Buffer.h>
-#include <Core/DvDevice.h>
-#include <Thread.h>
+#include <OpenHome/OhNetTypes.h>
+#include <OpenHome/Buffer.h>
+#include <OpenHome/Net/Core/DvDevice.h>
+#include <OpenHome/Private/Thread.h>
 
-#include <Core/DvAvOpenhomeOrgTime1.h>
+#include <OpenHome/Net/Core/DvAvOpenhomeOrgTime1.h>
 
 namespace OpenHome {
 namespace Media {

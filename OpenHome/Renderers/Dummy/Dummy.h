@@ -1,14 +1,14 @@
-#ifndef HEADER_OPENHOME_MEDIAPLAYER_RENDERERS_DUMMY
-#define HEADER_OPENHOME_MEDIAPLAYER_RENDERERS_DUMMY
+#ifndef HEADER_OPENHOME_MEDIA_RENDERERS_DUMMY
+#define HEADER_OPENHOME_MEDIA_RENDERERS_DUMMY
 
-#include <OhNetTypes.h>
-#include "../../Renderer.h"
-#include <Timer.h>
+#include <OpenHome/OhNetTypes.h>
+#include <OpenHome/Media/Renderer.h>
+#include <OpenHome/Private/Timer.h>
 #include <iostream>
 #include <string>
 
 namespace OpenHome {
-namespace MediaPlayer {
+namespace Media {
 
 class Dummy : public IRenderer
 {
@@ -41,8 +41,8 @@ private:
     uint32_t iDuration;
 };
 
-} // namespace MediaPlayer
+} // namespace Media
 } // namespace OpenHome
 
-#endif // HEADER_OPENHOME_MEDIAPLAYER_RENDERERS_DUMMY
+#endif // HEADER_OPENHOME_MEDIA_RENDERERS_DUMMY
 

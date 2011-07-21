@@ -1,5 +1,5 @@
-#include "Time.h"
-#include <Debug.h>
+#include <OpenHome/Media/Time.h>
+#include <OpenHome/Private/Debug.h>
 
 using namespace OpenHome;
 using namespace OpenHome::Media;

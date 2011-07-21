@@ -1,9 +1,9 @@
 #ifndef HEADER_OPENHOME_MEDIA_SOURCE
 #define HEADER_OPENHOME_MEDIA_SOURCE
 
-#include <OhNetTypes.h>
-#include <Buffer.h>
-#include "Standard.h"
+#include <OpenHome/OhNetTypes.h>
+#include <OpenHome/Buffer.h>
+#include <OpenHome/Media/Standard.h>
 
 namespace OpenHome {
 namespace Media {

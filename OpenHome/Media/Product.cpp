@@ -1,5 +1,5 @@
-#include "Product.h"
-#include <Debug.h>
+#include <OpenHome/Media/Product.h>
+#include <OpenHome/Private/Debug.h>
 
 using namespace OpenHome;
 using namespace OpenHome::Media;

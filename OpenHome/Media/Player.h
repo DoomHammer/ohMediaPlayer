@@ -1,16 +1,16 @@
 #ifndef HEADER_OPENHOME_MEDIA_PLAYER
 #define HEADER_OPENHOME_MEDIA_PLAYER
 
-#include <OhNetTypes.h>
-#include <Core/DvDevice.h>
-#include <Thread.h>
-#include <Buffer.h>
-#include <RefCounter.h>
-#include "Renderer.h"
-#include "Standard.h"
-#include "Info.h"
-#include "Time.h"
-#include "Volume.h"
+#include <OpenHome/OhNetTypes.h>
+#include <OpenHome/Net/Core/DvDevice.h>
+#include <OpenHome/Private/Thread.h>
+#include <OpenHome/Buffer.h>
+#include <OpenHome/Private/RefCounter.h>
+#include <OpenHome/Media/Renderer.h>
+#include <OpenHome/Media/Standard.h>
+#include <OpenHome/Media/Info.h>
+#include <OpenHome/Media/Time.h>
+#include <OpenHome/Media/Volume.h>
 
 #include <list>
 

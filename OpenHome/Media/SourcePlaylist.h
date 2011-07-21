@@ -1,9 +1,9 @@
 #ifndef HEADER_OPENHOME_MEDIA_SOURCE_PLAYLIST
 #define HEADER_OPENHOME_MEDIA_SOURCE_PLAYLIST
 
-#include <Core/DvDevice.h>
-#include "Source.h"
-#include "Player.h"
+#include <OpenHome/Net/Core/DvDevice.h>
+#include <OpenHome/Media/Source.h>
+#include <OpenHome/Media/Player.h>
 
 namespace OpenHome {
 namespace Media {

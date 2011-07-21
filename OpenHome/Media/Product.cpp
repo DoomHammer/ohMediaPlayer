@@ -2,7 +2,7 @@
 #include <Debug.h>
 
 using namespace OpenHome;
-using namespace OpenHome::MediaPlayer;
+using namespace OpenHome::Media;
 
 // Product
 
@@ -93,7 +93,7 @@ void ProviderProduct::UpdateSourceXml()
 
     Wait();
 
-	for (std::vector<MediaPlayer::Source*>::const_iterator i = iSourceList.begin(); i != iSourceList.end(); ++i) {
+	for (std::vector<Media::Source*>::const_iterator i = iSourceList.begin(); i != iSourceList.end(); ++i) {
         iSourceXml.Append("<Source>");
 
         //TODO: Xml escape the name

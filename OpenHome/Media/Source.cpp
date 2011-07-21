@@ -3,7 +3,7 @@
 #include "Player.h"
 
 using namespace OpenHome;
-using namespace OpenHome::MediaPlayer;
+using namespace OpenHome::Media;
 
 // Source
 

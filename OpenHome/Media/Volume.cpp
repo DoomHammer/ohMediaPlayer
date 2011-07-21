@@ -3,7 +3,7 @@
 #include "Player.h"
 
 using namespace OpenHome;
-using namespace OpenHome::MediaPlayer;
+using namespace OpenHome::Media;
 
 ProviderVolume::ProviderVolume(Net::DvDevice& aDevice, IVolume& aVolume)
     : DvProviderAvOpenhomeOrgVolume1(aDevice)

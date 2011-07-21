@@ -3,7 +3,7 @@
 #include "Playlist.h"
 
 using namespace OpenHome;
-using namespace OpenHome::MediaPlayer;
+using namespace OpenHome::Media;
 
 static const Brn kProvider("av.openhome.org/Providers/Playlist");
 

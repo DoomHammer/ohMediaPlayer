@@ -1,12 +1,12 @@
-#ifndef HEADER_OPENHOME_MEDIAPLAYER_SOURCE
-#define HEADER_OPENHOME_MEDIAPLAYER_SOURCE
+#ifndef HEADER_OPENHOME_MEDIA_SOURCE
+#define HEADER_OPENHOME_MEDIA_SOURCE
 
 #include <OhNetTypes.h>
 #include <Buffer.h>
 #include "Standard.h"
 
 namespace OpenHome {
-namespace MediaPlayer {
+namespace Media {
 
 class Track;
 class IPlayer;
@@ -60,8 +60,8 @@ private:
     IPlayer& iPlayer;
 };
 
-} // namespace MediaPlayer
+} // namespace Media
 } // namespace OpenHome
 
-#endif // HEADER_OPENHOME_MEDIAPLAYER_SOURCE
+#endif // HEADER_OPENHOME_MEDIA_SOURCE
 

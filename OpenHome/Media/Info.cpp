@@ -1,9 +1,9 @@
-#include "Info.h"
-#include <Debug.h>
-#include "Player.h"
+#include <OpenHome/Media/Info.h>
+#include <OpenHome/Private/Debug.h>
+#include <OpenHome/Media/Player.h>
 
 using namespace OpenHome;
-using namespace OpenHome::MediaPlayer;
+using namespace OpenHome::Media;
 
 ProviderInfo::ProviderInfo(Net::DvDevice& aDevice)
     : DvProviderAvOpenhomeOrgInfo1(aDevice)

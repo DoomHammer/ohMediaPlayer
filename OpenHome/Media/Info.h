@@ -1,15 +1,12 @@
-#ifndef HEADER_OPENHOME_MEDIAPLAYER_INFO
-#define HEADER_OPENHOME_MEDIAPLAYER_INFO
+#ifndef HEADER_OPENHOME_MEDIA_INFO
+#define HEADER_OPENHOME_MEDIA_INFO
 
-#include <OhNetTypes.h>
-#include <Buffer.h>
-#include <Core/DvDevice.h>
-#include <Thread.h>
+#include <OpenHome/Net/Core/DvDevice.h>
 
-#include <Core/DvAvOpenhomeOrgInfo1.h>
+#include <OpenHome/Net/Core/DvAvOpenhomeOrgInfo1.h>
 
 namespace OpenHome {
-namespace MediaPlayer {
+namespace Media {
 
 class Track;
 
@@ -33,8 +30,8 @@ private:
     Mutex iMutex;
 };
 
-} // namespace MediaPlayer
+} // namespace Media
 } // namespace OpenHome
 
-#endif // HEADER_OPENHOME_MEDIAPLAYER_INFO
+#endif // HEADER_OPENHOME_MEDIA_INFO
 

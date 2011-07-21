@@ -1,12 +1,12 @@
-#ifndef HEADER_OPENHOME_MEDIAPLAYER_SOURCE_PLAYLIST
-#define HEADER_OPENHOME_MEDIAPLAYER_SOURCE_PLAYLIST
+#ifndef HEADER_OPENHOME_MEDIA_SOURCE_PLAYLIST
+#define HEADER_OPENHOME_MEDIA_SOURCE_PLAYLIST
 
 #include <Core/DvDevice.h>
 #include "Source.h"
 #include "Player.h"
 
 namespace OpenHome {
-namespace MediaPlayer {
+namespace Media {
 
 class ProviderPlaylist;
 
@@ -28,8 +28,8 @@ private:
     ProviderPlaylist* iProviderPlaylist;
 };
 
-} // namespace MediaPlayer
+} // namespace Media
 } // namespace OpenHome
 
-#endif // HEADER_OPENHOME_MEDIAPLAYER_SOURCE_PLAYLIST
+#endif // HEADER_OPENHOME_MEDIA_SOURCE_PLAYLIST
 

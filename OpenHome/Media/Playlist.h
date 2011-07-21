@@ -1,5 +1,5 @@
-#ifndef HEADER_OPENHOME_MEDIAPLAYER_PLAYLIST
-#define HEADER_OPENHOME_MEDIAPLAYER_PLAYLIST
+#ifndef HEADER_OPENHOME_MEDIA_PLAYLIST
+#define HEADER_OPENHOME_MEDIA_PLAYLIST
 
 #include <OhNetTypes.h>
 #include <Buffer.h>
@@ -12,7 +12,7 @@
 #include "SourcePlaylist.h"
 
 namespace OpenHome {
-namespace MediaPlayer {
+namespace Media {
 
 class ProviderPlaylist : public Net::DvProviderAvOpenhomeOrgPlaylist1
 {
@@ -80,8 +80,8 @@ private:
     Source& iSource;
 };
 
-} // namespace MediaPlayer
+} // namespace Media
 } // namespace OpenHome
 
-#endif // HEADER_OPENHOME_PLAYLIST
+#endif // HEADER_OPENHOME_MEDIA_PLAYLIST
 

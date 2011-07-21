@@ -1,5 +1,5 @@
-#ifndef HEADER_OPENHOME_MEDIAPLAYER_VOLUME
-#define HEADER_OPENHOME_MEDIAPLAYER_VOLUME
+#ifndef HEADER_OPENHOME_MEDIA_VOLUME
+#define HEADER_OPENHOME_MEDIA_VOLUME
 
 #include <OhNetTypes.h>
 #include <Buffer.h>
@@ -9,7 +9,7 @@
 #include <Core/DvAvOpenhomeOrgVolume1.h>
 
 namespace OpenHome {
-namespace MediaPlayer {
+namespace Media {
 
 class IVolume;
 
@@ -35,9 +35,9 @@ private:
     IVolume& iVolume;
 };
 
-} // namespace MediaPlayer
+} // namespace Media
 } // namespace OpenHome
 
-#endif // HEADER_OPENHOME_MEDIAPLAYER_VOLUME
+#endif // HEADER_OPENHOME_MEDIA_VOLUME
 
 

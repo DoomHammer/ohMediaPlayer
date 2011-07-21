@@ -1,10 +1,10 @@
-#ifndef HEADER_OPENHOME_MEDIAPLAYER_RENDERER
-#define HEADER_OPENHOME_MEDIAPLAYER_RENDERER
+#ifndef HEADER_OPENHOME_MEDIA_RENDERER
+#define HEADER_OPENHOME_MEDIA_RENDERER
 
 #include <ohNetTypes.h>
 
 namespace OpenHome {
-namespace MediaPlayer {
+namespace Media {
 
 class ITrack;
 
@@ -35,8 +35,8 @@ public:
 };
 
 
-} // namespace MediaPlayer
+} // namespace Media
 } // namespace OpenHome
 
-#endif // HEADER_OPENHOME_MEDIAPLAYER_RENDERER
+#endif // HEADER_OPENHOME_MEDIA_RENDERER
 

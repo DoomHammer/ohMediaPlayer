@@ -1,10 +1,10 @@
-#ifndef HEADER_OPENHOME_MEDIAPLAYER_STANDARD
-#define HEADER_OPENHOME_MEDIAPLAYER_STANDARD
+#ifndef HEADER_OPENHOME_MEDIA_STANDARD
+#define HEADER_OPENHOME_MEDIA_STANDARD
 
 #include <vector>
 
 namespace OpenHome {
-namespace MediaPlayer {
+namespace Media {
 
 class ILockable
 {
@@ -34,7 +34,7 @@ private:
     std::vector<IObserver*> iObserverList;
 };
 
-} // namespace MediaPlayer
+} // namespace Media
 } // namespace OpenHome
 
-#endif HEADER_OPENHOME_MEDIAPLAYER_STANDARD
+#endif HEADER_OPENHOME_MEDIA_STANDARD

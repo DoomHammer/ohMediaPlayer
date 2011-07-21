@@ -7,7 +7,7 @@
 #include <Converter.h>
 
 using namespace OpenHome;
-using namespace OpenHome::MediaPlayer;
+using namespace OpenHome::Media;
 using namespace std;
 
 static const TInt kIdNotFound = 800;

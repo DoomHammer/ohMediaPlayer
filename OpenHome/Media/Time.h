@@ -1,5 +1,5 @@
-#ifndef HEADER_OPENHOME_MEDIAPLAYER_TIME
-#define HEADER_OPENHOME_MEDIAPLAYER_TIME
+#ifndef HEADER_OPENHOME_MEDIA_TIME
+#define HEADER_OPENHOME_MEDIA_TIME
 
 #include <OhNetTypes.h>
 #include <Buffer.h>
@@ -9,7 +9,7 @@
 #include <Core/DvAvOpenhomeOrgTime1.h>
 
 namespace OpenHome {
-namespace MediaPlayer {
+namespace Media {
 
 class ProviderTime : public Net::DvProviderAvOpenhomeOrgTime1
 {
@@ -29,8 +29,8 @@ private:
     Mutex iMutex;
 };
 
-} // namespace MediaPlayer
+} // namespace Media
 } // namespace OpenHome
 
-#endif // HEADER_OPENHOME_MEDIAPLAYER_TIME
+#endif // HEADER_OPENHOME_MEDIA_TIME
 

@@ -1,5 +1,5 @@
-#ifndef HEADER_OPENHOME_MEDIAPLAYER_PRODUCT
-#define HEADER_OPENHOME_MEDIAPLAYER_PRODUCT
+#ifndef HEADER_OPENHOME_MEDIA_PRODUCT
+#define HEADER_OPENHOME_MEDIA_PRODUCT
 
 #include <OhNetTypes.h>
 #include <Buffer.h>
@@ -13,7 +13,7 @@
 #include "Player.h"
 
 namespace OpenHome {
-namespace MediaPlayer {
+namespace Media {
 
 class ProviderProduct : public Net::DvProviderAvOpenhomeOrgProduct1, public IObserver, public ILockable
 {
@@ -80,8 +80,8 @@ private:
     Bws<kMaxSourceXmlBytes> iSourceXml;
 };
 
-} // namespace MediaPlayer
+} // namespace Media
 } // namespace OpenHome
 
-#endif // HEADER_OPENHOME_PRODUCT
+#endif // HEADER_OPENHOME_MEDIA_PRODUCT
 

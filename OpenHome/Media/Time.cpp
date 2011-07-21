@@ -2,7 +2,7 @@
 #include <Debug.h>
 
 using namespace OpenHome;
-using namespace OpenHome::MediaPlayer;
+using namespace OpenHome::Media;
 
 ProviderTime::ProviderTime(Net::DvDevice& aDevice)
     : DvProviderAvOpenhomeOrgTime1(aDevice)

@@ -2,7 +2,7 @@
 #include <Debug.h>
 
 using namespace OpenHome;
-using namespace OpenHome::MediaPlayer;
+using namespace OpenHome::Media;
 
 // Observable
 

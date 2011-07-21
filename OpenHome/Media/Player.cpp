@@ -1,13 +1,13 @@
-#include "Player.h"
-#include <Debug.h>
-#include "Product.h"
-#include "Playlist.h"
+#include <OpenHome/Media/Player.h>
+#include <OpenHome/Priavte/Debug.h>
+#include <OpenHome/Media/Product.h>
+#include <OpenHome/Media/Playlist.h>
 
 #include <algorithm>
 #include <functional>
 
 using namespace OpenHome;
-using namespace OpenHome::MediaPlayer;
+using namespace OpenHome::Media;
 
 // Track
 

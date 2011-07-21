@@ -1,5 +1,5 @@
-#ifndef HEADER_OPENHOME_MEDIAPLAYER_PLAYER
-#define HEADER_OPENHOME_MEDIAPLAYER_PLAYER
+#ifndef HEADER_OPENHOME_MEDIA_PLAYER
+#define HEADER_OPENHOME_MEDIA_PLAYER
 
 #include <OhNetTypes.h>
 #include <Core/DvDevice.h>
@@ -15,7 +15,7 @@
 #include <list>
 
 namespace OpenHome {
-namespace MediaPlayer {
+namespace Media {
 
 class Source;
 
@@ -171,8 +171,8 @@ private:
 };
 
 
-} // namespace MediaPlayer
+} // namespace Media
 } // namespace OpenHome
 
-#endif // HEADER_OPENHOME_MEDIAPLAYER_PLAYER
+#endif // HEADER_OPENHOME_MEDIA_PLAYER
 

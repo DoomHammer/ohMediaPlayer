@@ -9,16 +9,6 @@
 #include <OpenHome/Media/Playlist.h>
 #include "Vlc.h"
 
-#ifdef _WIN32
-
-#define CDECL __cdecl
-
-#else
-
-#define CDECL
-
-#endif
-
 using namespace OpenHome;
 using namespace OpenHome::Media;
 using namespace OpenHome::TestFramework;
@@ -84,7 +74,7 @@ void SourceIndexHandler::SetSourceIndex(TUint aValue)
     printf("Setting source: %d\n", aValue);
 }
 
-int CDECL main(int aArgc, char* aArgv[])
+int main(int aArgc, char* aArgv[])
 {
     Net::InitialisationParams* initParams = Net::InitialisationParams::Create();
 

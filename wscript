@@ -50,7 +50,7 @@ def configure(ctx):
         vlcLibraries = ctx.path.find_node('./OpenHome/Renderers/Vlc')
         vlcLibraries = vlcLibraries.abspath()
         ctx.env.LIB_MEDIA = ['Ws2_32', 'Iphlpapi', 'libvlc']
-        ctx.env.CXXFLAGS_MEDIA = ['/EHsc', '/FR', '/Gd']
+        ctx.env.CXXFLAGS_MEDIA = ['/EHsc', '/FR']
         if(debug):
             ctx.env.CXXFLAGS_MEDIA += ['/MTd', '/Od', '/Zi']
             ctx.env.LINKFLAGS_MEDIA += ['/debug']

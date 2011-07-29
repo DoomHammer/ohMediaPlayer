@@ -1,0 +1,2 @@
+OpenHome.Room:Living Room
+OpenHome.Name:My Media Renderer 

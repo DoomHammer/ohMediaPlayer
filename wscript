@@ -13,6 +13,7 @@ def options(ctx):
     ctx.add_option('--ohNetLibraries', action='store', default='../ohNet/Build/Obj', help='Path to root of ohNet library binaries')
     ctx.add_option('--vlcHeaders', action='store', default='../vlc-1.1.10/include', help='Path to root of vlc header files')
     ctx.add_option('--debug', action='store', default='true', help='Generate and use binaries with debugging support')
+    ctx.add_option('--prefix', action='store', default='install', help='Installation prefix')
 
 def configure(ctx):
     if sys.platform == 'win32':
@@ -49,7 +50,8 @@ def configure(ctx):
         ohNetLibraries = ohNetLibraries + os.sep + 'Windows'
         vlcLibraries = ctx.path.find_node('./OpenHome/Renderers/Vlc')
         vlcLibraries = vlcLibraries.abspath()
-        ctx.env.LIB_MEDIA = ['Ws2_32', 'Iphlpapi', 'libvlc']
+        ctx.env.LIB_MEDIA = ['Ws2_32', 'Iphlpapi']
+        ctx.env.LIB_VLC = ['libvlc']
         ctx.env.CXXFLAGS_MEDIA = ['/EHsc', '/FR']
         if(debug):
             ctx.env.CXXFLAGS_MEDIA += ['/MTd', '/Od', '/Zi']
@@ -59,7 +61,8 @@ def configure(ctx):
 
     elif sys.platform == 'linux2':
         ohNetLibraries = ohNetLibraries + os.sep + 'Posix'
-        ctx.env.LIB_MEDIA = ['pthread', 'vlc']
+        ctx.env.LIB_MEDIA = ['pthread']
+        ctx.env.LIB_VLC = ['vlc']
         ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-Werror', '-pipe', '-fexceptions']
         if(debug):
             ctx.env.CXXFLAGS_MEDIA += ['-g']
@@ -67,10 +70,11 @@ def configure(ctx):
     elif sys.platform == 'darwin':
         ohNetLibraries = ohNetLibraries + os.sep + 'Mac'
         vlcLibraries = ctx.path.find_node('../../../Applications/VLC.app/Contents/MacOS/lib')
-	print vlcLibraries
-	vlcLibraries = vlcLibraries.abspath()
-	print vlcLibraries
-        ctx.env.LIB_MEDIA = ['pthread', 'vlc']
+        print vlcLibraries
+        vlcLibraries = vlcLibraries.abspath()
+        print vlcLibraries
+        ctx.env.LIB_MEDIA = ['pthread']
+        ctx.env.LIB_VLC = ['vlc']
         ctx.env.CXXFLAGS_MEDIA += ['-Werror', '-pipe', '-fexceptions']
         if(debug):
             ctx.env.CXXFLAGS_MEDIA += ['-g']
@@ -96,6 +100,36 @@ def configure(ctx):
 
 
 def build(ctx):
+    ctx.install_files('${PREFIX}/include', [
+            'OpenHome/Store.h',
+        ], relative_trick=True)
+    
+    ctx.install_files('${PREFIX}/share/Tests/TestStore', [
+            'OpenHome/Tests/TestStore/defaults0.txt',
+            'OpenHome/Tests/TestStore/defaultsString0.txt',
+        ], relative_trick=False)
+
+    ctx.stlib(
+        source = [
+            'OpenHome/Store.cpp',
+            'OpenHome/MurmurHash3.cpp'
+        ],
+        target = 'ohPersist',
+        use    = 'MEDIA',
+        includes = ctx.env.INCLUDES_MEDIA
+        )
+
+    ctx.program(
+        source      = [
+            'OpenHome/Tests/TestStore.cpp'
+        ],
+        includes    = ctx.env.INCLUDES_MEDIA,
+        target      = 'TestStore',
+        install_path= '${PREFIX}/bin/Tests',
+        stlib       = ['ohNetCore', 'TestFramework'],
+        use         = ['MEDIA', 'ohPersist']
+        )
+
     ctx.stlib(
         source = [
             'OpenHome/Media/Product.cpp', 
@@ -109,7 +143,7 @@ def build(ctx):
             'OpenHome/Media/SourcePlaylist.cpp'
         ],
         target = 'ohMedia',
-        use    = 'MEDIA',
+        use    = ['MEDIA', 'ohPersist'],
         includes = ctx.env.INCLUDES_MEDIA
         )
 
@@ -121,7 +155,7 @@ def build(ctx):
         includes    = ctx.env.INCLUDES_MEDIA,
         target      = 'ohMediaPlayerDummy',
         stlib       = ['ohNetCore', 'ohNetDevices', 'TestFramework'],
-        use         = ['MEDIA', 'ohMedia']
+        use         = ['ohMedia']
         )
 
     ctx.program(
@@ -132,7 +166,7 @@ def build(ctx):
         includes    = ctx.env.INCLUDES_MEDIA,
         target      = 'ohMediaPlayerVlc',
         stlib       = ['ohNetCore', 'ohNetDevices', 'TestFramework'],
-        use         = ['MEDIA', 'ohMedia']
+        use         = ['ohMedia', 'VLC']
         )
 
 

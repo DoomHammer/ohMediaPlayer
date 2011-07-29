@@ -1,0 +1,2 @@
+OpenHome.Volume:50
+OpenHome.Volume.Limit:80

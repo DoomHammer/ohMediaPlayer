@@ -2,3 +2,5 @@ build
 .lock-wafbuild
 waf-*
 .waf-*
+install
+*.swp

@@ -49,7 +49,8 @@ static const char* kProtocolInfo =
 "http-get:*:video/x-ms-wax:*,"
 "http-get:*:video/x-ms-wvx:*,"
 "http-get:*:video/x-m4v:*,"
-"http-get:*:video/x-matroska:*"
+"http-get:*:video/x-matroska:*,"
+"http-get:*:application/octet-stream:*"
 ;
 
 class StandbyHandler : public IStandbyHandler
@@ -82,7 +83,7 @@ int main(int aArgc, char* aArgv[])
     
     Net::UpnpLibrary::StartDv();
 
-	Bwh udn("device");
+	Bwh udn("device1");
 
     Net::DvDeviceStandard* device = new Net::DvDeviceStandard(udn);
 

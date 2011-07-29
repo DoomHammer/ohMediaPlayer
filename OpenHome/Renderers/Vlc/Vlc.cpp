@@ -298,13 +298,17 @@ void Vlc::SeekableChanged(const struct libvlc_event_t* aEvent)
 {
     iMutex.Wait();    
 
-    Log::Print("Vlc::SeekableChanged\n");
-
     uint32_t seekable = aEvent->u.media_player_seekable_changed.new_seekable;
-    ASSERT(seekable == 1); //We only support moving from not seekable to seekable
+    Log::Print("Vlc::SeekableChanged %d\n", seekable);
 
-    if(iPendingSeek > 0) {
-        libvlc_media_player_set_time(iPlayer, iPendingSeek*1000);
+    if(seekable == 1) {
+        if(iPendingSeek > 0) {
+            libvlc_media_player_set_time(iPlayer, iPendingSeek*1000);
+            iPendingSeek = 0;
+        }
+    }
+    else {
+        iDuration = 0;
         iPendingSeek = 0;
     }
 

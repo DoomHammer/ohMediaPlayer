@@ -48,7 +48,7 @@ def configure(ctx):
 
     if sys.platform == 'win32':
         ohNetLibraries = ohNetLibraries + os.sep + 'Windows'
-        vlcLibraries = ctx.path.find_node('./OpenHome/Renderers/Vlc')
+        vlcLibraries = ctx.path.find_node('./Renderers/Vlc')
         vlcLibraries = vlcLibraries.abspath()
         ctx.env.LIB_MEDIA = ['Ws2_32', 'Iphlpapi']
         ctx.env.LIB_VLC = ['libvlc']
@@ -149,8 +149,8 @@ def build(ctx):
 
     ctx.program(
         source      = [
-            'OpenHome/Renderers/Dummy/main.cpp',
-            'OpenHome/Renderers/Dummy/Dummy.cpp'
+            'Renderers/Dummy/main.cpp',
+            'Renderers/Dummy/Dummy.cpp'
             ],
         includes    = ctx.env.INCLUDES_MEDIA,
         target      = 'ohMediaPlayerDummy',
@@ -160,8 +160,8 @@ def build(ctx):
 
     ctx.program(
         source      = [
-            'OpenHome/Renderers/Vlc/main.cpp',
-            'OpenHome/Renderers/Vlc/Vlc.cpp'
+            'Renderers/Vlc/main.cpp',
+            'Renderers/Vlc/Vlc.cpp'
             ],
         includes    = ctx.env.INCLUDES_MEDIA,
         target      = 'ohMediaPlayerVlc',

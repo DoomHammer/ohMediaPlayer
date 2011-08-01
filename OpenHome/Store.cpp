@@ -4,6 +4,7 @@
 #include <OpenHome/Private/Ascii.h>
 #include <iostream>
 #include <vector>
+#include <string>
 #include "MurmurHash3.h"
 
 using namespace OpenHome;
@@ -134,7 +135,7 @@ StoreFile::StoreFile(const string& aStoreFile, const string& aDefaultsFile)
         while(iDefaults.good()) {
             string line;
             getline(iDefaults, line);
-            if(line[0] == '\0') {
+            if(iDefaults.eof()) {
                 break;
             }
             if(line[0] != '#') {
@@ -250,7 +251,7 @@ void StoreFile::MountDefaults()
 
         uint32_t hash = Hash(key);
 
-        MapValue mapValue(0, -1);
+        MapValue mapValue((StoreOption*)0, -1);
         pair<uint32_t, MapValue> p(hash, mapValue);
         pair<Map::iterator, bool> result = iMap.insert(p);
         if(result.second == false) {

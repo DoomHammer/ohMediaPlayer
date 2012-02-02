@@ -57,19 +57,19 @@ private:
     
     //From DvProviderAvOpenhomeOrgProduct1 
 private:
-    virtual void Manufacturer(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aName, Net::IInvocationResponseString& aInfo, Net::IInvocationResponseString& aUrl, Net::IInvocationResponseString& aImageUri);
-    virtual void Model(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aName, Net::IInvocationResponseString& aInfo, Net::IInvocationResponseString& aUrl, Net::IInvocationResponseString& aImageUri);
-    virtual void Product(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aRoom, Net::IInvocationResponseString& aName, Net::IInvocationResponseString& aInfo, Net::IInvocationResponseString& aUrl, Net::IInvocationResponseString& aImageUri);
-    virtual void Standby(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseBool& aValue);
-    virtual void SetStandby(Net::IInvocationResponse& aResponse, TUint aVersion, TBool aValue);
-    virtual void SourceCount(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue);
-    virtual void SourceXml(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue);
-    virtual void SourceIndex(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue);
-    virtual void SetSourceIndex(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue);
-    virtual void SetSourceIndexByName(Net::IInvocationResponse& aResponse, TUint aVersion, const Brx& aValue);
-    virtual void Source(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aIndex, Net::IInvocationResponseString& aSystemName, Net::IInvocationResponseString& aType, Net::IInvocationResponseString& aName, Net::IInvocationResponseBool& aVisible);
-    virtual void Attributes(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue);
-    virtual void SourceXmlChangeCount(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue);
+    virtual void Manufacturer(Net::IDvInvocation& aResponse,  Net::IDvInvocationResponseString& aName, Net::IDvInvocationResponseString& aInfo, Net::IDvInvocationResponseString& aUrl, Net::IDvInvocationResponseString& aImageUri);
+    virtual void Model(Net::IDvInvocation& aResponse,  Net::IDvInvocationResponseString& aName, Net::IDvInvocationResponseString& aInfo, Net::IDvInvocationResponseString& aUrl, Net::IDvInvocationResponseString& aImageUri);
+    virtual void Product(Net::IDvInvocation& aResponse,  Net::IDvInvocationResponseString& aRoom, Net::IDvInvocationResponseString& aName, Net::IDvInvocationResponseString& aInfo, Net::IDvInvocationResponseString& aUrl, Net::IDvInvocationResponseString& aImageUri);
+    virtual void Standby(Net::IDvInvocation& aResponse,  Net::IDvInvocationResponseBool& aValue);
+    virtual void SetStandby(Net::IDvInvocation& aResponse,  TBool aValue);
+    virtual void SourceCount(Net::IDvInvocation& aResponse,  Net::IDvInvocationResponseUint& aValue);
+    virtual void SourceXml(Net::IDvInvocation& aResponse,  Net::IDvInvocationResponseString& aValue);
+    virtual void SourceIndex(Net::IDvInvocation& aResponse,  Net::IDvInvocationResponseUint& aValue);
+    virtual void SetSourceIndex(Net::IDvInvocation& aResponse,  TUint aValue);
+    virtual void SetSourceIndexByName(Net::IDvInvocation& aResponse,  const Brx& aValue);
+    virtual void Source(Net::IDvInvocation& aResponse,  TUint aIndex, Net::IDvInvocationResponseString& aSystemName, Net::IDvInvocationResponseString& aType, Net::IDvInvocationResponseString& aName, Net::IDvInvocationResponseBool& aVisible);
+    virtual void Attributes(Net::IDvInvocation& aResponse,  Net::IDvInvocationResponseString& aValue);
+    virtual void SourceXmlChangeCount(Net::IDvInvocation& aResponse,  Net::IDvInvocationResponseUint& aValue);
 
 private:
     IStandbyHandler& iStandbyHandler;

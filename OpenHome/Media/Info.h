@@ -21,10 +21,10 @@ public:
     
     //From DvProviderAvOpenhomeOrgInfo1 
 private:
-    virtual void Counters(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aTrackCount, Net::IInvocationResponseUint& aDetailsCount, Net::IInvocationResponseUint& aMetatextCount);
-    virtual void Track(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aUri, Net::IInvocationResponseString& aMetadata);
-    virtual void Details(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aDuration, Net::IInvocationResponseUint& aBitRate, Net::IInvocationResponseUint& aBitDepth, Net::IInvocationResponseUint& aSampleRate, Net::IInvocationResponseBool& aLossless, Net::IInvocationResponseString& aCodecName);
-    virtual void Metatext(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue);
+    virtual void Counters(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aTrackCount, Net::IDvInvocationResponseUint& aDetailsCount, Net::IDvInvocationResponseUint& aMetatextCount);
+    virtual void Track(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseString& aUri, Net::IDvInvocationResponseString& aMetadata);
+    virtual void Details(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aDuration, Net::IDvInvocationResponseUint& aBitRate, Net::IDvInvocationResponseUint& aBitDepth, Net::IDvInvocationResponseUint& aSampleRate, Net::IDvInvocationResponseBool& aLossless, Net::IDvInvocationResponseString& aCodecName);
+    virtual void Metatext(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseString& aValue);
 
 private:
     Mutex iMutex;

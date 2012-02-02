@@ -93,7 +93,7 @@ void ProviderInfo::SetMetatext(const Brx& aMetatext)
 }
 
 //From DvProviderAvOpenhomeOrgInfo1
-void ProviderInfo::Counters(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aTrackCount, Net::IInvocationResponseUint& aDetailsCount, Net::IInvocationResponseUint& aMetatextCount)
+void ProviderInfo::Counters(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aTrackCount, Net::IDvInvocationResponseUint& aDetailsCount, Net::IDvInvocationResponseUint& aMetatextCount)
 {
     TUint trackCount;
     TUint detailsCount;
@@ -105,17 +105,17 @@ void ProviderInfo::Counters(Net::IInvocationResponse& aResponse, TUint aVersion,
     GetPropertyMetatextCount(metatextCount);
     iMutex.Signal();
 
-    aResponse.Start();
+    aResponse.StartResponse();
 
     aTrackCount.Write(trackCount);
     aDetailsCount.Write(detailsCount);
     aMetatextCount.Write(metatextCount);
 
-    aResponse.End();
+    aResponse.EndResponse();
     
 }
 
-void ProviderInfo::Track(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aUri, Net::IInvocationResponseString& aMetadata)
+void ProviderInfo::Track(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseString& aUri, Net::IDvInvocationResponseString& aMetadata)
 {
     Brhz uri;
     Brhz metadata;
@@ -125,17 +125,17 @@ void ProviderInfo::Track(Net::IInvocationResponse& aResponse, TUint aVersion, Ne
     GetPropertyMetadata(metadata);
     iMutex.Signal();
 
-    aResponse.Start();
+    aResponse.StartResponse();
 
     aUri.Write(uri);
     aUri.WriteFlush();
     aMetadata.Write(metadata);
     aMetadata.WriteFlush();
 
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderInfo::Details(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aDuration, Net::IInvocationResponseUint& aBitRate, Net::IInvocationResponseUint& aBitDepth, Net::IInvocationResponseUint& aSampleRate, Net::IInvocationResponseBool& aLossless, Net::IInvocationResponseString& aCodecName)
+void ProviderInfo::Details(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aDuration, Net::IDvInvocationResponseUint& aBitRate, Net::IDvInvocationResponseUint& aBitDepth, Net::IDvInvocationResponseUint& aSampleRate, Net::IDvInvocationResponseBool& aLossless, Net::IDvInvocationResponseString& aCodecName)
 {
     TUint duration;
     TUint bitRate;
@@ -153,7 +153,7 @@ void ProviderInfo::Details(Net::IInvocationResponse& aResponse, TUint aVersion, 
     GetPropertyCodecName(codecName);
     iMutex.Signal();
 
-    aResponse.Start();
+    aResponse.StartResponse();
 
     aDuration.Write(duration);
     aBitRate.Write(bitRate);
@@ -163,19 +163,19 @@ void ProviderInfo::Details(Net::IInvocationResponse& aResponse, TUint aVersion, 
     aCodecName.Write(codecName);
     aCodecName.WriteFlush();
 
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderInfo::Metatext(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue)
+void ProviderInfo::Metatext(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseString& aValue)
 {
     Brhz metatext;
 
     GetPropertyMetatext(metatext);
 
-    aResponse.Start();
+    aResponse.StartResponse();
 
     aValue.Write(metatext);
     aValue.WriteFlush();
 
-    aResponse.End();
+    aResponse.EndResponse();
 }

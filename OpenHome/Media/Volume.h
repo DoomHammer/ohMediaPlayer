@@ -20,14 +20,14 @@ public:
 
     //From DvProviderAvOpenhomeOrgVolume1 
 private:
-    virtual void Characteristics(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aVolumeMax, Net::IInvocationResponseUint& aVolumeUnity, Net::IInvocationResponseUint& aVolumeSteps, Net::IInvocationResponseUint& aVolumeMilliDbPerStep, Net::IInvocationResponseUint& aBalanceMax, Net::IInvocationResponseUint& aFadeMax);
-    virtual void SetVolume(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue);
-    virtual void VolumeInc(Net::IInvocationResponse& aResponse, TUint aVersion);
-    virtual void VolumeDec(Net::IInvocationResponse& aResponse, TUint aVersion);
-    virtual void Volume(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue);
-    virtual void SetMute(Net::IInvocationResponse& aResponse, TUint aVersion, TBool aValue);
-    virtual void Mute(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseBool& aValue);
-    virtual void VolumeLimit(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue);
+    virtual void Characteristics(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aVolumeMax, Net::IDvInvocationResponseUint& aVolumeUnity, Net::IDvInvocationResponseUint& aVolumeSteps, Net::IDvInvocationResponseUint& aVolumeMilliDbPerStep, Net::IDvInvocationResponseUint& aBalanceMax, Net::IDvInvocationResponseUint& aFadeMax);
+    virtual void SetVolume(Net::IDvInvocation& aResponse, TUint aValue);
+    virtual void VolumeInc(Net::IDvInvocation& aResponse, TUint aVersion);
+    virtual void VolumeDec(Net::IDvInvocation& aResponse, TUint aVersion);
+    virtual void Volume(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aValue);
+    virtual void SetMute(Net::IDvInvocation& aResponse, TBool aValue);
+    virtual void Mute(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseBool& aValue);
+    virtual void VolumeLimit(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aValue);
 private:
     void SetVolumeLocked(uint32_t aValue);
 private:

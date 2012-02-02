@@ -37,30 +37,30 @@ private:
 
     //From DvProviderAvOpenhomeOrgPlaylist1
 private:
-    virtual void Play(Net::IInvocationResponse& aResponse, TUint aVersion);
-    virtual void Pause(Net::IInvocationResponse& aResponse, TUint aVersion);
-    virtual void Stop(Net::IInvocationResponse& aResponse, TUint aVersion);
-    virtual void Next(Net::IInvocationResponse& aResponse, TUint aVersion);
-    virtual void Previous(Net::IInvocationResponse& aResponse, TUint aVersion);
-    virtual void SetRepeat(Net::IInvocationResponse& aResponse, TUint aVersion, TBool aValue);
-    virtual void Repeat(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseBool& aValue);
-    virtual void SetShuffle(Net::IInvocationResponse& aResponse, TUint aVersion, TBool aValue);
-    virtual void Shuffle(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseBool& aValue);
-    virtual void SeekSecondAbsolute(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue);
-    virtual void SeekSecondRelative(Net::IInvocationResponse& aResponse, TUint aVersion, TInt aValue);
-    virtual void SeekId(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue);
-    virtual void SeekIndex(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue);
-    virtual void TransportState(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue);
-    virtual void Id(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue);
-    virtual void Read(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aId, Net::IInvocationResponseString& aUri, Net::IInvocationResponseString& aMetadata);
-    virtual void ReadList(Net::IInvocationResponse& aResponse, TUint aVersion, const Brx& aIdList, Net::IInvocationResponseString& aTrackList);
-    virtual void Insert(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aAfterId, const Brx& aUri, const Brx& aMetadata, Net::IInvocationResponseUint& aNewId);
-    virtual void DeleteId(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue);
-    virtual void DeleteAll(Net::IInvocationResponse& aResponse, TUint aVersion);
-    virtual void TracksMax(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue);
-    virtual void IdArray(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aToken, Net::IInvocationResponseBinary& aArray);
-    virtual void IdArrayChanged(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aToken, Net::IInvocationResponseBool& aValue);
-    virtual void ProtocolInfo(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue);
+    virtual void Play(Net::IDvInvocation& aResponse);
+    virtual void Pause(Net::IDvInvocation& aResponse);
+    virtual void Stop(Net::IDvInvocation& aResponse);
+    virtual void Next(Net::IDvInvocation& aResponse);
+    virtual void Previous(Net::IDvInvocation& aResponse);
+    virtual void SetRepeat(Net::IDvInvocation& aResponse, TBool aValue);
+    virtual void Repeat(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseBool& aValue);
+    virtual void SetShuffle(Net::IDvInvocation& aResponse, TBool aValue);
+    virtual void Shuffle(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseBool& aValue);
+    virtual void SeekSecondAbsolute(Net::IDvInvocation& aResponse, TUint aValue);
+    virtual void SeekSecondRelative(Net::IDvInvocation& aResponse, TInt aValue);
+    virtual void SeekId(Net::IDvInvocation& aResponse, TUint aValue);
+    virtual void SeekIndex(Net::IDvInvocation& aResponse, TUint aValue);
+    virtual void TransportState(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseString& aValue);
+    virtual void Id(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aValue);
+    virtual void Read(Net::IDvInvocation& aResponse, TUint aId, Net::IDvInvocationResponseString& aUri, Net::IDvInvocationResponseString& aMetadata);
+    virtual void ReadList(Net::IDvInvocation& aResponse, const Brx& aIdList, Net::IDvInvocationResponseString& aTrackList);
+    virtual void Insert(Net::IDvInvocation& aResponse, TUint aAfterId, const Brx& aUri, const Brx& aMetadata, Net::IDvInvocationResponseUint& aNewId);
+    virtual void DeleteId(Net::IDvInvocation& aResponse, TUint aValue);
+    virtual void DeleteAll(Net::IDvInvocation& aResponse);
+    virtual void TracksMax(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aValue);
+    virtual void IdArray(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aToken, Net::IDvInvocationResponseBinary& aArray);
+    virtual void IdArrayChanged(Net::IDvInvocation& aResponse, TUint aToken, Net::IDvInvocationResponseBool& aValue);
+    virtual void ProtocolInfo(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseString& aValue);
 
 private:
     void UpdateIdArray();

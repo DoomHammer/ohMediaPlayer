@@ -144,7 +144,7 @@ void ProviderProduct::Signal() const
 }
 
 //From DvProviderAvOpenhomeOrgProduct1
-void ProviderProduct::Manufacturer(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aName, Net::IInvocationResponseString& aInfo, Net::IInvocationResponseString& aUrl, Net::IInvocationResponseString& aImageUri)
+void ProviderProduct::Manufacturer(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseString& aName, Net::IDvInvocationResponseString& aInfo, Net::IDvInvocationResponseString& aUrl, Net::IDvInvocationResponseString& aImageUri)
 {
 	Brhz name;
 	Brhz info;
@@ -154,7 +154,7 @@ void ProviderProduct::Manufacturer(Net::IInvocationResponse& aResponse, TUint aV
     GetPropertyManufacturerInfo(info);
     GetPropertyManufacturerUrl(url);
     GetPropertyManufacturerImageUri(image);
-    aResponse.Start();
+    aResponse.StartResponse();
     aName.Write(name);
     aName.WriteFlush();
     aInfo.Write(info);
@@ -163,10 +163,10 @@ void ProviderProduct::Manufacturer(Net::IInvocationResponse& aResponse, TUint aV
     aUrl.WriteFlush();
 	aImageUri.Write(image);
 	aImageUri.WriteFlush();
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderProduct::Model(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aName, Net::IInvocationResponseString& aInfo, Net::IInvocationResponseString& aUrl, Net::IInvocationResponseString& aImageUri)
+void ProviderProduct::Model(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseString& aName, Net::IDvInvocationResponseString& aInfo, Net::IDvInvocationResponseString& aUrl, Net::IDvInvocationResponseString& aImageUri)
 {
 	Brhz name;
 	Brhz info;
@@ -176,7 +176,7 @@ void ProviderProduct::Model(Net::IInvocationResponse& aResponse, TUint aVersion,
     GetPropertyModelInfo(info);
     GetPropertyModelUrl(url);
     GetPropertyModelImageUri(image);
-    aResponse.Start();
+    aResponse.StartResponse();
     aName.Write(name);
     aName.WriteFlush();
     aInfo.Write(info);
@@ -185,10 +185,10 @@ void ProviderProduct::Model(Net::IInvocationResponse& aResponse, TUint aVersion,
     aUrl.WriteFlush();
 	aImageUri.Write(image);
 	aImageUri.WriteFlush();
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderProduct::Product(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aRoom, Net::IInvocationResponseString& aName, Net::IInvocationResponseString& aInfo, Net::IInvocationResponseString& aUrl, Net::IInvocationResponseString& aImageUri)
+void ProviderProduct::Product(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseString& aRoom, Net::IDvInvocationResponseString& aName, Net::IDvInvocationResponseString& aInfo, Net::IDvInvocationResponseString& aUrl, Net::IDvInvocationResponseString& aImageUri)
 {
 	Brhz room;
 	Brhz name;
@@ -200,7 +200,7 @@ void ProviderProduct::Product(Net::IInvocationResponse& aResponse, TUint aVersio
     GetPropertyProductInfo(info);
     GetPropertyProductUrl(url);
     GetPropertyProductImageUri(image);
-    aResponse.Start();
+    aResponse.StartResponse();
     aRoom.Write(room);
     aRoom.WriteFlush();
     aName.Write(name);
@@ -211,63 +211,63 @@ void ProviderProduct::Product(Net::IInvocationResponse& aResponse, TUint aVersio
     aUrl.WriteFlush();
 	aImageUri.Write(image);
 	aImageUri.WriteFlush();
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderProduct::Standby(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseBool& aValue)
+void ProviderProduct::Standby(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseBool& aValue)
 {
 	TBool value;
     GetPropertyStandby(value);
-    aResponse.Start();
+    aResponse.StartResponse();
     aValue.Write(value);
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderProduct::SetStandby(Net::IInvocationResponse& aResponse, TUint aVersion, TBool aValue)
+void ProviderProduct::SetStandby(Net::IDvInvocation& aResponse, TBool aValue)
 {
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 
     if (SetPropertyStandby(aValue)) {
     	iStandbyHandler.SetStandby(aValue);
     }
 }
 
-void ProviderProduct::SourceCount(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
+void ProviderProduct::SourceCount(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aValue)
 {
 	TUint value;
     GetPropertySourceCount(value);
-    aResponse.Start();
+    aResponse.StartResponse();
     aValue.Write(value);
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderProduct::SourceXml(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue)
+void ProviderProduct::SourceXml(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseString& aValue)
 {
 	Brhz value;
     GetPropertySourceXml(value);
-    aResponse.Start();
+    aResponse.StartResponse();
     aValue.Write(value);
     aValue.WriteFlush();
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderProduct::SourceIndex(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
+void ProviderProduct::SourceIndex(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aValue)
 {
 	TUint value;
     GetPropertySourceIndex(value);
-    aResponse.Start();
+    aResponse.StartResponse();
     aValue.Write(value);
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderProduct::SetSourceIndex(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
+void ProviderProduct::SetSourceIndex(Net::IDvInvocation& aResponse, TUint aValue)
 {
 	TUint count;
     GetPropertySourceCount(count);
 	if (aValue < count) {
-	    aResponse.Start();
-	    aResponse.End();
+	    aResponse.StartResponse();
+	    aResponse.EndResponse();
 	    if (SetPropertySourceIndex(aValue)) {
 	    	iSourceIndexHandler.SetSourceIndex(aValue);
 	    }
@@ -277,18 +277,18 @@ void ProviderProduct::SetSourceIndex(Net::IInvocationResponse& aResponse, TUint 
 	}
 }
 
-void ProviderProduct::SetSourceIndexByName(Net::IInvocationResponse& aResponse, TUint aVersion, const Brx& aValue)
+void ProviderProduct::SetSourceIndexByName(Net::IDvInvocation& aResponse, const Brx& aValue)
 {
 }
 
-void ProviderProduct::Source(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aIndex, Net::IInvocationResponseString& aSystemName, Net::IInvocationResponseString& aType, Net::IInvocationResponseString& aName, Net::IInvocationResponseBool& aVisible)
+void ProviderProduct::Source(Net::IDvInvocation& aResponse, TUint aIndex, Net::IDvInvocationResponseString& aSystemName, Net::IDvInvocationResponseString& aType, Net::IDvInvocationResponseString& aName, Net::IDvInvocationResponseBool& aVisible)
 {
     //TODO: Missing locking
 	TUint count;
     GetPropertySourceCount(count);
 	if (aIndex < count) {
 		class Source* source = iSourceList[aIndex];
-	    aResponse.Start();
+	    aResponse.StartResponse();
 	    aSystemName.Write(source->iSystemName);
 	    aSystemName.WriteFlush();
 	    aType.Write(source->iType);
@@ -296,31 +296,31 @@ void ProviderProduct::Source(Net::IInvocationResponse& aResponse, TUint aVersion
 	    aName.Write(source->iName);
 	    aName.WriteFlush();
 	    aVisible.Write(source->iVisible);
-	    aResponse.End();
+	    aResponse.EndResponse();
 	}
 	else {
 		aResponse.Error(802, Brn("Source index out of range"));
 	}
 }
 
-void ProviderProduct::Attributes(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue)
+void ProviderProduct::Attributes(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseString& aValue)
 {
 	Brhz value;
     GetPropertyAttributes(value);
-    aResponse.Start();
+    aResponse.StartResponse();
     aValue.Write(value);
     aValue.WriteFlush();
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderProduct::SourceXmlChangeCount(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
+void ProviderProduct::SourceXmlChangeCount(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aValue)
 {
 	iMutex.Wait();
 	TUint value = iSourceXmlChangeCount;
 	iMutex.Signal();
-    aResponse.Start();
+    aResponse.StartResponse();
     aValue.Write(value);
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
 

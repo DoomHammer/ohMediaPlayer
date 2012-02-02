@@ -141,98 +141,98 @@ void ProviderPlaylist::SetId(TUint aId)
     SetPropertyId(aId);
 }
 
-void ProviderPlaylist::Play(Net::IInvocationResponse& aResponse, TUint aVersion)
+void ProviderPlaylist::Play(Net::IDvInvocation& aResponse)
 {
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 
     iSource.Play(0);
 }
 
-void ProviderPlaylist::Pause(Net::IInvocationResponse& aResponse, TUint aVersion)
+void ProviderPlaylist::Pause(Net::IDvInvocation& aResponse)
 {
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
     
     iSource.Pause();
 }
 
-void ProviderPlaylist::Stop(Net::IInvocationResponse& aResponse, TUint aVersion)
+void ProviderPlaylist::Stop(Net::IDvInvocation& aResponse)
 {
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 
     iSource.Stop();
 }
 
-void ProviderPlaylist::Next(Net::IInvocationResponse& aResponse, TUint aVersion)
+void ProviderPlaylist::Next(Net::IDvInvocation& aResponse)
 {
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 
     iSource.Play(1);
 }
 
-void ProviderPlaylist::Previous(Net::IInvocationResponse& aResponse, TUint aVersion)
+void ProviderPlaylist::Previous(Net::IDvInvocation& aResponse)
 {
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 
     iSource.Play(-1);
 }
 
-void ProviderPlaylist::SetRepeat(Net::IInvocationResponse& aResponse, TUint aVersion, TBool aValue)
+void ProviderPlaylist::SetRepeat(Net::IDvInvocation& aResponse, TBool aValue)
 {
     SetPropertyRepeat(aValue);
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 }
 
-void ProviderPlaylist::Repeat(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseBool& aValue)
+void ProviderPlaylist::Repeat(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseBool& aValue)
 {
     TBool repeat;
     GetPropertyRepeat(repeat);
-    aResponse.Start();
+    aResponse.StartResponse();
     aValue.Write(repeat);
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderPlaylist::SetShuffle(Net::IInvocationResponse& aResponse, TUint aVersion, TBool aValue)
+void ProviderPlaylist::SetShuffle(Net::IDvInvocation& aResponse, TBool aValue)
 {
     SetPropertyShuffle(aValue);
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 }
 
-void ProviderPlaylist::Shuffle(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseBool& aValue)
+void ProviderPlaylist::Shuffle(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseBool& aValue)
 {
     TBool shuffle;
     GetPropertyShuffle(shuffle);
-    aResponse.Start();
+    aResponse.StartResponse();
     aValue.Write(shuffle);
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderPlaylist::SeekSecondAbsolute(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
+void ProviderPlaylist::SeekSecondAbsolute(Net::IDvInvocation& aResponse, TUint aValue)
 {
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 
     iSource.PlaySecondAbsolute(aValue);
 }
 
-void ProviderPlaylist::SeekSecondRelative(Net::IInvocationResponse& aResponse, TUint aVersion, TInt aValue)
+void ProviderPlaylist::SeekSecondRelative(Net::IDvInvocation& aResponse, TInt aValue)
 {
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 
     iSource.PlaySecondRelative(aValue);
 }
 
-void ProviderPlaylist::SeekId(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
+void ProviderPlaylist::SeekId(Net::IDvInvocation& aResponse, TUint aValue)
 {
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 
     const Track* track = 0;
 
@@ -252,10 +252,10 @@ void ProviderPlaylist::SeekId(Net::IInvocationResponse& aResponse, TUint aVersio
     }
 }
 
-void ProviderPlaylist::SeekIndex(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
+void ProviderPlaylist::SeekIndex(Net::IDvInvocation& aResponse, TUint aValue)
 {
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 
     const Track* track = 0;
 
@@ -283,28 +283,28 @@ void ProviderPlaylist::SeekIndex(Net::IInvocationResponse& aResponse, TUint aVer
     }
 }
 
-void ProviderPlaylist::TransportState(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue)
+void ProviderPlaylist::TransportState(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseString& aValue)
 {
     Log::Print("ProviderPlaylist::TransportState\n");
     Brhz transportState;
     GetPropertyTransportState(transportState);
-    aResponse.Start();
+    aResponse.StartResponse();
     aValue.Write(transportState);
     aValue.WriteFlush();
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderPlaylist::Id(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
+void ProviderPlaylist::Id(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aValue)
 {
     Log::Print("ProviderPlaylist::Id\n");
     TUint id;
     GetPropertyId(id);
-    aResponse.Start();
+    aResponse.StartResponse();
     aValue.Write(id);
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderPlaylist::Read(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aId, Net::IInvocationResponseString& aUri, Net::IInvocationResponseString& aMetadata)
+void ProviderPlaylist::Read(Net::IDvInvocation& aResponse, TUint aId, Net::IDvInvocationResponseString& aUri, Net::IDvInvocationResponseString& aMetadata)
 {
     Log::Print("ProviderPlaylist::Read\n");
     if(aId == 0) {
@@ -324,18 +324,18 @@ void ProviderPlaylist::Read(Net::IInvocationResponse& aResponse, TUint aVersion,
         track->IncRef();
         iMutex.Signal();
 
-        aResponse.Start();
+        aResponse.StartResponse();
         aUri.Write(track->Uri());
         aUri.WriteFlush();
         aMetadata.Write(track->Metadata());
         aMetadata.WriteFlush();
-        aResponse.End();
+        aResponse.EndResponse();
 
         track->DecRef();
     }
 }
 
-void ProviderPlaylist::ReadList(Net::IInvocationResponse& aResponse, TUint aVersion, const Brx& aIdList, Net::IInvocationResponseString& aTrackList)
+void ProviderPlaylist::ReadList(Net::IDvInvocation& aResponse, const Brx& aIdList, Net::IDvInvocationResponseString& aTrackList)
 {
     Log::Print("ProviderPlaylist::ReadList\n");
     uint32_t tracksMax;
@@ -368,7 +368,7 @@ void ProviderPlaylist::ReadList(Net::IInvocationResponse& aResponse, TUint aVers
     Brn metaStart("<Metadata>");
     Brn metaEnd("</Metadata>");
 
-    aResponse.Start();
+    aResponse.StartResponse();
     aTrackList.Write(Brn("<TrackList>"));
 
     for( vector<uint32_t>::const_iterator id=v.begin(); id!= v.end(); id++) {
@@ -406,10 +406,10 @@ void ProviderPlaylist::ReadList(Net::IInvocationResponse& aResponse, TUint aVers
 
     aTrackList.Write(Brn("</TrackList>"));
     aTrackList.WriteFlush();
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderPlaylist::Insert(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aAfterId, const Brx& aUri, const Brx& aMetadata, Net::IInvocationResponseUint& aNewId)
+void ProviderPlaylist::Insert(Net::IDvInvocation& aResponse, TUint aAfterId, const Brx& aUri, const Brx& aMetadata, Net::IDvInvocationResponseUint& aNewId)
 {
     Log::Print("ProviderPlaylist::Insert\n");
     iMutex.Wait();
@@ -436,15 +436,15 @@ void ProviderPlaylist::Insert(Net::IInvocationResponse& aResponse, TUint aVersio
 
     uint32_t id = iSource.NewId();
     iList.insert(i, new Track(id, aUri, aMetadata));
-    aResponse.Start();
+    aResponse.StartResponse();
     aNewId.Write(id);
-    aResponse.End();
+    aResponse.EndResponse();
     UpdateIdArray();
 
     iMutex.Signal();
 }
 
-void ProviderPlaylist::DeleteId(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
+void ProviderPlaylist::DeleteId(Net::IDvInvocation& aResponse, TUint aValue)
 {
     Log::Print("ProviderPlaylist::DeleteId\n");
 
@@ -470,15 +470,15 @@ void ProviderPlaylist::DeleteId(Net::IInvocationResponse& aResponse, TUint aVers
 
     iMutex.Signal();
 
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 
     if(deleted) {
         iSource.Deleted(aValue, replacement);
     }
 }
 
-void ProviderPlaylist::DeleteAll(Net::IInvocationResponse& aResponse, TUint aVersion)
+void ProviderPlaylist::DeleteAll(Net::IDvInvocation& aResponse)
 {
     Log::Print("ProviderPlaylist::DeleteAll\n");
 
@@ -501,39 +501,39 @@ void ProviderPlaylist::DeleteAll(Net::IInvocationResponse& aResponse, TUint aVer
 
     iMutex.Signal();
 
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 
     if(deleted) {
         iSource.Deleted(0, 0); //Special value of 0 indicates entire playlist was deleted
     }
 }
 
-void ProviderPlaylist::TracksMax(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
+void ProviderPlaylist::TracksMax(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aValue)
 {
     Log::Print("ProviderPlaylist::TracksMax\n");
     TUint tracksMax;
     GetPropertyTracksMax(tracksMax);
-    aResponse.Start();
+    aResponse.StartResponse();
     aValue.Write(tracksMax);
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderPlaylist::IdArray(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aToken, Net::IInvocationResponseBinary& aArray)
+void ProviderPlaylist::IdArray(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aToken, Net::IDvInvocationResponseBinary& aArray)
 {
     Log::Print("ProviderPlaylist::IdArray\n");
     iMutex.Wait();
 
-    aResponse.Start();
+    aResponse.StartResponse();
     aToken.Write(iToken);
     aArray.Write(iIdArray);
     aArray.WriteFlush();
-    aResponse.End();
+    aResponse.EndResponse();
 
     iMutex.Signal();
 }
 
-void ProviderPlaylist::IdArrayChanged(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aToken, Net::IInvocationResponseBool& aValue)
+void ProviderPlaylist::IdArrayChanged(Net::IDvInvocation& aResponse, TUint aToken, Net::IDvInvocationResponseBool& aValue)
 {
     Log::Print("ProviderPlaylist::IdArrayChanged\n");
     TBool changed = false;
@@ -544,20 +544,20 @@ void ProviderPlaylist::IdArrayChanged(Net::IInvocationResponse& aResponse, TUint
     }
     iMutex.Signal();
 
-    aResponse.Start();
+    aResponse.StartResponse();
     aValue.Write(changed);
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderPlaylist::ProtocolInfo(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseString& aValue)
+void ProviderPlaylist::ProtocolInfo(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseString& aValue)
 {
     Brhz protocolInfo;
     GetPropertyProtocolInfo(protocolInfo);
 
-    aResponse.Start();
+    aResponse.StartResponse();
     aValue.Write(protocolInfo);
     aValue.WriteFlush();
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
 //Must be called with iMutex held

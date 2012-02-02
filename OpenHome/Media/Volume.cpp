@@ -35,7 +35,7 @@ ProviderVolume::ProviderVolume(Net::DvDevice& aDevice, IVolume& aVolume)
 }
 
 //From DvProviderAvOpenhomeOrgVolume1
-void ProviderVolume::Characteristics(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aVolumeMax, Net::IInvocationResponseUint& aVolumeUnity, Net::IInvocationResponseUint& aVolumeSteps, Net::IInvocationResponseUint& aVolumeMilliDbPerStep, Net::IInvocationResponseUint& aBalanceMax, Net::IInvocationResponseUint& aFadeMax)
+void ProviderVolume::Characteristics(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aVolumeMax, Net::IDvInvocationResponseUint& aVolumeUnity, Net::IDvInvocationResponseUint& aVolumeSteps, Net::IDvInvocationResponseUint& aVolumeMilliDbPerStep, Net::IDvInvocationResponseUint& aBalanceMax, Net::IDvInvocationResponseUint& aFadeMax)
 {
     //All the characteristics are readonly, therefore no mutex
     uint32_t max;
@@ -56,20 +56,20 @@ void ProviderVolume::Characteristics(Net::IInvocationResponse& aResponse, TUint 
     uint32_t fadeMax;
     GetPropertyFadeMax(fadeMax);
 
-    aResponse.Start();
+    aResponse.StartResponse();
     aVolumeMax.Write(max);
     aVolumeUnity.Write(unity);
     aVolumeSteps.Write(steps);
     aVolumeMilliDbPerStep.Write(milliDb);
     aBalanceMax.Write(balanceMax);
     aFadeMax.Write(fadeMax);
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderVolume::SetVolume(Net::IInvocationResponse& aResponse, TUint aVersion, TUint aValue)
+void ProviderVolume::SetVolume(Net::IDvInvocation& aResponse, TUint aValue)
 {
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 
     iMutex.Wait();
     SetVolumeLocked(aValue);
@@ -88,10 +88,10 @@ void ProviderVolume::SetVolumeLocked(TUint aValue)
     iVolume.SetVolume(aValue);
 }
 
-void ProviderVolume::VolumeInc(Net::IInvocationResponse& aResponse, TUint aVersion)
+void ProviderVolume::VolumeInc(Net::IDvInvocation& aResponse, TUint aVersion)
 {
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 
     iMutex.Wait();
     uint32_t volume;
@@ -100,10 +100,10 @@ void ProviderVolume::VolumeInc(Net::IInvocationResponse& aResponse, TUint aVersi
     iMutex.Signal();
 }
 
-void ProviderVolume::VolumeDec(Net::IInvocationResponse& aResponse, TUint aVersion)
+void ProviderVolume::VolumeDec(Net::IDvInvocation& aResponse, TUint aVersion)
 {
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 
     iMutex.Wait();
     uint32_t volume;
@@ -112,7 +112,7 @@ void ProviderVolume::VolumeDec(Net::IInvocationResponse& aResponse, TUint aVersi
     iMutex.Signal();
 }
 
-void ProviderVolume::Volume(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
+void ProviderVolume::Volume(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aValue)
 {
     iMutex.Wait();
 
@@ -121,15 +121,15 @@ void ProviderVolume::Volume(Net::IInvocationResponse& aResponse, TUint aVersion,
 
     iMutex.Signal();
 
-    aResponse.Start();
+    aResponse.StartResponse();
     aValue.Write(volume);
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderVolume::SetMute(Net::IInvocationResponse& aResponse, TUint aVersion, TBool aValue)
+void ProviderVolume::SetMute(Net::IDvInvocation& aResponse, TBool aValue)
 {
-    aResponse.Start();
-    aResponse.End();
+    aResponse.StartResponse();
+    aResponse.EndResponse();
 
     iMutex.Wait();
 
@@ -139,7 +139,7 @@ void ProviderVolume::SetMute(Net::IInvocationResponse& aResponse, TUint aVersion
     iMutex.Signal();
 }
 
-void ProviderVolume::Mute(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseBool& aValue)
+void ProviderVolume::Mute(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseBool& aValue)
 {
     iMutex.Wait();
 
@@ -148,18 +148,18 @@ void ProviderVolume::Mute(Net::IInvocationResponse& aResponse, TUint aVersion, N
 
     iMutex.Signal();
 
-    aResponse.Start();
+    aResponse.StartResponse();
     aValue.Write(mute);
-    aResponse.End();
+    aResponse.EndResponse();
 }
 
-void ProviderVolume::VolumeLimit(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aValue)
+void ProviderVolume::VolumeLimit(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aValue)
 {
     //Limit is readonly, therefore no mutex
     uint32_t limit;
     GetPropertyVolumeLimit(limit);
 
-    aResponse.Start();
+    aResponse.StartResponse();
     aValue.Write(limit);
-    aResponse.End();
+    aResponse.EndResponse();
 }

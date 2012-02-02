@@ -51,7 +51,7 @@ TUint ProviderTime::Duration()
 }
 
 //From DvProviderAvOpenhomeOrgTime1
-void ProviderTime::Time(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aTrackCount, Net::IInvocationResponseUint& aDuration, Net::IInvocationResponseUint& aSeconds)
+void ProviderTime::Time(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aTrackCount, Net::IDvInvocationResponseUint& aDuration, Net::IDvInvocationResponseUint& aSeconds)
 {
     TUint trackCount;
     TUint duration;
@@ -63,13 +63,13 @@ void ProviderTime::Time(Net::IInvocationResponse& aResponse, TUint aVersion, Net
     GetPropertySeconds(seconds);
     iMutex.Signal();
 
-    aResponse.Start();
+    aResponse.StartResponse();
 
     aTrackCount.Write(trackCount);
     aDuration.Write(duration);
     aSeconds.Write(seconds);
 
-    aResponse.End();
+    aResponse.EndResponse();
     
 }
 

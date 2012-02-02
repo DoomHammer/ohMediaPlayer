@@ -23,7 +23,7 @@ public:
     
     //From DvProviderAvOpenhomeOrgTime1 
 private:
-    virtual void Time(Net::IInvocationResponse& aResponse, TUint aVersion, Net::IInvocationResponseUint& aTrackCount, Net::IInvocationResponseUint& aDuration, Net::IInvocationResponseUint& aSeconds);
+    virtual void Time(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aTrackCount, Net::IDvInvocationResponseUint& aDuration, Net::IDvInvocationResponseUint& aSeconds);
 
 private:
     Mutex iMutex;

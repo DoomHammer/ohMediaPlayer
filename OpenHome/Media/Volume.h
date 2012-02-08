@@ -22,8 +22,8 @@ public:
 private:
     virtual void Characteristics(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aVolumeMax, Net::IDvInvocationResponseUint& aVolumeUnity, Net::IDvInvocationResponseUint& aVolumeSteps, Net::IDvInvocationResponseUint& aVolumeMilliDbPerStep, Net::IDvInvocationResponseUint& aBalanceMax, Net::IDvInvocationResponseUint& aFadeMax);
     virtual void SetVolume(Net::IDvInvocation& aResponse, TUint aValue);
-    virtual void VolumeInc(Net::IDvInvocation& aResponse, TUint aVersion);
-    virtual void VolumeDec(Net::IDvInvocation& aResponse, TUint aVersion);
+    virtual void VolumeInc(Net::IDvInvocation& aResponse);
+    virtual void VolumeDec(Net::IDvInvocation& aResponse);
     virtual void Volume(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseUint& aValue);
     virtual void SetMute(Net::IDvInvocation& aResponse, TBool aValue);
     virtual void Mute(Net::IDvInvocation& aResponse, Net::IDvInvocationResponseBool& aValue);

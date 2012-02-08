@@ -100,7 +100,7 @@ void ProviderVolume::SetVolumeLocked(TUint aValue)
     iVolume.SetVolume(aValue);
 }
 
-void ProviderVolume::VolumeInc(Net::IDvInvocation& aResponse, TUint aVersion)
+void ProviderVolume::VolumeInc(Net::IDvInvocation& aResponse)
 {
     aResponse.StartResponse();
     aResponse.EndResponse();
@@ -112,7 +112,7 @@ void ProviderVolume::VolumeInc(Net::IDvInvocation& aResponse, TUint aVersion)
     iMutex.Signal();
 }
 
-void ProviderVolume::VolumeDec(Net::IDvInvocation& aResponse, TUint aVersion)
+void ProviderVolume::VolumeDec(Net::IDvInvocation& aResponse)
 {
     aResponse.StartResponse();
     aResponse.EndResponse();

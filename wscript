@@ -76,6 +76,7 @@ def configure(ctx):
         ctx.env.LIB_MEDIA = ['pthread']
         ctx.env.LIB_VLC = ['vlc']
         ctx.env.CXXFLAGS_MEDIA += ['-Werror', '-pipe', '-fexceptions']
+        ctx.env.LINKFLAGS_MEDIA += ['-framework', 'CoreFoundation', '-framework', 'SystemConfiguration']
         if(debug):
             ctx.env.CXXFLAGS_MEDIA += ['-g']
     else:

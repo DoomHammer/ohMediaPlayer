@@ -9,6 +9,19 @@ ProviderInfo::ProviderInfo(Net::DvDevice& aDevice)
     : DvProviderAvOpenhomeOrgInfo1(aDevice)
     , iMutex("INFO")
 {
+    EnablePropertyTrackCount();
+    EnablePropertyDetailsCount();
+    EnablePropertyMetatextCount();
+    EnablePropertyUri();
+    EnablePropertyMetadata();
+    EnablePropertyDuration();
+    EnablePropertyBitRate();
+    EnablePropertyBitDepth();
+    EnablePropertySampleRate();
+    EnablePropertyLossless();
+    EnablePropertyCodecName();
+    EnablePropertyMetatext();
+
     EnableActionCounters();
     EnableActionTrack();
     EnableActionDetails();

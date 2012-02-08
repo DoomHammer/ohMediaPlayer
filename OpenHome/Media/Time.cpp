@@ -8,6 +8,10 @@ ProviderTime::ProviderTime(Net::DvDevice& aDevice)
     : DvProviderAvOpenhomeOrgTime1(aDevice)
     , iMutex("TIME")
 {
+    EnablePropertyTrackCount();
+    EnablePropertyDuration();
+    EnablePropertySeconds();
+
     EnableActionTime();
 
     SetPropertyTrackCount(0);

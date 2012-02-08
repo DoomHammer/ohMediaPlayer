@@ -31,6 +31,25 @@ ProviderProduct::ProviderProduct(Net::DvDevice& aDevice
     , iMutex("PROD")
     , iSourceXml(Brx::Empty())
 {
+    EnablePropertyStandby();
+    EnablePropertyAttributes();
+    EnablePropertyManufacturerName();
+    EnablePropertyManufacturerInfo();
+    EnablePropertyManufacturerUrl();    
+    EnablePropertyManufacturerImageUri();
+    EnablePropertyModelName();
+    EnablePropertyModelInfo();
+    EnablePropertyModelUrl();
+    EnablePropertyModelImageUri();
+    EnablePropertyProductRoom();
+    EnablePropertyProductName();
+    EnablePropertyProductInfo();
+    EnablePropertyProductUrl();
+    EnablePropertyProductImageUri();
+    EnablePropertySourceIndex();
+    EnablePropertySourceCount();
+    EnablePropertySourceXml();
+
     EnableActionManufacturer();
     EnableActionModel();
     EnableActionProduct();

@@ -10,6 +10,18 @@ ProviderVolume::ProviderVolume(Net::DvDevice& aDevice, IVolume& aVolume)
     , iMutex("VOLU")
     , iVolume(aVolume)
 {
+    EnablePropertyVolume();
+    EnablePropertyMute();
+    EnablePropertyBalance();
+    EnablePropertyFade();
+    EnablePropertyVolumeLimit();
+    EnablePropertyVolumeMax();
+    EnablePropertyVolumeUnity();
+    EnablePropertyVolumeSteps();
+    EnablePropertyVolumeMilliDbPerStep();
+    EnablePropertyBalanceMax();
+    EnablePropertyFadeMax();
+
     PropertiesLock();
     SetPropertyVolume(50);
     SetPropertyMute(false);

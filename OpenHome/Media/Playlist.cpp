@@ -33,6 +33,14 @@ ProviderPlaylist::ProviderPlaylist(Net::DvDevice& aDevice, TUint aTracksMax, con
     , iState(eStopped)
 {
 
+    EnablePropertyTransportState();
+    EnablePropertyRepeat();
+    EnablePropertyShuffle();
+    EnablePropertyId();
+    EnablePropertyTracksMax();
+    EnablePropertyProtocolInfo();
+    EnablePropertyIdArray();
+    
     EnableActionPlay();
     EnableActionPause();
     EnableActionStop();

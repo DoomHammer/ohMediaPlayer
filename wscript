@@ -61,9 +61,12 @@ def configure(ctx):
 
     elif sys.platform == 'linux2':
         ohNetLibraries = ohNetLibraries + os.sep + 'Posix'
+        vlcLibraries = ctx.path.find_node('../vlc-1.1.10/src/.libs')
+        vlcLibraries = vlcLibraries.abspath()
         ctx.env.LIB_MEDIA = ['pthread']
-        ctx.env.LIB_VLC = ['vlc']
-        ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-Werror', '-pipe', '-fexceptions']
+        ctx.env.LIB_VLC = ['vlc', 'vlccore']
+        #ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-Werror', '-pipe', '-fexceptions']
+        ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-pipe', '-fexceptions']
         if(debug):
             ctx.env.CXXFLAGS_MEDIA += ['-g']
 
@@ -95,8 +98,8 @@ def configure(ctx):
     print 'LIBPATH: {0}'.format(ctx.env.LIBPATH_MEDIA)
 
     #Ensure those directories actually exist
-    ctx.find_file('.', ctx.env.INCLUDES_MEDIA)
-    ctx.find_file('.', ctx.env.LIBPATH_MEDIA)
+    #ctx.find_file('.', ctx.env.INCLUDES_MEDIA)
+    #ctx.find_file('.', ctx.env.LIBPATH_MEDIA)
 
 
 

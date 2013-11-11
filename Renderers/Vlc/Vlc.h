@@ -7,6 +7,7 @@
 #include <string>
 #include <vlc/vlc.h>
 #include <OpenHome/Private/Timer.h>
+#include <OpenHome/Private/Env.h>
 
 namespace OpenHome {
 namespace Media {
@@ -14,7 +15,7 @@ namespace Media {
 class Vlc : public IRenderer
 {
 public:
-    Vlc();
+    Vlc(Environment& aEnv);
     ~Vlc();
     virtual void Play(uint32_t aHandle, const ITrack& aTrack, uint32_t aSecond);
     virtual void Pause();

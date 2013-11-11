@@ -6,6 +6,8 @@ using namespace OpenHome;
 using namespace OpenHome::Media;
 using namespace std;
 
+static const TUint kMedia          = 1<<16;
+
 void DurationChanged(const struct libvlc_event_t* aEvent, void* aContext)
 {
     ((Vlc*)aContext)->DurationChanged(aEvent);
@@ -51,7 +53,7 @@ const char* kVlcArgs[] = {
     "--verbose=2"
     };
 
-Vlc::Vlc()
+Vlc::Vlc(Environment& aEnv)
     : iVlc(0)
     , iPlayer(0)
     , iMedia(0)
@@ -61,15 +63,15 @@ Vlc::Vlc()
     , iPendingVolume(false)
     , iPendingMute(false)
 {
-    Debug::SetLevel(Debug::kMedia);
+    Debug::SetLevel(kMedia);
     iVlc = libvlc_new (sizeof(kVlcArgs) / sizeof(kVlcArgs[0]), kVlcArgs);
     libvlc_set_log_verbosity(iVlc, 2);
     libvlc_log_t* log = libvlc_log_open(iVlc);
     libvlc_log_close(log);
     iTimerFinishedFunctor = MakeFunctor(*this, &Vlc::TimerFinishedExpired);
-    iTimerFinished = new Timer(iTimerFinishedFunctor);
+    iTimerFinished = new Timer(aEnv, iTimerFinishedFunctor);
     iTimerPlayFunctor = MakeFunctor(*this, &Vlc::TimerPlayExpired);
-    iTimerPlay = new Timer(iTimerPlayFunctor);
+    iTimerPlay = new Timer(aEnv, iTimerPlayFunctor);
 
     libvlc_audio_output_t* outputs = libvlc_audio_output_list_get(iVlc);
     libvlc_audio_output_t* ptr = outputs;

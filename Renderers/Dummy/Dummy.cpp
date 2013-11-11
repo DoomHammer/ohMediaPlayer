@@ -6,11 +6,11 @@ using namespace OpenHome;
 using namespace OpenHome::Media;
 using namespace std;
 
-Dummy::Dummy()
+Dummy::Dummy(Environment& aEnv)
     : iTickFunctor(MakeFunctor(*this, &Dummy::Tick))
-    , iTickTimer(iTickFunctor)
+    , iTickTimer(aEnv, iTickFunctor)
     , iPrefetchFunctor(MakeFunctor(*this, &Dummy::Prefetch))
-    , iPrefetchTimer(iPrefetchFunctor)
+    , iPrefetchTimer(aEnv, iPrefetchFunctor)
 {
 }
 

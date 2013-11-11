@@ -5,7 +5,6 @@
 #include <OpenHome/Net/Core/DvDevice.h>
 #include <OpenHome/Private/Thread.h>
 #include <OpenHome/Buffer.h>
-#include <OpenHome/Private/RefCounter.h>
 #include <OpenHome/Media/Renderer.h>
 #include <OpenHome/Media/Standard.h>
 #include <OpenHome/Media/Info.h>
@@ -39,6 +38,57 @@ public:
     virtual uint32_t Id() const = 0;
     virtual void Uri(const uint8_t*& aUri, uint32_t& aBytes) const = 0;
     virtual void Metadata(const uint8_t*& aMetadata, uint32_t& aBytes) const = 0;
+};
+
+class AtomicInt : public INonCopyable
+{
+public:
+	AtomicInt(TInt aInitialValue)
+		: iInt(aInitialValue)
+		, iMutex("AINT")
+	{};
+	AtomicInt()
+		: iInt(0)
+		, iMutex("AINT")
+	{};
+	TInt Inc()
+	{
+		AutoMutex _amtx(iMutex);
+		TInt value = ++iInt;
+		return value;
+	};
+	TInt Dec()
+	{
+		AutoMutex _amtx(iMutex);
+		TInt value = --iInt;
+		return value;
+	};
+private:
+	TInt iInt;
+	mutable Mutex iMutex;
+};
+
+class RefCounter
+{
+public:
+	RefCounter()
+		: iCounter(1)
+	{};
+	void IncRef() const
+	{
+		iCounter.Inc();
+	};
+	void DecRef() const
+	{
+		if (iCounter.Dec() == 0)
+		{
+			delete this;
+		}
+	};
+protected:
+	virtual ~RefCounter() {};
+private:
+	mutable AtomicInt iCounter;
 };
 
 class Track : public RefCounter, public ITrack

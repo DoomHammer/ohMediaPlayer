@@ -37,4 +37,4 @@ private:
 } // namespace Media
 } // namespace OpenHome
 
-#endif HEADER_OPENHOME_MEDIA_STANDARD
+#endif //HEADER_OPENHOME_MEDIA_STANDARD

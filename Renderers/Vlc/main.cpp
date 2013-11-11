@@ -1,9 +1,8 @@
+#include <stdio.h>
 #include <OpenHome/OhNetTypes.h>
 #include <OpenHome/Net/Core/DvDevice.h>
 #include <OpenHome/Net/Core/OhNet.h>
 #include <OpenHome/Private/Ascii.h>
-#include <OpenHome/Net/Private/Stack.h>
-#include <OpenHome/Private/Maths.h>
 #include <OpenHome/Private/OptionParser.h>
 #include <OpenHome/Media/Product.h>
 #include <OpenHome/Media/Playlist.h>
@@ -79,18 +78,18 @@ int main(int aArgc, char* aArgv[])
 {
     Net::InitialisationParams* initParams = Net::InitialisationParams::Create();
 
-    Net::UpnpLibrary::Initialise(initParams);
-    
-    Net::UpnpLibrary::StartDv();
+    Net::Library* lib = new Net::Library(initParams);
 
-	Bwh udn("device1");
+    Net::DvStack* dvStack = lib->StartDv();
 
-    Net::DvDeviceStandard* device = new Net::DvDeviceStandard(udn);
+	Brhz udn("device1");
+
+    Net::DvDeviceStandard* device = new Net::DvDeviceStandard(*dvStack, udn);
 
     SourceIndexHandler* sourceIndexHandler = new SourceIndexHandler();
     StandbyHandler* standbyHandler = new StandbyHandler();
 
-    Vlc* vlc = new Vlc();
+    Vlc* vlc = new Vlc(lib->Env());
 
     Player* player = new Player(
         vlc,

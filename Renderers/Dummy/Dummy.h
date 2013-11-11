@@ -4,6 +4,7 @@
 #include <OpenHome/OhNetTypes.h>
 #include <OpenHome/Media/Renderer.h>
 #include <OpenHome/Private/Timer.h>
+#include <OpenHome/Private/Env.h>
 #include <iostream>
 #include <string>
 
@@ -13,7 +14,7 @@ namespace Media {
 class Dummy : public IRenderer
 {
 public:
-    Dummy();
+    Dummy(Environment& aEnv);
     ~Dummy();
     virtual void Play(uint32_t aHandle, const ITrack& aTrack, uint32_t aSecond);
     virtual void Pause();

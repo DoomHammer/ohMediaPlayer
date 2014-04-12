@@ -23,7 +23,7 @@ ProviderVolume::ProviderVolume(Net::DvDevice& aDevice, IVolume& aVolume)
     EnablePropertyFadeMax();
 
     PropertiesLock();
-    SetPropertyVolume(50);
+    SetPropertyVolume(100);
     SetPropertyMute(false);
     SetPropertyBalance(0);
     SetPropertyFade(0);

@@ -12,6 +12,7 @@ def options(ctx):
     ctx.add_option('--ohNetHeaders', action='store', default='../ohNet/Build/Include', help='Path to root of ohNet header files')
     ctx.add_option('--ohNetLibraries', action='store', default='../ohNet/Build/Obj', help='Path to root of ohNet library binaries')
     ctx.add_option('--vlcHeaders', action='store', default='../vlc-1.1.10/include', help='Path to root of vlc header files')
+    ctx.add_option('--disableVlc', action='store_true', default=False, help='Should VLC support be built')
     ctx.add_option('--debug', action='store', default='true', help='Generate and use binaries with debugging support')
     ctx.add_option('--prefix', action='store', default='install', help='Installation prefix')
 
@@ -25,15 +26,18 @@ def configure(ctx):
     #Arrange include paths and store in ctx.env.HeaderPath
     ohNetHeaders = ctx.path.find_node(ctx.options.ohNetHeaders)
     ohNetHeaders = ohNetHeaders.abspath()
-   
-    vlcHeaders = ctx.path.find_node(ctx.options.vlcHeaders)
-    vlcHeaders = vlcHeaders.abspath()
 
     curpath = ctx.path.find_node('.')
     curpath = curpath.abspath()
 
-    hpath = [ohNetHeaders, curpath, vlcHeaders]
+    hpath = [ohNetHeaders, curpath]
     ctx.env.INCLUDES_MEDIA = hpath
+
+    ctx.env.DISABLEVLC = ctx.options.disableVlc
+    if ctx.options.disableVlc == False:
+        vlcHeaders = ctx.path.find_node(ctx.options.vlcHeaders)
+        vlcHeaders = vlcHeaders.abspath()
+        ctx.env.INCLUDES_VLC = [vlcHeaders]
 
     #Arrange library paths and store in ctx.env.LibraryPath
     ohNetLibraries = ctx.path.find_node(ctx.options.ohNetLibraries)
@@ -48,10 +52,11 @@ def configure(ctx):
 
     if sys.platform == 'win32':
         ohNetLibraries = ohNetLibraries + os.sep + 'Windows'
-        vlcLibraries = ctx.path.find_node('./Renderers/Vlc')
-        vlcLibraries = vlcLibraries.abspath()
+        if ctx.options.disableVlc == False:
+            vlcLibraries = ctx.path.find_node('./Renderers/Vlc')
+            vlcLibraries = vlcLibraries.abspath()
+            ctx.env.LIB_VLC = ['libvlc']
         ctx.env.LIB_MEDIA = ['Ws2_32', 'Iphlpapi']
-        ctx.env.LIB_VLC = ['libvlc']
         ctx.env.CXXFLAGS_MEDIA = ['/EHsc', '/FR']
         if(debug):
             ctx.env.CXXFLAGS_MEDIA += ['/MTd', '/Od', '/Zi']
@@ -61,10 +66,11 @@ def configure(ctx):
 
     elif sys.platform == 'linux2':
         ohNetLibraries = ohNetLibraries + os.sep + 'Posix'
-        vlcLibraries = ctx.path.find_node('../vlc-1.1.10/src/.libs')
-        vlcLibraries = vlcLibraries.abspath()
+        if ctx.options.disableVlc == False:
+            vlcLibraries = ctx.path.find_node('../vlc-1.1.10/src/.libs')
+            vlcLibraries = vlcLibraries.abspath()
+            ctx.env.LIB_VLC = ['vlc', 'vlccore']
         ctx.env.LIB_MEDIA = ['pthread']
-        ctx.env.LIB_VLC = ['vlc', 'vlccore']
         #ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-Werror', '-pipe', '-fexceptions']
         ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-pipe', '-fexceptions']
         if(debug):
@@ -72,12 +78,13 @@ def configure(ctx):
 
     elif sys.platform == 'darwin':
         ohNetLibraries = ohNetLibraries + os.sep + 'Mac'
-        vlcLibraries = ctx.path.find_node('../../../Applications/VLC.app/Contents/MacOS/lib')
-        print vlcLibraries
-        vlcLibraries = vlcLibraries.abspath()
-        print vlcLibraries
+        if ctx.options.disableVlc == False:
+            vlcLibraries = ctx.path.find_node('../../../Applications/VLC.app/Contents/MacOS/lib')
+            print vlcLibraries
+            vlcLibraries = vlcLibraries.abspath()
+            print vlcLibraries
+            ctx.env.LIB_VLC = ['vlc']
         ctx.env.LIB_MEDIA = ['pthread']
-        ctx.env.LIB_VLC = ['vlc']
         ctx.env.CXXFLAGS_MEDIA += ['-Werror', '-pipe', '-fexceptions']
         ctx.env.LINKFLAGS_MEDIA += ['-framework', 'CoreFoundation', '-framework', 'SystemConfiguration']
         if(debug):
@@ -91,7 +98,9 @@ def configure(ctx):
     else:
         ohNetLibraries = ohNetLibraries + os.sep + 'Release'
 
-    ctx.env.LIBPATH_MEDIA = [ohNetLibraries, vlcLibraries]
+    ctx.env.LIBPATH_MEDIA = [ohNetLibraries]
+    if ctx.options.disableVlc == False:
+        ctx.env.LIBPATH_VLC = [vlcLibraries]
 
     #Let user know about selected paths
     print 'INCLUDES: {0}'.format(ctx.env.INCLUDES_MEDIA)
@@ -162,15 +171,16 @@ def build(ctx):
         use         = ['ohMedia']
         )
 
-    ctx.program(
-        source      = [
-            'Renderers/Vlc/main.cpp',
-            'Renderers/Vlc/Vlc.cpp'
-            ],
-        includes    = ctx.env.INCLUDES_MEDIA,
-        target      = 'ohMediaPlayerVlc',
-        stlib       = ['ohNetCore', 'ohNetDevices', 'TestFramework'],
-        use         = ['ohMedia', 'VLC']
-        )
+    if ctx.env.DISABLEVLC == False:
+        ctx.program(
+            source      = [
+                'Renderers/Vlc/main.cpp',
+                'Renderers/Vlc/Vlc.cpp'
+                ],
+            includes    = ctx.env.INCLUDES_MEDIA,
+            target      = 'ohMediaPlayerVlc',
+            stlib       = ['ohNetCore', 'ohNetDevices', 'TestFramework'],
+            use         = ['ohMedia', 'VLC']
+            )
 
 

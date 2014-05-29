@@ -6,7 +6,11 @@
 #include <OpenHome/Private/OptionParser.h>
 #include <OpenHome/Media/Product.h>
 #include <OpenHome/Media/Playlist.h>
-#include "Vlc.h"
+#include "config.h"
+#include "Dummy/Dummy.h"
+#ifdef HAVE_VLC_VLC_H
+#  include "Vlc/Vlc.h"
+#endif
 
 using namespace OpenHome;
 using namespace OpenHome::Media;
@@ -76,6 +80,15 @@ void SourceIndexHandler::SetSourceIndex(TUint aValue)
 
 int main(int aArgc, char* aArgv[])
 {
+    OptionParser parser;
+
+    OptionString optionRenderer("-r", "--renderer", Brn("dummy"), "Renderer module name.");
+    parser.AddOption(&optionRenderer);
+
+    if (!parser.Parse(aArgc, aArgv)) {
+        return (1);
+    }
+
     Net::InitialisationParams* initParams = Net::InitialisationParams::Create();
 
     Net::Library* lib = new Net::Library(initParams);
@@ -89,10 +102,20 @@ int main(int aArgc, char* aArgv[])
     SourceIndexHandler* sourceIndexHandler = new SourceIndexHandler();
     StandbyHandler* standbyHandler = new StandbyHandler();
 
-    Vlc* vlc = new Vlc(lib->Env());
+    IRenderer* renderer = NULL;
+    if (0 == strcmp((const char*)optionRenderer.Value().Ptr(), "dummy"))
+    {
+      renderer = new Dummy(lib->Env());
+    }
+#ifdef HAVE_VLC_VLC_H
+    else
+    {
+      renderer = new Vlc(lib->Env());
+    }
+#endif
 
     Player* player = new Player(
-        vlc,
+        renderer,
         *device, 
         *standbyHandler, 
         *sourceIndexHandler, 
@@ -130,6 +153,8 @@ int main(int aArgc, char* aArgv[])
     delete sourceIndexHandler;
     delete standbyHandler;
     delete player;
+    delete renderer;
+    delete lib;
 
     printf("Exit complete\n");
 	

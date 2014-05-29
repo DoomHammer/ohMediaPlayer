@@ -38,6 +38,7 @@ def configure(ctx):
         vlcHeaders = ctx.path.find_node(ctx.options.vlcHeaders)
         vlcHeaders = vlcHeaders.abspath()
         ctx.env.INCLUDES_VLC = [vlcHeaders]
+        ctx.check(header_name='vlc/vlc.h')
 
     #Arrange library paths and store in ctx.env.LibraryPath
     ohNetLibraries = ctx.path.find_node(ctx.options.ohNetLibraries)
@@ -110,6 +111,7 @@ def configure(ctx):
     #ctx.find_file('.', ctx.env.INCLUDES_MEDIA)
     #ctx.find_file('.', ctx.env.LIBPATH_MEDIA)
 
+    ctx.write_config_header('config.h')
 
 
 def build(ctx):
@@ -160,27 +162,34 @@ def build(ctx):
         includes = ctx.env.INCLUDES_MEDIA
         )
 
-    ctx.program(
+    ctx.stlib(
         source      = [
-            'Renderers/Dummy/main.cpp',
             'Renderers/Dummy/Dummy.cpp'
             ],
         includes    = ctx.env.INCLUDES_MEDIA,
-        target      = 'ohMediaPlayerDummy',
-        stlib       = ['ohNetCore', 'ohNetDevices', 'TestFramework'],
-        use         = ['ohMedia']
+        target      = 'rendererDummy',
         )
 
+    uses = ['ohMedia', 'rendererDummy']
+
     if ctx.env.DISABLEVLC == False:
-        ctx.program(
+        ctx.stlib(
             source      = [
-                'Renderers/Vlc/main.cpp',
                 'Renderers/Vlc/Vlc.cpp'
                 ],
             includes    = ctx.env.INCLUDES_MEDIA,
-            target      = 'ohMediaPlayerVlc',
-            stlib       = ['ohNetCore', 'ohNetDevices', 'TestFramework'],
-            use         = ['ohMedia', 'VLC']
+            target      = 'rendererVlc',
+            use         = ['VLC']
             )
 
+        uses.append('rendererVlc')
 
+    ctx.program(
+        source      = [
+            'Renderers/main.cpp',
+            ],
+        includes    = ctx.env.INCLUDES_MEDIA,
+        target      = 'ohMediaPlayer',
+        stlib       = ['ohNetCore', 'ohNetDevices', 'TestFramework'],
+        use         = uses
+        )

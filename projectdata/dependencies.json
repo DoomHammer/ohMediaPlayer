@@ -1,0 +1,55 @@
+[
+    {
+	    "name": "ohNet",
+        "type": "openhome",
+        "platform-specific": true,
+        "version": "1.0.1247",
+        "archive-suffix": "-${titlecase-debugmode}",
+        "configure-args": [
+            "--ohNetLibraries", "${dest}${name}-${platform}-${titlecase-debugmode}/lib",
+            "--ohNetHeaders", "${dest}${name}-${platform}-${titlecase-debugmode}/include/ohnet"
+        ]
+    },
+    {
+	    "name": "ohWafHelpers",
+        "type": "openhome",
+        "platform-specific": false,
+        "version": "0.0.22",
+        "archive-filename": "${name}-${version}.tar.gz"
+    },
+  {
+    "name": "vsrd",
+    "type": "external",
+    "platform-specific": true,
+    "version": "0.0.1",
+    "binary-repo": "https://github.com/DoomHammer/Very-Simple-Resource-Dumper/releases/download/v${version}",
+    "archive-path": "${binary-repo}/${archive-filename}",
+    "archive-filename": "${name}-${platform}.tar.gz"
+  },
+  {
+    "name": "civetweb",
+    "type": "external",
+    "platform-specific": true,
+    "version": "1.6.1",
+    "binary-repo": "https://github.com/DoomHammer/civetweb/releases/download/v${version}",
+    "archive-path": "${binary-repo}/${archive-filename}",
+    "archive-filename": "${name}-${platform}.tar.gz",
+    "configure-args": [
+      "--civetwebLibraries", "${dest}${name}-${version}/lib",
+      "--civetwebHeaders", "${dest}${name}-${version}/include"
+    ]
+  },
+  {
+    "name": "jsonhandle",
+    "type": "external",
+    "platform-specific": true,
+    "version": "0.5.2",
+    "binary-repo": "https://github.com/DoomHammer/jsonhandle/releases/download/v${version}",
+    "archive-path": "${binary-repo}/${archive-filename}",
+    "archive-filename": "${name}-${platform}.tar.gz",
+    "configure-args": [
+      "--jsonhandleLibraries", "${dest}${name}/lib",
+      "--jsonhandleHeaders", "${dest}${name}/include"
+    ]
+  }
+]

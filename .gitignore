@@ -4,3 +4,7 @@ waf-*
 .waf-*
 install
 *.swp
+*.pyc
+Config/app/bower_components
+Config/node_modules
+dependencies

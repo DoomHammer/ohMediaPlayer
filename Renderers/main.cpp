@@ -3,10 +3,16 @@
 #include <OpenHome/Net/Core/DvDevice.h>
 #include <OpenHome/Net/Core/OhNet.h>
 #include <OpenHome/Private/Ascii.h>
+#include <OpenHome/Private/Debug.h>
 #include <OpenHome/Private/OptionParser.h>
 #include <OpenHome/Media/Product.h>
 #include <OpenHome/Media/Playlist.h>
+
+
+#include <Config/Config.h>
+
 #include "config.h"
+
 #include "Dummy/Dummy.h"
 #ifdef HAVE_VLC_VLC_H
 #  include "Vlc/Vlc.h"
@@ -64,7 +70,7 @@ public:
 
 void StandbyHandler::SetStandby(TBool aValue)
 {
-    printf("Setting Standby: %d\n", aValue);
+  Log::Print("Setting Standby: %d\n", aValue);
 }
 
 class SourceIndexHandler : public ISourceIndexHandler
@@ -75,7 +81,7 @@ public:
 
 void SourceIndexHandler::SetSourceIndex(TUint aValue)
 {
-    printf("Setting source: %d\n", aValue);
+  Log::Print("Setting source: %d\n", aValue);
 }
 
 int main(int aArgc, char* aArgv[])
@@ -95,7 +101,7 @@ int main(int aArgc, char* aArgv[])
 
     Net::DvStack* dvStack = lib->StartDv();
 
-	Brhz udn("device1");
+	Brhz udn("4c494e4e-device1");
 
     Net::DvDeviceStandard* device = new Net::DvDeviceStandard(*dvStack, udn);
 
@@ -114,13 +120,26 @@ int main(int aArgc, char* aArgv[])
     }
 #endif
 
+    std::vector<OpenHome::NetworkAdapter*>* subnetList = lib->CreateSubnetList();
+    TIpAddress adapter = (*subnetList)[0]->Address();
+    OpenHome::Net::Library::DestroySubnetList(subnetList);
+
+    char url[1024];
+    char attributes[1024];
+
+    sprintf(url, "%d.%d.%d.%d", adapter&0xff, (adapter>>8)&0xff, (adapter>>16)&0xff, (adapter>>24)&0xff);
+    Config::GetInstance().GetAbout().SetUrl(url);
+    sprintf(url, "http://%s:%s/", url, kHttpPort);
+    sprintf(attributes, "Info Time App:Config=%s Volume", url);
+    Config::GetInstance().GetAbout().SetVersion(VERSION);
+
     Player* player = new Player(
         renderer,
         *device, 
         *standbyHandler, 
         *sourceIndexHandler, 
         true,
-        "Info Time Volume",
+        attributes,
         "OpenHome",
         "OpenHome Consortium",
         "http://openhome.org",
@@ -129,10 +148,10 @@ int main(int aArgc, char* aArgv[])
         "",
         "",
         "",
-        "OpenHomeKeith",
-        "OpenHome Media Player",
+        Config::GetInstance().GetString("device", "room").c_str(),
+        Config::GetInstance().GetString("device", "name").c_str(),
         "",
-        "",
+        url,
         "");
 
     SourcePlaylist* sourcePlaylist = new SourcePlaylist(*device, kTracksMax, kProtocolInfo, *player);
@@ -147,7 +166,7 @@ int main(int aArgc, char* aArgv[])
         scanf("%c", &c);
     }
 
-	printf("Quiting...\n");
+    Log::Print("Quiting...\n");
 
     delete (device);
     delete sourceIndexHandler;
@@ -156,7 +175,7 @@ int main(int aArgc, char* aArgv[])
     delete renderer;
     delete lib;
 
-    printf("Exit complete\n");
+    Log::Print("Exit complete\n");
 	
     return (0);
 }

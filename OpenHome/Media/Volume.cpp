@@ -2,6 +2,8 @@
 
 #include <OpenHome/Media/Player.h>
 
+#include <Config/Config.h>
+
 using namespace OpenHome;
 using namespace OpenHome::Media;
 
@@ -23,11 +25,11 @@ ProviderVolume::ProviderVolume(Net::DvDevice& aDevice, IVolume& aVolume)
     EnablePropertyFadeMax();
 
     PropertiesLock();
-    SetPropertyVolume(100);
+    SetPropertyVolume(Config::GetInstance().GetInt("volume", "startupVolume"));
     SetPropertyMute(false);
     SetPropertyBalance(0);
     SetPropertyFade(0);
-    SetPropertyVolumeLimit(100);
+    SetPropertyVolumeLimit(Config::GetInstance().GetInt("volume", "volumeLimit"));
     SetPropertyVolumeMax(100);
     SetPropertyVolumeUnity(80);
     SetPropertyVolumeSteps(100);

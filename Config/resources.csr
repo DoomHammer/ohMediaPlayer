@@ -1,0 +1,16 @@
+@ index.html : app/index.html;
+
+! /js;
+@ app.js : app/js/app.js;
+@ controllers.js : app/js/controllers.js;
+@ directives.js : app/js/directives.js;
+@ filters.js : app/js/filters.js;
+@ services.js : app/js/services.js;
+
+! /css;
+@ app.css : app/css/app.css;
+
+! /partials;
+@ about.html : app/partials/about.html;
+@ device.html : app/partials/device.html;
+@ volume.html : app/partials/volume.html;

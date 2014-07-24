@@ -1,0 +1,10 @@
+{
+ "device": {
+  "room": "OpenHomeKeith",
+  "name": "ohMediaPlayer",
+ },
+ "volume": {
+  "startupVolume": "40",
+  "volumeLimit": "80"
+ }
+}

@@ -97,6 +97,7 @@ Player::Player(IRenderer* aRenderer
     aDevice.SetAttribute("Upnp.ModelUrl", aModelUrl);
     aDevice.SetAttribute("Upnp.SerialNumber", "");
     aDevice.SetAttribute("Upnp.Upc", "");
+    aDevice.SetAttribute("Upnp.PresentationUrl", aProductUrl);
 
     iProduct = new ProviderProduct(aDevice,
         aStandbyHandler,

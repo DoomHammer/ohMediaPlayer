@@ -1,0 +1,15 @@
+{
+  "name": "ohmediaplayer-config",
+  "description": "Web Configuration for ohMediaPlayer",
+  "version": "0.0.1",
+  "homepage": "https://github.com/DoomHammer/ohMediaPlayer",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "angular": "1.2.x",
+    "angular-route": "1.2.x",
+    "angular-loader": "1.2.x",
+    "angular-mocks": "~1.2.x",
+    "angular-resource": "~1.2.x"
+  }
+}

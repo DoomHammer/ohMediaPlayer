@@ -101,7 +101,7 @@ int main(int aArgc, char* aArgv[])
 
     Net::DvStack* dvStack = lib->StartDv();
 
-	Brhz udn("4c494e4e-device1");
+    Brhz udn("4c494e4e-device1");
 
     Net::DvDeviceStandard* device = new Net::DvDeviceStandard(*dvStack, udn);
 
@@ -157,7 +157,6 @@ int main(int aArgc, char* aArgv[])
     SourcePlaylist* sourcePlaylist = new SourcePlaylist(*device, kTracksMax, kProtocolInfo, *player);
 
     player->AddSource(sourcePlaylist);
-    
 
     device->SetEnabled();
 
@@ -168,12 +167,11 @@ int main(int aArgc, char* aArgv[])
 
     Log::Print("Quiting...\n");
 
-    delete (device);
+    delete sourcePlaylist;
+    delete device;
     delete sourceIndexHandler;
     delete standbyHandler;
     delete player;
-    delete renderer;
-    delete lib;
 
     Log::Print("Exit complete\n");
 	

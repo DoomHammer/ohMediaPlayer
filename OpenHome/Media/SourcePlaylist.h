@@ -14,7 +14,7 @@ class SourcePlaylist : public Source
 {
 public:
     SourcePlaylist(Net::DvDevice& aDevice, uint32_t aTracksMax, const char* aProtocolInfo, Player& aPlayer);
-    ~SourcePlaylist();
+    virtual ~SourcePlaylist();
 
 //from Source
 public:

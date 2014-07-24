@@ -29,8 +29,8 @@ ProviderPlaylist::ProviderPlaylist(Net::DvDevice& aDevice, TUint aTracksMax, con
     , iToken(0)
     , iIdArray(sizeof(TUint)*aTracksMax)
     , iMutex("Play")
-    , iSource(aSource)
     , iState(eStopped)
+    , iSource(aSource)
 {
 
     EnablePropertyTransportState();

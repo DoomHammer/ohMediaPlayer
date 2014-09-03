@@ -24,7 +24,9 @@
     "version": "0.0.1",
     "binary-repo": "https://github.com/DoomHammer/Very-Simple-Resource-Dumper/releases/download/v${version}",
     "archive-path": "${binary-repo}/${archive-filename}",
-    "archive-filename": "${name}-${platform}.tar.gz"
+    "archive-filename": "${name}-${platform}.tar.gz",
+    "source-git": "https://github.com/DoomHammer/Very-Simple-Resource-Dumper.git",
+    "tag": "v0.0.1"
   },
   {
     "name": "civetweb",
@@ -37,7 +39,9 @@
     "configure-args": [
       "--civetwebLibraries", "${dest}${name}-${version}/lib",
       "--civetwebHeaders", "${dest}${name}-${version}/include"
-    ]
+    ],
+    "source-git": "https://github.com/DoomHammer/civetweb.git",
+    "tag": "v1.6.1"
   },
   {
     "name": "jsonhandle",
@@ -50,6 +54,8 @@
     "configure-args": [
       "--jsonhandleLibraries", "${dest}${name}/lib",
       "--jsonhandleHeaders", "${dest}${name}/include"
-    ]
+    ],
+    "source-git": "https://github.com/DoomHammer/jsonhandle.git",
+    "tag": "v0.5.2"
   }
 ]

@@ -2,10 +2,10 @@ from waflib.Task import Task
 from waflib.TaskGen import extension
 
 
-class csr2c(Task):
-    run_str = 'vsrd ${SRC} -o ${TGT}'
+class csr2h(Task):
+    run_str = 'vsrd ${SRC} --static -o ${TGT}'
     ext_in = '.csr'
-    ext_out = '.c'
+    ext_out = '.h'
 
     def scan(self):
         import re
@@ -20,12 +20,6 @@ class csr2c(Task):
         return (ret, ())
 
 
-class csr2h(Task):
-    run_str = 'vsrd --header -o ${TGT}'
-
-
 @extension('.csr')
 def process_csr(self, node):
-    tsk_c = self.create_task('csr2c', node, node.change_ext('.c'))
     self.create_task('csr2h', node, node.change_ext('.h'))
-    self.source.extend(tsk_c.outputs)

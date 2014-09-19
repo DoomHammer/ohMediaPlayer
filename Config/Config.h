@@ -17,7 +17,7 @@ private:
   std::string iMac;
   std::string iVersion;
   std::string iUpdateAvailable;
-  
+
 public:
   About()
     : iUrl("127.0.0.1")
@@ -25,16 +25,16 @@ public:
     , iVersion("0.0.1")
     , iUpdateAvailable("None")
   {};
-  
+
   std::string& GetUrl();
   void SetUrl(const char *aValue);
-  
+
   std::string& GetMac();
   void SetMac(const char *aValue);
-  
+
   std::string& GetVersion();
   void SetVersion(const char *aValue);
-  
+
   std::string& GetUpdateAvailable();
   void SetUpdateAvailable(const char *aValue);
 };
@@ -120,9 +120,9 @@ class Config
     MimeTypeMapper& GetMimeMapper();
     DataMapper& GetDataMapper();
 
-    std::vector<const char *>& GetControllers();
-    void RegisterController(const char* aController);
-  
+    std::vector<std::string>& GetControllers();
+    void RegisterController(const char* aController, unsigned long long size);
+
     About& GetAbout();
 
   private:
@@ -132,13 +132,13 @@ class Config
     ~Config();
 
     JsonHandle* DefaultConfig();
-  
+
     About iAbout;
 
     MimeTypeMapper iMimeMapper;
     DataMapper iDataMapper;
 
-    std::vector<const char *> iControllers;
+    std::vector<std::string> iControllers;
 
     JsonHandle *iRoot;
     CivetServer *iServer;

@@ -21,7 +21,7 @@
     "name": "vsrd",
     "type": "external",
     "platform-specific": true,
-    "version": "0.0.1",
+    "version": "0.0.2",
     "binary-repo": "https://github.com/DoomHammer/Very-Simple-Resource-Dumper/releases/download/v${version}",
     "archive-path": "${binary-repo}/${archive-filename}",
     "archive-filename": "${name}-${platform}.tar.gz",

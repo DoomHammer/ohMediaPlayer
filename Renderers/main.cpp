@@ -19,12 +19,14 @@
 #  include "Vlc/Vlc.h"
 #endif
 
+#include <Renderers/resources.h>
+
 using namespace OpenHome;
 using namespace OpenHome::Media;
 using namespace OpenHome::TestFramework;
 
 static const TUint kTracksMax = 1000;
-static const char* kProtocolInfo = 
+static const char* kProtocolInfo =
 "http-get:*:audio/x-flac:*,"
 "http-get:*:audio/wav:*,"
 "http-get:*:audio/wave:*,"
@@ -65,7 +67,7 @@ static const char* kProtocolInfo =
 
 class StandbyHandler : public IStandbyHandler
 {
-public: 
+public:
     virtual void SetStandby(TBool aValue);
 };
 
@@ -134,20 +136,16 @@ int main(int aArgc, char* aArgv[])
     sprintf(attributes, "Info Time App:Config=%s Volume", url);
     Config::GetInstance().GetAbout().SetVersion(VERSION);
 
-    Config::GetInstance().RegisterController(R"delimiter(
-angularControllers
-  .controller('RendererCtrl', ['$scope', '$timeout', 'Config', function($scope, $timeout, Config) {
-    var partial = 'renderer';
-    UniversalController($scope, $timeout, Config, partial);
-  }])
-        )delimiter");
+    unsigned long long size;
+    const char* res = getResource("/renderer.js", &size);
+    Config::GetInstance().RegisterController(res, size);
     Config::GetInstance().GetDataMapper().Append("/data/renderer.json", "renderer");
 
     Player* player = new Player(
         renderer,
-        *device, 
-        *standbyHandler, 
-        *sourceIndexHandler, 
+        *device,
+        *standbyHandler,
+        *sourceIndexHandler,
         true,
         attributes,
         "OpenHome",
@@ -184,6 +182,6 @@ angularControllers
     delete player;
 
     Log::Print("Exit complete\n");
-	
+
     return (0);
 }

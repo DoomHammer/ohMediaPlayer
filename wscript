@@ -29,7 +29,7 @@ def configure(ctx):
         ctx.load('msvc')
     else:
         ctx.load('compiler_cxx')
-    ctx.load('csr2c', tooldir='./waftools')
+    ctx.load('csr2h', tooldir='./waftools')
 
     #Arrange include paths and store in ctx.env.HeaderPath
     ohNetHeaders = ctx.path.find_node(ctx.options.ohNetHeaders)
@@ -78,9 +78,11 @@ def configure(ctx):
         ctx.env.CXXFLAGS_MEDIA = ['/EHsc', '/FR']
         if(debug):
             ctx.env.CXXFLAGS_MEDIA += ['/MTd', '/Od', '/Zi']
+            ctx.env.CXXFLAGS_WEB += ['/MTd', '/Od', '/Zi']
             ctx.env.LINKFLAGS_MEDIA += ['/debug']
         else:
             ctx.env.CXXFLAGS_MEDIA += ['/MT', '/Ox']
+            ctx.env.CXXFLAGS_WEB += ['/MT', '/Ox']
 
     elif sys.platform == 'linux2':
         if ctx.options.disableVlc == False:
@@ -98,6 +100,7 @@ def configure(ctx):
         ctx.env.LIB_WEB = ['jsonhandle', 'civetweb', 'pthread', 'dl']
         #ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-Werror', '-pipe', '-fexceptions']
         ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-pipe', '-fexceptions', '--std=c++11']
+        ctx.env.CXXFLAGS_WEB += ['-Wall', '-pipe', '-fexceptions', '--std=c++11']
         if(debug):
             ctx.env.CXXFLAGS_MEDIA += ['-g']
 
@@ -110,6 +113,7 @@ def configure(ctx):
             ctx.env.LIB_VLC = ['vlc']
         ctx.env.LIB_MEDIA = ['pthread']
         ctx.env.CXXFLAGS_MEDIA += ['-Werror', '-pipe', '-fexceptions', '--std=c++11']
+        ctx.env.CXXFLAGS_WEB += ['-Werror', '-pipe', '-fexceptions', '--std=c++11']
         ctx.env.LINKFLAGS_MEDIA += ['-framework', 'CoreFoundation', '-framework', 'SystemConfiguration']
         if(debug):
             ctx.env.CXXFLAGS_MEDIA += ['-g']
@@ -190,13 +194,14 @@ def build(ctx):
 
     ctx.stlib(
         source      = [
-            'Renderers/Dummy/Dummy.cpp'
+            'Renderers/Dummy/Dummy.cpp',
+            'Renderers/resources.csr'
             ],
         includes    = ctx.env.INCLUDES_MEDIA,
         target      = 'rendererDummy',
         )
 
-    uses = ['ohMedia', 'rendererDummy', 'WEB']
+    uses = ['ohMedia', 'rendererDummy']
 
     if ctx.env.DISABLEVLC == False:
         ctx.stlib(
@@ -210,11 +215,24 @@ def build(ctx):
 
         uses.append('rendererVlc')
 
+    config_includes = []
+    config_includes.extend(ctx.env.INCLUDES_MEDIA)
+    config_includes.extend(ctx.env.INCLUDES_WEB)
+    ctx.stlib(
+        source      = [
+            'Config/Config.cpp',
+            'Config/resources.csr'
+        ],
+        includes    = config_includes,
+        target      = 'config',
+        use         = 'WEB'
+        )
+
+    uses.append('config')
+
     ctx.program(
         source      = [
-            'Renderers/main.cpp',
-            'Config/Config.cpp',
-            'Config/resources.csr',
+            'Renderers/main.cpp'
             ],
         includes    = ctx.env.INCLUDES_MEDIA,
         target      = 'ohMediaPlayer',

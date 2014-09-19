@@ -177,7 +177,7 @@ class DataHandler: public CommonHandler
 class ControllersHandler: public CivetHandler
 {
   private:
-    vector<const char*>& iControllers;
+    vector<string>& iControllers;
 
     bool handleAll(const char *aMethod, CivetServer *aServer, struct mg_connection *aConn)
     {
@@ -199,14 +199,14 @@ class ControllersHandler: public CivetHandler
 
       for (auto &controller: iControllers)
       {
-        mg_printf(aConn, "%s", controller);
+        mg_printf(aConn, "%s", controller.c_str());
       }
 
       return true;
     }
 
   public:
-    ControllersHandler(vector<const char*>& aControllers)
+    ControllersHandler(vector<string>& aControllers)
       : iControllers(aControllers)
     {};
 
@@ -229,25 +229,25 @@ class AboutHandler: public CivetHandler
     AboutHandler(About& aAbout) :
       iAbout(aAbout)
     {};
-  
+
     bool handleGet(CivetServer *aServer, struct mg_connection *aConn)
     {
       const struct mg_request_info *request_info = mg_get_request_info(aConn);
       string s;
 
       OpenHome::Log::Print("GET %s\n", request_info->uri);
-      
+
       JsonHandle root;
-      
+
       root["modelName"] = "ohMediaPlayer";
       root["manufacturer"] = "Linn";
       root["softwareVersion"] = iAbout.GetVersion().c_str();
       root["softwareUpdateAvailable"] = iAbout.GetUpdateAvailable().c_str();
       root["ipAddress"] = iAbout.GetUrl().c_str();
       root["macAddress"] = iAbout.GetMac().c_str();
-      
+
       root.toCompactString(s);
-      
+
       mg_printf(aConn, "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
       mg_printf(aConn, "%s", s.c_str());
       return true;
@@ -284,7 +284,7 @@ Config::Config()
   iServer->addHandler("/partials", new StaticHandler());
 
   iServer->addHandler("/data", new DataHandler(*iRoot));
-  
+
   iServer->addHandler("/data/about.json", new AboutHandler(GetAbout()));
 
   iServer->addHandler("/", new StaticHandler());
@@ -328,14 +328,14 @@ DataMapper& Config::GetDataMapper()
   return iDataMapper;
 }
 
-vector<const char *>& Config::GetControllers()
+vector<string>& Config::GetControllers()
 {
   return iControllers;
 }
 
-void Config::RegisterController(const char* aController)
+void Config::RegisterController(const char* aController, unsigned long long size)
 {
-  iControllers.push_back(aController);
+  iControllers.emplace_back(string(aController, size));
 }
 
 About& Config::GetAbout()

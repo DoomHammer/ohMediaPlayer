@@ -1,0 +1,6 @@
+<form name="renderer" class="form-horizontal" novalidate>
+  <div class="form-group">
+    <label for="name" class="col-xs-2">Name</label><div class="col-xs-2"><select id="name" ng-model="data.active" ng-options="key as key for (key, value) in data.available"/></div>
+  </div>
+  <div ng-include="data.available[data.active].partialUrl"></div>
+</form>

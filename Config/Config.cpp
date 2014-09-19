@@ -6,127 +6,80 @@
 #include <CivetServer.h>
 #include <JsonHandle.h>
 
+#include <fstream>
 #include <stdlib.h>
 #include <string.h>
 
-#include <unordered_map>
+using namespace std;
 
-const char * kHttpPort = "8080";
-
-class SMimeType
+const char* kHttpPort = "8080";
+const char* kConfigFile = "config.json";
+const char* kDefaultConfig = R"delimiter(
 {
-  private:
-    std::unordered_map<std::string, std::string> e2m;
-  public:
-    SMimeType()
-    {
-      e2m["none"] = "text/plain";
-      e2m["html"] = "text/html";
-      e2m["css"] = "text/css";
-      e2m["js"] = "application/javascript";
-      e2m["json"] = "application/json";
-    };
-
-    const char * Get(std::string &aExt)
-    {
-      static const char * plain = "text/plain";
-      const char * ret;
-      auto search = e2m.find(aExt);
-
-      if (search != e2m.end())
-      {
-        ret = search->second.c_str();
-      }
-      else
-      {
-        ret = plain;
-      }
-
-      return ret;
-    }
-};
-
-SMimeType MimeType()
-{
-  static SMimeType m;
-  return m;
+ "device": {
+  "room": "OpenHomeKeith",
+  "name": "ohMediaPlayer"
+ },
+ "volume": {
+  "startupVolume": "40",
+  "volumeLimit": "80"
+ }
 }
+)delimiter";
 
-class SFileMapper
-{
-  private:
-    std::unordered_map<std::string, std::string> p2p;
-  public:
-    SFileMapper()
-    {
-      p2p["/data/device.json"] = "device";
-      p2p["/data/volume.json"] = "volume";
-    }
-
-    const char * Get(const char *aExt)
-    {
-      static const char * none = "";
-      const char * ret;
-      auto search = p2p.find(aExt);
-
-      if (search != p2p.end())
-      {
-        ret = search->second.c_str();
-      }
-      else
-      {
-        ret = none;
-      }
-
-      return ret;
-    }
-};
-
-SFileMapper FileMapper()
-{
-  static SFileMapper m;
-  return m;
-}
-
-void handle_404(struct mg_connection *aConn)
+void FileNotFoundHandler(struct mg_connection* aConn)
 {
   mg_printf(aConn, "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n");
 }
 
-class StaticHandler: public CivetHandler
+// via http://techoverflow.net/blog/2013/01/11/cpp-check-if-file-exists/
+bool fexists(const char* filename)
 {
-  private:
+  ifstream ifile(filename);
+  return ifile;
+}
+
+void OkHandler(struct mg_connection* aConn, const char* aContentType)
+{
+  mg_printf(aConn, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\n\r\n", aContentType);
+}
+
+string& MimeFromUri(string& aUri)
+{
+  size_t rfind = aUri.rfind(".");
+  string ext(rfind == string::npos ? "" : aUri.substr(rfind+1, string::npos));
+  return Config::GetInstance().GetMimeMapper().Get(ext.c_str());
+}
+
+class CommonHandler: public CivetHandler
+{
+  protected:
     bool handleAll(const char *aMethod, CivetServer *aServer, struct mg_connection *aConn)
     {
       const struct mg_request_info *request_info = mg_get_request_info(aConn);
-      const char *resource;
-      unsigned long long resSize;
-      std::string uri = request_info->uri;
+      string uri = request_info->uri;
 
-      OpenHome::Log::Print("Path: %s\n", uri.c_str());
+      OpenHome::Log::Print("%s: %s\n", aMethod, uri.c_str());
 
-      if (uri == "/")
+      string contentType("text/html"), content;
+
+      if (internalHandler(aMethod, aConn, uri, contentType, content))
       {
-        uri = "/index.html";
-      }
-
-      size_t rfind = uri.rfind(".");
-      std::string ext(rfind == std::string::npos ? "none" : uri.substr(rfind+1, std::string::npos));
-
-      resource = getResource(uri.c_str(), &resSize);
-
-      if (resSize)
-      {
-        mg_printf(aConn, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\n\r\n", MimeType().Get(ext));
-        mg_printf(aConn, "%s", resource);
+        OkHandler(aConn, contentType.c_str());
+        if (content.length())
+        {
+          mg_printf(aConn, "%s", content.c_str());
+        }
       }
       else
       {
-        handle_404(aConn);
+        FileNotFoundHandler(aConn);
       }
 
       return true;
     }
+
+    virtual bool internalHandler(const char *aMethod, struct mg_connection *aConn, string& aUri, string& aContentType, string& aContent) = 0;
 
   public:
     bool handleGet(CivetServer *aServer, struct mg_connection *aConn)
@@ -140,62 +93,131 @@ class StaticHandler: public CivetHandler
     }
 };
 
-class DataHandler: public CivetHandler
+class StaticHandler: public CommonHandler
+{
+  private:
+    virtual bool internalHandler(const char *aMethod, struct mg_connection *aConn, string& aUri, string& aContentType, string& aContent)
+    {
+      bool ret = false;
+      string uri(aUri);
+
+      OpenHome::Log::Print("StaticHandler\n");
+
+      if (uri == "/")
+      {
+        uri = "/index.html";
+      }
+
+      string& mime(MimeFromUri(uri));
+
+      OpenHome::Log::Print("Content-Type: %s\n", mime.c_str());
+
+      unsigned long long resSize;
+      const char* resource = getResource(uri.c_str(), &resSize);
+
+      if (resSize)
+      {
+        aContentType = mime;
+        aContent = resource;
+        ret = true;
+      }
+
+      return ret;
+    }
+};
+
+class DataHandler: public CommonHandler
 {
   private:
     JsonHandle root;
+
+    virtual bool internalHandler(const char *aMethod, struct mg_connection *aConn, string& aUri, string& aContentType, string& aContent)
+    {
+      bool ret = false;
+      string& field = Config::GetInstance().GetDataMapper().Get(aUri.c_str());
+
+      OpenHome::Log::Print("DataHandler\n");
+
+      string& mime(MimeFromUri(aUri));
+
+      OpenHome::Log::Print("Content-Type: %s\n", mime.c_str());
+
+      if (strcmp(aMethod, "GET") == 0)
+      {
+        if (field.length() > 0)
+        {
+          root[field].toCompactString(aContent);
+          ret = true;
+        }
+      }
+      else if (strcmp(aMethod, "POST") == 0)
+      {
+        char postData[1024] = "\0";
+        mg_read(aConn, postData, sizeof(postData));
+
+        JsonHandle post;
+        post.fromString(postData);
+
+        OpenHome::Log::Print("POST DATA: ##%s##\n", postData);
+
+        if (field.length() > 0)
+        {
+          root[field] = post;
+          root.toFile(kConfigFile);
+        }
+        ret = true;
+      }
+
+      return ret;
+    }
   public:
     DataHandler(JsonHandle &aRoot) : root(aRoot) {};
+};
+
+class ControllersHandler: public CivetHandler
+{
+  private:
+    vector<const char*>& iControllers;
+
+    bool handleAll(const char *aMethod, CivetServer *aServer, struct mg_connection *aConn)
+    {
+      const struct mg_request_info *request_info = mg_get_request_info(aConn);
+      const char *resource;
+      unsigned long long resSize;
+      string uri = request_info->uri;
+
+      size_t rfind = uri.rfind(".");
+      string ext(rfind == string::npos ? "none" : uri.substr(rfind+1, string::npos));
+      string& mime = Config::GetInstance().GetMimeMapper().Get(ext.c_str());
+
+      OpenHome::Log::Print("Path: %s\n", uri.c_str());
+      OpenHome::Log::Print("Content-Type: %s\n", mime.c_str());
+
+      resource = getResource(uri.c_str(), &resSize);
+      mg_printf(aConn, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\n\r\n", mime.c_str());
+      mg_printf(aConn, "%s", resource);
+
+      for (auto &controller: iControllers)
+      {
+        mg_printf(aConn, "%s", controller);
+      }
+
+      return true;
+    }
+
+  public:
+    ControllersHandler(vector<const char*>& aControllers)
+      : iControllers(aControllers)
+    {};
 
     bool handleGet(CivetServer *aServer, struct mg_connection *aConn)
     {
-      const struct mg_request_info *request_info = mg_get_request_info(aConn);
-      std::string s;
-      std::string field(FileMapper().Get(request_info->uri));
-
-      OpenHome::Log::Print("GET %s\n", request_info->uri);
-      
-      if (field.length() > 0)
-      {
-        root[field].toCompactString(s);
-      }
-      else
-      {
-        handle_404(aConn);
-        return true;
-      }
-
-      mg_printf(aConn, "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
-      mg_printf(aConn, "%s", s.c_str());
-      return true;
+      return handleAll("GET", aServer, aConn);
     }
 
     bool handlePost(CivetServer *aServer, struct mg_connection *aConn)
     {
-      const struct mg_request_info *request_info = mg_get_request_info(aConn);
-      char post_data[1024] = "\0";
-      mg_read(aConn, post_data, sizeof(post_data));
-      JsonHandle post;
-      post.fromString(post_data);
-      std::string field(FileMapper().Get(request_info->uri));
-
-      OpenHome::Log::Print("POST %s\n", request_info->uri);
-      OpenHome::Log::Print("POST DATA: ##%s##\n", post_data);
-      
-      if (field.length() > 0)
-      {
-        root[field] = post;
-      }
-      else
-      {
-        handle_404(aConn);
-        return true;
-      }
-
-      root.toFile("config.json");
-
-      mg_printf(aConn, "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
-      return true;
+      return handleAll("POST", aServer, aConn);
     }
 };
 
@@ -211,7 +233,7 @@ class AboutHandler: public CivetHandler
     bool handleGet(CivetServer *aServer, struct mg_connection *aConn)
     {
       const struct mg_request_info *request_info = mg_get_request_info(aConn);
-      std::string s;
+      string s;
 
       OpenHome::Log::Print("GET %s\n", request_info->uri);
       
@@ -233,7 +255,7 @@ class AboutHandler: public CivetHandler
 
     bool handlePost(CivetServer *aServer, struct mg_connection *aConn)
     {
-        handle_404(aConn);
+        FileNotFoundHandler(aConn);
         return true;
     }
 };
@@ -244,13 +266,21 @@ Config::Config()
     "listening_ports", kHttpPort, 0
   };
 
-  iRoot = new JsonHandle();
-  iRoot->fromFile("config.json");
+  if (fexists(kConfigFile))
+  {
+    iRoot = new JsonHandle();
+    iRoot->fromFile(kConfigFile);
+  }
+  else
+  {
+    iRoot = DefaultConfig();
+  }
 
   iServer = new CivetServer(options);
   iServer->addHandler("/css", new StaticHandler());
   iServer->addHandler("/img", new StaticHandler());
   iServer->addHandler("/js", new StaticHandler());
+  iServer->addHandler("/js/controllers.js", new ControllersHandler(GetControllers()));
   iServer->addHandler("/partials", new StaticHandler());
 
   iServer->addHandler("/data", new DataHandler(*iRoot));
@@ -266,7 +296,7 @@ Config::~Config()
   delete iServer;
 }
 
-std::string Config::GetString(const char *aSect, const char *aKey)
+string Config::GetString(const char *aSect, const char *aKey)
 {
   return (*iRoot)[aSect][aKey];
 }
@@ -281,12 +311,39 @@ bool Config::GetBool(const char *aSect, const char *aKey)
   return (*iRoot)[aSect][aKey];
 }
 
+JsonHandle* Config::DefaultConfig()
+{
+  JsonHandle* ret = new JsonHandle;
+  ret->fromString(kDefaultConfig);
+  return ret;
+}
+
+MimeTypeMapper& Config::GetMimeMapper()
+{
+  return iMimeMapper;
+}
+
+DataMapper& Config::GetDataMapper()
+{
+  return iDataMapper;
+}
+
+vector<const char *>& Config::GetControllers()
+{
+  return iControllers;
+}
+
+void Config::RegisterController(const char* aController)
+{
+  iControllers.push_back(aController);
+}
+
 About& Config::GetAbout()
 {
   return iAbout;
 }
 
-std::string& About::GetUrl()
+string& About::GetUrl()
 {
   return iUrl;
 }
@@ -296,7 +353,7 @@ void About::SetUrl(const char *aValue)
   iUrl = aValue;
 }
 
-std::string& About::GetMac()
+string& About::GetMac()
 {
   return iMac;
 }
@@ -306,7 +363,7 @@ void About::SetMac(const char *aValue)
   iMac = aValue;
 }
 
-std::string& About::GetVersion()
+string& About::GetVersion()
 {
   return iVersion;
 }
@@ -316,7 +373,7 @@ void About::SetVersion(const char *aValue)
   iVersion = aValue;
 }
 
-std::string& About::GetUpdateAvailable()
+string& About::GetUpdateAvailable()
 {
   return iUpdateAvailable;
 }

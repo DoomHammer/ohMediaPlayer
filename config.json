@@ -1,10 +1,21 @@
 {
  "device": {
   "room": "OpenHomeKeith",
-  "name": "ohMediaPlayer",
+  "name": "ohMediaPlayer"
  },
  "volume": {
   "startupVolume": "40",
   "volumeLimit": "80"
+ },
+ "renderer": {
+  "active": "dummy",
+  "available": {
+   "VLC": {
+    "partialUrl": null
+   },
+   "dummy": {
+    "partialUrl": null
+   }
+  }
  }
 }

@@ -46,7 +46,7 @@ var UniversalController = function($scope, $timeout, Config, partial) {
     });
 };
 
-angular.module('configApp.controllers', [])
+var angularControllers = angular.module('configApp.controllers', [])
   .controller('AboutCtrl', ['$scope', 'Config', function($scope, Config) {
     var partial = "about";
     $scope.data = Config.get({"partial": partial});

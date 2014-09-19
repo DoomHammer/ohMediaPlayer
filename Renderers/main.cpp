@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #include <OpenHome/OhNetTypes.h>
 #include <OpenHome/Net/Core/DvDevice.h>
 #include <OpenHome/Net/Core/OhNet.h>
@@ -132,6 +133,15 @@ int main(int aArgc, char* aArgv[])
     sprintf(url, "http://%s:%s/", url, kHttpPort);
     sprintf(attributes, "Info Time App:Config=%s Volume", url);
     Config::GetInstance().GetAbout().SetVersion(VERSION);
+
+    Config::GetInstance().RegisterController(R"delimiter(
+angularControllers
+  .controller('RendererCtrl', ['$scope', '$timeout', 'Config', function($scope, $timeout, Config) {
+    var partial = 'renderer';
+    UniversalController($scope, $timeout, Config, partial);
+  }])
+        )delimiter");
+    Config::GetInstance().GetDataMapper().Append("/data/renderer.json", "renderer");
 
     Player* player = new Player(
         renderer,

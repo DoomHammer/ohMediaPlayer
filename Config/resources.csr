@@ -14,3 +14,4 @@
 @ about.html : app/partials/about.html;
 @ device.html : app/partials/device.html;
 @ volume.html : app/partials/volume.html;
+@ renderer.html : app/partials/renderer.html;

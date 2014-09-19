@@ -6,9 +6,16 @@
 @ directives.js : app/js/directives.js;
 @ filters.js : app/js/filters.js;
 @ services.js : app/js/services.js;
+@ jquery-1.11.1.min.js : app/js/jquery-1.11.1.min.js;
+@ bootstrap.min.js : app/js/bootstrap.min.js;
+@ angular.min.js : app/js/angular.min.js;
+@ angular-route.min.js : app/js/angular-route.min.js;
+@ angular-resource.min.js : app/js/angular-resource.min.js;
 
 ! /css;
 @ app.css : app/css/app.css;
+@ bootstrap.min.css : app/css/bootstrap.min.css;
+@ bootstrap-theme.min.css : app/css/bootstrap-theme.min.css;
 
 ! /partials;
 @ about.html : app/partials/about.html;

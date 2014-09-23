@@ -101,7 +101,7 @@ int main(int aArgc, char* aArgv[])
 
     Net::DvStack* dvStack = lib->StartDv();
 
-    Brhz udn("4c494e4e-device1");
+    Brhz udn("device1");
 
     Net::DvDeviceStandard* device = new Net::DvDeviceStandard(*dvStack, udn);
 

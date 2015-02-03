@@ -8,9 +8,9 @@ using namespace std;
 
 Dummy::Dummy(Environment& aEnv)
     : iTickFunctor(MakeFunctor(*this, &Dummy::Tick))
-    , iTickTimer(aEnv, iTickFunctor)
+    , iTickTimer(aEnv, iTickFunctor, "DummyRendererTick")
     , iPrefetchFunctor(MakeFunctor(*this, &Dummy::Prefetch))
-    , iPrefetchTimer(aEnv, iPrefetchFunctor)
+    , iPrefetchTimer(aEnv, iPrefetchFunctor, "DummyRendererPrefetch")
 {
 }
 

@@ -13,6 +13,8 @@ def options(ctx):
     ctx.load('compiler_cxx')
     ctx.add_option('--ohNetHeaders', action='store', default='../ohNet/Build/Include', help='Path to root of ohNet header files')
     ctx.add_option('--ohNetLibraries', action='store', default='../ohNet/Build/Obj', help='Path to root of ohNet library binaries')
+    ctx.add_option('--ohNetGeneratedHeaders', action='store', default='../ohNetGenerated/Build/Include', help='Path to root of ohNetGenerated header files')
+    ctx.add_option('--ohNetGeneratedLibraries', action='store', default='../ohNetGenerated/Build/Obj', help='Path to root of ohNetGenerated library binaries')
     ctx.add_option('--vlcHeaders', action='store', default='../vlc-1.1.10/include', help='Path to root of vlc header files')
     ctx.add_option('--disableVlc', action='store_true', default=False, help='Should VLC support be built')
     ctx.add_option('--civetwebHeaders', action='store', default='../civetweb', help='Path to root of civetweb header files')
@@ -35,10 +37,13 @@ def configure(ctx):
     ohNetHeaders = ctx.path.find_node(ctx.options.ohNetHeaders)
     ohNetHeaders = ohNetHeaders.abspath()
 
+    ohNetGeneratedHeaders = ctx.path.find_node(ctx.options.ohNetGeneratedHeaders)
+    ohNetGeneratedHeaders = ohNetGeneratedHeaders.abspath()
+
     curpath = ctx.path.find_node('.')
     curpath = curpath.abspath()
 
-    hpath = [ohNetHeaders, curpath, top]
+    hpath = [ohNetHeaders, ohNetGeneratedHeaders, curpath, top]
     ctx.env.INCLUDES_MEDIA = hpath
 
     vlcHeaders = ctx.path.find_node(ctx.options.vlcHeaders)
@@ -61,6 +66,9 @@ def configure(ctx):
     #Arrange library paths and store in ctx.env.LibraryPath
     ohNetLibraries = ctx.path.find_node(ctx.options.ohNetLibraries)
     ohNetLibraries = ohNetLibraries.abspath()
+
+    ohNetGeneratedLibraries = ctx.path.find_node(ctx.options.ohNetGeneratedLibraries)
+    ohNetGeneratedLibraries = ohNetGeneratedLibraries.abspath()
 
     vlcLibraries = None
 
@@ -121,7 +129,7 @@ def configure(ctx):
         ctx.fatal("Unsupported build platform {0}".format(os.sys.platform))
 
 
-    ctx.env.LIBPATH_MEDIA = [ohNetLibraries]
+    ctx.env.LIBPATH_MEDIA = [ohNetLibraries, ohNetGeneratedLibraries]
     if ctx.options.disableVlc == False:
         ctx.env.LIBPATH_VLC = [vlcLibraries]
     ctx.env.LIBPATH_WEB = [civetwebLibraries, jsonhandleLibraries]
@@ -236,7 +244,7 @@ def build(ctx):
             ],
         includes    = ctx.env.INCLUDES_MEDIA,
         target      = 'ohMediaPlayer',
-        stlib       = ['ohNetCore', 'ohNetDevices', 'TestFramework'],
+        stlib       = ['ohNetCore', 'ohNetGeneratedDevices', 'ohNetDevices', 'TestFramework'],
         use         = uses,
         )
 

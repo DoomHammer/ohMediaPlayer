@@ -3,11 +3,22 @@
 	    "name": "ohNet",
         "type": "openhome",
         "platform-specific": true,
-        "version": "1.0.1247",
+        "version": "1.1.1456",
         "archive-suffix": "-${titlecase-debugmode}",
         "configure-args": [
             "--ohNetLibraries", "${dest}${name}-${platform}-${titlecase-debugmode}/lib",
             "--ohNetHeaders", "${dest}${name}-${platform}-${titlecase-debugmode}/include/ohnet"
+        ]
+    },
+     {
+           "name": "ohNetGenerated",
+        "type": "openhome",
+        "platform-specific": true,
+        "version": "1.0.66",
+        "archive-suffix": "-${titlecase-debugmode}",
+        "configure-args": [
+            "--ohNetGeneratedLibraries", "${dest}${name}-${platform}-${titlecase-debugmode}/lib",
+            "--ohNetGeneratedHeaders", "${dest}${name}-${platform}-${titlecase-debugmode}/include/ohnet"
         ]
     },
     {

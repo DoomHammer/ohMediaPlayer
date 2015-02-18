@@ -107,8 +107,8 @@ def configure(ctx):
         ctx.env.LIB_MEDIA = ['pthread']
         ctx.env.LIB_WEB = ['jsonhandle', 'civetweb', 'pthread', 'dl']
         #ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-Werror', '-pipe', '-fexceptions']
-        ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-pipe', '-fexceptions', '--std=c++11']
-        ctx.env.CXXFLAGS_WEB += ['-Wall', '-pipe', '-fexceptions', '--std=c++11']
+        ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-pipe', '-fexceptions', '-std=c++11']
+        ctx.env.CXXFLAGS_WEB += ['-Wall', '-pipe', '-fexceptions', '-std=c++11']
         if(debug):
             ctx.env.CXXFLAGS_MEDIA += ['-g']
 

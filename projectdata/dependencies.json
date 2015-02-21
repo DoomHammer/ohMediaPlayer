@@ -58,7 +58,7 @@
     "name": "jsonhandle",
     "type": "external",
     "platform-specific": true,
-    "version": "0.5.2",
+    "version": "0.5.3",
     "binary-repo": "https://github.com/DoomHammer/jsonhandle/releases/download/v${version}",
     "archive-path": "${binary-repo}/${archive-filename}",
     "archive-filename": "${name}-${platform}.tar.gz",

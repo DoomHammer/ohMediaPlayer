@@ -9,18 +9,32 @@ out = 'build' + os.sep + sys.platform
 
 sys.path.append('waftools')
 
+def find_rel_or_abs(ctx, node):
+    ret = ctx.path.find_node(node)
+    if ret is None:
+        ret = ctx.root.find_node(node)
+    return ret
+
+def find_ohnet_libs(ctx, lib, platform):
+    ohNetLibrariesPath = os.path.join(lib, platform, ctx.options.debugmode)
+    ohNetLibraries = find_rel_or_abs(ctx, ohNetLibrariesPath)
+    if ohNetLibraries is None:
+        ohNetLibrariesPath = lib
+        ohNetLibraries = find_rel_or_abs(ctx, ohNetLibrariesPath)
+    return ohNetLibraries.abspath()
+
 def options(ctx):
     ctx.load('compiler_cxx')
     ctx.add_option('--ohNetHeaders', action='store', default='../ohNet/Build/Include', help='Path to root of ohNet header files')
     ctx.add_option('--ohNetLibraries', action='store', default='../ohNet/Build/Obj', help='Path to root of ohNet library binaries')
     ctx.add_option('--ohNetGeneratedHeaders', action='store', default='../ohNetGenerated/Build/Include', help='Path to root of ohNetGenerated header files')
     ctx.add_option('--ohNetGeneratedLibraries', action='store', default='../ohNetGenerated/Build/Obj', help='Path to root of ohNetGenerated library binaries')
-    ctx.add_option('--vlcHeaders', action='store', default='../vlc-1.1.10/include', help='Path to root of vlc header files')
+    ctx.add_option('--vlcHeaders', action='store', default='/usr/include', help='Path to root of vlc header files')
     ctx.add_option('--disableVlc', action='store_true', default=False, help='Should VLC support be built')
-    ctx.add_option('--civetwebHeaders', action='store', default='../civetweb', help='Path to root of civetweb header files')
+    ctx.add_option('--civetwebHeaders', action='store', default='../civetweb/include', help='Path to root of civetweb header files')
     ctx.add_option('--civetwebLibraries', action='store', default='../civetweb', help='Path to root of civetweb library binaries')
-    ctx.add_option('--jsonhandleHeaders', action='store', default='../jsonhandle', help='Path to root of jsonhandle header files')
-    ctx.add_option('--jsonhandleLibraries', action='store', default='../jsonhandle', help='Path to root of jsonhandle library binaries')
+    ctx.add_option('--jsonhandleHeaders', action='store', default='../jsonhandle/src', help='Path to root of jsonhandle header files')
+    ctx.add_option('--jsonhandleLibraries', action='store', default='../jsonhandle' + os.sep + out, help='Path to root of jsonhandle library binaries')
     ctx.add_option('--debug', action='store_const', const='Debug', default='Release', dest='debugmode', help='Generate and use binaries with debugging support')
     ctx.add_option('--release', action='store_const', const='Release', default='Release', dest='debugmode', help='Generate and use binaries without debugging support')
     ctx.add_option('--prefix', action='store', default='install', help='Installation prefix')
@@ -34,41 +48,36 @@ def configure(ctx):
     ctx.load('csr2h', tooldir='./waftools')
 
     #Arrange include paths and store in ctx.env.HeaderPath
-    ohNetHeaders = ctx.path.find_node(ctx.options.ohNetHeaders)
+    ohNetHeaders = find_rel_or_abs(ctx, ctx.options.ohNetHeaders)
     ohNetHeaders = ohNetHeaders.abspath()
 
-    ohNetGeneratedHeaders = ctx.path.find_node(ctx.options.ohNetGeneratedHeaders)
+    ohNetGeneratedHeaders = find_rel_or_abs(ctx, ctx.options.ohNetGeneratedHeaders)
     ohNetGeneratedHeaders = ohNetGeneratedHeaders.abspath()
 
-    curpath = ctx.path.find_node('.')
+    curpath = find_rel_or_abs(ctx, '.')
     curpath = curpath.abspath()
 
     hpath = [ohNetHeaders, ohNetGeneratedHeaders, curpath, top]
     ctx.env.INCLUDES_MEDIA = hpath
 
-    vlcHeaders = ctx.path.find_node(ctx.options.vlcHeaders)
+    vlcHeaders = find_rel_or_abs(ctx, ctx.options.vlcHeaders)
     if not vlcHeaders:
+        print 'VLC headers not found.'
         ctx.options.disableVlc = True
     ctx.env.DISABLEVLC = ctx.options.disableVlc
     if ctx.options.disableVlc == False:
         vlcHeaders = vlcHeaders.abspath()
         ctx.env.INCLUDES_VLC = [vlcHeaders]
         ctx.check(header_name='vlc/vlc.h')
+        print 'Using VLC headers from %s' % vlcHeaders
 
-    civetwebHeaders = ctx.path.find_node(os.path.join(ctx.options.civetwebHeaders))
+    civetwebHeaders = find_rel_or_abs(ctx, os.path.join(ctx.options.civetwebHeaders))
     civetwebHeaders = civetwebHeaders.abspath()
 
-    jsonhandleHeaders = ctx.path.find_node(os.path.join(ctx.options.jsonhandleHeaders))
+    jsonhandleHeaders = find_rel_or_abs(ctx, os.path.join(ctx.options.jsonhandleHeaders))
     jsonhandleHeaders = jsonhandleHeaders.abspath()
 
     ctx.env.INCLUDES_WEB = [civetwebHeaders, jsonhandleHeaders]
-
-    #Arrange library paths and store in ctx.env.LibraryPath
-    ohNetLibraries = ctx.path.find_node(ctx.options.ohNetLibraries)
-    ohNetLibraries = ohNetLibraries.abspath()
-
-    ohNetGeneratedLibraries = ctx.path.find_node(ctx.options.ohNetGeneratedLibraries)
-    ohNetGeneratedLibraries = ohNetGeneratedLibraries.abspath()
 
     vlcLibraries = None
 
@@ -77,9 +86,18 @@ def configure(ctx):
     else:
         debug = False
 
+    civetwebLibraries = find_rel_or_abs(ctx, os.path.join(ctx.options.civetwebLibraries))
+    civetwebLibraries = civetwebLibraries.abspath()
+
+    jsonhandleLibraries = find_rel_or_abs(ctx, os.path.join(ctx.options.jsonhandleLibraries))
+    jsonhandleLibraries = jsonhandleLibraries.abspath()
+
+    ctx.env.LIB_WEB = ['jsonhandle', 'civetweb', 'pthread', 'dl']
+
     if sys.platform == 'win32':
+        ohNetPlatform = 'Windows'
         if ctx.options.disableVlc == False:
-            vlcLibraries = ctx.path.find_node('./Renderers/Vlc')
+            vlcLibraries = find_rel_or_abs(ctx, './Renderers/Vlc')
             vlcLibraries = vlcLibraries.abspath()
             ctx.env.LIB_VLC = ['libvlc']
         ctx.env.LIB_MEDIA = ['Ws2_32', 'Iphlpapi']
@@ -93,19 +111,13 @@ def configure(ctx):
             ctx.env.CXXFLAGS_WEB += ['/MT', '/Ox']
 
     elif sys.platform == 'linux2':
+        ohNetPlatform = 'Posix'
         if ctx.options.disableVlc == False:
-            vlcLibraries = ctx.path.find_node('../vlc-1.1.10/src/.libs')
+            vlcLibraries = find_rel_or_abs(ctx, '/usr/lib')
             vlcLibraries = vlcLibraries.abspath()
             ctx.env.LIB_VLC = ['vlc', 'vlccore']
 
-        civetwebLibraries = ctx.path.find_node(os.path.join(ctx.options.civetwebLibraries))
-        civetwebLibraries = civetwebLibraries.abspath()
-
-        jsonhandleLibraries = ctx.path.find_node(os.path.join(ctx.options.jsonhandleLibraries))
-        jsonhandleLibraries = jsonhandleLibraries.abspath()
-
         ctx.env.LIB_MEDIA = ['pthread']
-        ctx.env.LIB_WEB = ['jsonhandle', 'civetweb', 'pthread', 'dl']
         #ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-Werror', '-pipe', '-fexceptions']
         ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-pipe', '-fexceptions', '-std=c++11']
         ctx.env.CXXFLAGS_WEB += ['-Wall', '-pipe', '-fexceptions', '-std=c++11']
@@ -113,8 +125,9 @@ def configure(ctx):
             ctx.env.CXXFLAGS_MEDIA += ['-g']
 
     elif sys.platform == 'darwin':
+        ohNetPlatform = 'Mac-x64'
         if ctx.options.disableVlc == False:
-            vlcLibraries = ctx.path.find_node('../../../Applications/VLC.app/Contents/MacOS/lib')
+            vlcLibraries = find_rel_or_abs(ctx, '../../../Applications/VLC.app/Contents/MacOS/lib')
             print vlcLibraries
             vlcLibraries = vlcLibraries.abspath()
             print vlcLibraries
@@ -127,6 +140,11 @@ def configure(ctx):
             ctx.env.CXXFLAGS_MEDIA += ['-g']
     else:
         ctx.fatal("Unsupported build platform {0}".format(os.sys.platform))
+
+    #Arrange library paths and store in ctx.env.LibraryPath
+    ohNetLibraries = find_ohnet_libs(ctx, ctx.options.ohNetLibraries, ohNetPlatform)
+
+    ohNetGeneratedLibraries = find_ohnet_libs(ctx, ctx.options.ohNetGeneratedLibraries, ohNetPlatform)
 
 
     ctx.env.LIBPATH_MEDIA = [ohNetLibraries, ohNetGeneratedLibraries]

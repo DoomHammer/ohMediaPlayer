@@ -69,9 +69,9 @@ Vlc::Vlc(Environment& aEnv)
     libvlc_log_t* log = libvlc_log_open(iVlc);
     libvlc_log_close(log);
     iTimerFinishedFunctor = MakeFunctor(*this, &Vlc::TimerFinishedExpired);
-    iTimerFinished = new Timer(aEnv, iTimerFinishedFunctor);
+    iTimerFinished = new Timer(aEnv, iTimerFinishedFunctor, "VlcRendererFinished");
     iTimerPlayFunctor = MakeFunctor(*this, &Vlc::TimerPlayExpired);
-    iTimerPlay = new Timer(aEnv, iTimerPlayFunctor);
+    iTimerPlay = new Timer(aEnv, iTimerPlayFunctor, "VlcRendererPlay");
 
     libvlc_audio_output_t* outputs = libvlc_audio_output_list_get(iVlc);
     libvlc_audio_output_t* ptr = outputs;

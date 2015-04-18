@@ -30,6 +30,7 @@ def options(ctx):
     ctx.add_option('--ohNetGeneratedHeaders', action='store', default='../ohNetGenerated/Build/Include', help='Path to root of ohNetGenerated header files')
     ctx.add_option('--ohNetGeneratedLibraries', action='store', default='../ohNetGenerated/Build/Obj', help='Path to root of ohNetGenerated library binaries')
     ctx.add_option('--vlcHeaders', action='store', default='/usr/include', help='Path to root of vlc header files')
+    ctx.add_option('--vlcLibraries', action='store', default='/usr/lib', help='Path to root of vlc library binaries')
     ctx.add_option('--disableVlc', action='store_true', default=False, help='Should VLC support be built')
     ctx.add_option('--civetwebHeaders', action='store', default='../civetweb/include', help='Path to root of civetweb header files')
     ctx.add_option('--civetwebLibraries', action='store', default='../civetweb', help='Path to root of civetweb library binaries')
@@ -68,7 +69,7 @@ def configure(ctx):
     if ctx.options.disableVlc == False:
         vlcHeaders = vlcHeaders.abspath()
         ctx.env.INCLUDES_VLC = [vlcHeaders]
-        ctx.check(header_name='vlc/vlc.h')
+        ctx.check(header_name='vlc/vlc.h', use=['VLC'])
         print 'Using VLC headers from %s' % vlcHeaders
 
     civetwebHeaders = find_rel_or_abs(ctx, os.path.join(ctx.options.civetwebHeaders))
@@ -113,7 +114,7 @@ def configure(ctx):
     elif sys.platform == 'linux2':
         ohNetPlatform = 'Posix'
         if ctx.options.disableVlc == False:
-            vlcLibraries = find_rel_or_abs(ctx, '/usr/lib')
+            vlcLibraries = find_rel_or_abs(ctx, ctx.options.vlcLibraries)
             vlcLibraries = vlcLibraries.abspath()
             ctx.env.LIB_VLC = ['vlc', 'vlccore']
 
@@ -168,9 +169,6 @@ def configure(ctx):
 
 
 def build(ctx):
-    from waflib import Build
-    ctx.post_mode = Build.POST_LAZY
-
     ctx.install_files('${PREFIX}/include', [
             'OpenHome/Store.h',
         ], relative_trick=True)

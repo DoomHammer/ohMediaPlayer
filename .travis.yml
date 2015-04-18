@@ -3,7 +3,11 @@ compiler:
 - clang
 before_install:
 - sudo apt-get update
+addons:
+  apt:
+    packages:
+    - libvlc-dev
+    - libvlccore-dev
 install:
-- sudo apt-get install libvlc-dev libvlccore-dev
 - git clone https://github.com/openhome/ohdevtools.git
 script: ./go build

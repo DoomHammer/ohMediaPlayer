@@ -261,6 +261,7 @@ def build(ctx):
         includes    = ctx.env.INCLUDES_MEDIA,
         target      = 'ohMediaPlayer',
         stlib       = ['ohNetCore', 'ohNetGeneratedDevices', 'ohNetDevices', 'TestFramework'],
+        lib         = ['rt'],
         use         = uses,
         )
 

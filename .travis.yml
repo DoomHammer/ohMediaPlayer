@@ -1,13 +1,18 @@
 language: cpp
 compiler:
-- clang
-before_install:
-- sudo apt-get update
+  - clang
+  - gcc
+sudo: false
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
-    - libvlc-dev
-    - libvlccore-dev
+      - libvlc-dev
+      - libvlccore-dev
+      - gcc-4.8
+      - g++-4.8
 install:
-- git clone https://github.com/openhome/ohdevtools.git
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+  - git clone https://github.com/openhome/ohdevtools.git
 script: ./go build

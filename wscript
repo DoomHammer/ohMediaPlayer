@@ -1,11 +1,18 @@
 import sys
 import os
 
-APPNAME = 'ohMediaPlayer'
-VERSION = '0.0.1'
+from waflib.Node import Node
+from waftools.filetasks import (
+    find_resource_or_fail)
 
-top = '.'
-out = 'build' + os.sep + sys.platform
+import os.path, sys
+sys.path[0:0] = [os.path.join('dependencies', 'AnyPlatform', 'ohWafHelpers')]
+
+from filetasks import gather_files, build_tree, copy_task
+from utilfuncs import invoke_test, guess_dest_platform, configure_toolchain, guess_ohnet_location
+
+APPNAME = 'ohMediaPlayer'
+VERSION = '0.1.0'
 
 sys.path.append('waftools')
 
@@ -15,191 +22,163 @@ def find_rel_or_abs(ctx, node):
         ret = ctx.root.find_node(node)
     return ret
 
-def find_ohnet_libs(ctx, lib, platform):
-    ohNetLibrariesPath = os.path.join(lib, platform, ctx.options.debugmode)
-    ohNetLibraries = find_rel_or_abs(ctx, ohNetLibrariesPath)
-    if ohNetLibraries is None:
-        ohNetLibrariesPath = lib
-        ohNetLibraries = find_rel_or_abs(ctx, ohNetLibrariesPath)
-    return ohNetLibraries.abspath()
+def options(opt):
+    opt.load('compiler_cxx')
+    opt.load('compiler_c')
+    opt.add_option('--ohnet-include-dir', action='store', default='../ohNet/Build/Include', help='Path to root of ohNet header files')
+    opt.add_option('--ohnet-lib-dir', action='store', default='../ohNet/Build/Obj', help='Path to root of ohNet library binaries')
+    opt.add_option('--ohnet', action='store', default=None)
+    opt.add_option('--vlcHeaders', action='store', default='/usr/include', help='Path to root of vlc header files')
+    opt.add_option('--vlcLibraries', action='store', default='/usr/lib', help='Path to root of vlc library binaries')
+    opt.add_option('--disableVlc', action='store_true', default=False, help='Should VLC support be built')
+    opt.add_option('--civetwebHeaders', action='store', default='../civetweb/include', help='Path to root of civetweb header files')
+    opt.add_option('--civetwebLibraries', action='store', default='../civetweb', help='Path to root of civetweb library binaries')
+    opt.add_option('--jsonhandleHeaders', action='store', default='../jsonhandle/src', help='Path to root of jsonhandle header files')
+    opt.add_option('--jsonhandleLibraries', action='store', default='../jsonhandle/lib', help='Path to root of jsonhandle library binaries')
+    opt.add_option('--debug', action='store_const', const='Debug', default='Release', dest='debugmode', help='Generate and use binaries with debugging support')
+    opt.add_option('--release', action='store_const', const='Release', default='Release', dest='debugmode', help='Generate and use binaries without debugging support')
+    opt.add_option('--dest-platform', action='store', default=None)
+    opt.add_option('--cross', action='store', default=None)
 
-def options(ctx):
-    ctx.load('compiler_cxx')
-    ctx.add_option('--ohNetHeaders', action='store', default='../ohNet/Build/Include', help='Path to root of ohNet header files')
-    ctx.add_option('--ohNetLibraries', action='store', default='../ohNet/Build/Obj', help='Path to root of ohNet library binaries')
-    ctx.add_option('--ohNetGeneratedHeaders', action='store', default='../ohNetGenerated/Build/Include', help='Path to root of ohNetGenerated header files')
-    ctx.add_option('--ohNetGeneratedLibraries', action='store', default='../ohNetGenerated/Build/Obj', help='Path to root of ohNetGenerated library binaries')
-    ctx.add_option('--vlcHeaders', action='store', default='/usr/include', help='Path to root of vlc header files')
-    ctx.add_option('--vlcLibraries', action='store', default='/usr/lib', help='Path to root of vlc library binaries')
-    ctx.add_option('--disableVlc', action='store_true', default=False, help='Should VLC support be built')
-    ctx.add_option('--civetwebHeaders', action='store', default='../civetweb/include', help='Path to root of civetweb header files')
-    ctx.add_option('--civetwebLibraries', action='store', default='../civetweb', help='Path to root of civetweb library binaries')
-    ctx.add_option('--jsonhandleHeaders', action='store', default='../jsonhandle/src', help='Path to root of jsonhandle header files')
-    ctx.add_option('--jsonhandleLibraries', action='store', default='../jsonhandle' + os.sep + out, help='Path to root of jsonhandle library binaries')
-    ctx.add_option('--debug', action='store_const', const='Debug', default='Release', dest='debugmode', help='Generate and use binaries with debugging support')
-    ctx.add_option('--release', action='store_const', const='Release', default='Release', dest='debugmode', help='Generate and use binaries without debugging support')
-    ctx.add_option('--prefix', action='store', default='install', help='Installation prefix')
+def configure(conf):
 
-def configure(ctx):
-    if sys.platform == 'win32':
-        ctx.env['MSVC_TARGETS'] = ['x86']
-        ctx.load('msvc')
-    else:
-        ctx.load('compiler_cxx')
-    ctx.load('csr2h', tooldir='./waftools')
+    if conf.options.dest_platform is None:
+        try:
+            conf.options.dest_platform = guess_dest_platform()
+        except KeyError:
+            conf.fatal('Specify --dest-platform')
 
-    #Arrange include paths and store in ctx.env.HeaderPath
-    ohNetHeaders = find_rel_or_abs(ctx, ctx.options.ohNetHeaders)
-    ohNetHeaders = ohNetHeaders.abspath()
+    configure_toolchain(conf)
+    guess_ohnet_location(conf)
 
-    ohNetGeneratedHeaders = find_rel_or_abs(ctx, ctx.options.ohNetGeneratedHeaders)
-    ohNetGeneratedHeaders = ohNetGeneratedHeaders.abspath()
+    conf.load('csr2h', tooldir='./waftools')
 
-    curpath = find_rel_or_abs(ctx, '.')
-    curpath = curpath.abspath()
+    hpath = [
+        '.',
+        conf.path.find_node('.').abspath()
+        ]
+    conf.env.INCLUDES_MEDIA = hpath
 
-    hpath = [ohNetHeaders, ohNetGeneratedHeaders, curpath, top]
-    ctx.env.INCLUDES_MEDIA = hpath
-
-    vlcHeaders = find_rel_or_abs(ctx, ctx.options.vlcHeaders)
+    vlcHeaders = find_rel_or_abs(conf, conf.options.vlcHeaders)
     if not vlcHeaders:
         print 'VLC headers not found.'
-        ctx.options.disableVlc = True
-    ctx.env.DISABLEVLC = ctx.options.disableVlc
-    if ctx.options.disableVlc == False:
+        conf.options.disableVlc = True
+    conf.env.DISABLEVLC = conf.options.disableVlc
+    if conf.options.disableVlc == False:
         vlcHeaders = vlcHeaders.abspath()
-        ctx.env.INCLUDES_VLC = [vlcHeaders]
-        ctx.check(header_name='vlc/vlc.h', use=['VLC'])
+        print 'VLC headers: ', vlcHeaders
+        conf.env.INCLUDES_VLC = [vlcHeaders]
+        conf.check(header_name='vlc/vlc.h', use=['VLC'])
         print 'Using VLC headers from %s' % vlcHeaders
 
-    civetwebHeaders = find_rel_or_abs(ctx, os.path.join(ctx.options.civetwebHeaders))
+    civetwebHeaders = find_rel_or_abs(conf, os.path.join(conf.options.civetwebHeaders))
     civetwebHeaders = civetwebHeaders.abspath()
 
-    jsonhandleHeaders = find_rel_or_abs(ctx, os.path.join(ctx.options.jsonhandleHeaders))
+    jsonhandleHeaders = find_rel_or_abs(conf, os.path.join(conf.options.jsonhandleHeaders))
     jsonhandleHeaders = jsonhandleHeaders.abspath()
 
-    ctx.env.INCLUDES_WEB = [civetwebHeaders, jsonhandleHeaders]
+    conf.env.INCLUDES_WEB = [civetwebHeaders, jsonhandleHeaders]
 
     vlcLibraries = None
 
-    if(ctx.options.debugmode == 'Debug'):
-        debug = True
-    else:
-        debug = False
-
-    civetwebLibraries = find_rel_or_abs(ctx, os.path.join(ctx.options.civetwebLibraries))
+    civetwebLibraries = find_rel_or_abs(conf, os.path.join(conf.options.civetwebLibraries))
     civetwebLibraries = civetwebLibraries.abspath()
 
-    jsonhandleLibraries = find_rel_or_abs(ctx, os.path.join(ctx.options.jsonhandleLibraries))
+    jsonhandleLibraries = find_rel_or_abs(conf, os.path.join(conf.options.jsonhandleLibraries))
     jsonhandleLibraries = jsonhandleLibraries.abspath()
 
-    ctx.env.LIB_WEB = ['jsonhandle', 'civetweb', 'pthread', 'dl']
+    conf.env.LIB_WEB = ['jsonhandle', 'civetweb', 'pthread', 'dl']
+    conf.env.LIBPATH_WEB = [civetwebLibraries, jsonhandleLibraries]
 
-    if sys.platform == 'win32':
-        ohNetPlatform = 'Windows'
-        if ctx.options.disableVlc == False:
-            vlcLibraries = find_rel_or_abs(ctx, './Renderers/Vlc')
+    if sys.platform == 'linux2':
+        if conf.options.disableVlc == False:
+            vlcLibraries = find_rel_or_abs(conf, conf.options.vlcLibraries)
             vlcLibraries = vlcLibraries.abspath()
-            ctx.env.LIB_VLC = ['libvlc']
-        ctx.env.LIB_MEDIA = ['Ws2_32', 'Iphlpapi']
-        ctx.env.CXXFLAGS_MEDIA = ['/EHsc', '/FR']
-        if(debug):
-            ctx.env.CXXFLAGS_MEDIA += ['/MTd', '/Od', '/Zi']
-            ctx.env.CXXFLAGS_WEB += ['/MTd', '/Od', '/Zi']
-            ctx.env.LINKFLAGS_MEDIA += ['/debug']
-        else:
-            ctx.env.CXXFLAGS_MEDIA += ['/MT', '/Ox']
-            ctx.env.CXXFLAGS_WEB += ['/MT', '/Ox']
+            conf.env.LIB_VLC = ['vlc', 'vlccore']
+            conf.env.LIBPATH_VLC = [vlcLibraries]
 
-    elif sys.platform == 'linux2':
-        ohNetPlatform = 'Posix'
-        if ctx.options.disableVlc == False:
-            vlcLibraries = find_rel_or_abs(ctx, ctx.options.vlcLibraries)
-            vlcLibraries = vlcLibraries.abspath()
-            ctx.env.LIB_VLC = ['vlc', 'vlccore']
-
-        ctx.env.LIB_MEDIA = ['pthread']
-        #ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-Werror', '-pipe', '-fexceptions']
-        ctx.env.CXXFLAGS_MEDIA += ['-Wall', '-pipe', '-fexceptions', '-std=c++11']
-        ctx.env.CXXFLAGS_WEB += ['-Wall', '-pipe', '-fexceptions', '-std=c++11']
-        if(debug):
-            ctx.env.CXXFLAGS_MEDIA += ['-g']
-
-    elif sys.platform == 'darwin':
-        ohNetPlatform = 'Mac-x64'
-        if ctx.options.disableVlc == False:
-            vlcLibraries = find_rel_or_abs(ctx, '../../../Applications/VLC.app/Contents/MacOS/lib')
-            print vlcLibraries
-            vlcLibraries = vlcLibraries.abspath()
-            print vlcLibraries
-            ctx.env.LIB_VLC = ['vlc']
-        ctx.env.LIB_MEDIA = ['pthread']
-        ctx.env.CXXFLAGS_MEDIA += ['-Werror', '-pipe', '-fexceptions', '--std=c++11']
-        ctx.env.CXXFLAGS_WEB += ['-Werror', '-pipe', '-fexceptions', '--std=c++11']
-        ctx.env.LINKFLAGS_MEDIA += ['-framework', 'CoreFoundation', '-framework', 'SystemConfiguration']
-        if(debug):
-            ctx.env.CXXFLAGS_MEDIA += ['-g']
+        conf.env.LIB_MEDIA = ['pthread']
     else:
-        ctx.fatal("Unsupported build platform {0}".format(os.sys.platform))
-
-    #Arrange library paths and store in ctx.env.LibraryPath
-    ohNetLibraries = find_ohnet_libs(ctx, ctx.options.ohNetLibraries, ohNetPlatform)
-
-    ohNetGeneratedLibraries = find_ohnet_libs(ctx, ctx.options.ohNetGeneratedLibraries, ohNetPlatform)
-
-
-    ctx.env.LIBPATH_MEDIA = [ohNetLibraries, ohNetGeneratedLibraries]
-    if ctx.options.disableVlc == False:
-        ctx.env.LIBPATH_VLC = [vlcLibraries]
-    ctx.env.LIBPATH_WEB = [civetwebLibraries, jsonhandleLibraries]
+        conf.fatal("Unsupported build platform {0}".format(os.sys.platform))
 
     #Let user know about selected paths
-    print 'INCLUDES_MEDIA: {0}'.format(ctx.env.INCLUDES_MEDIA)
-    print 'LIBPATH_MEDIA: {0}'.format(ctx.env.LIBPATH_MEDIA)
-    print 'INCLUDES_WEB: {0}'.format(ctx.env.INCLUDES_WEB)
-    print 'LIBPATH_WEB: {0}'.format(ctx.env.LIBPATH_WEB)
+    print 'INCLUDES_MEDIA: {0}'.format(conf.env.INCLUDES_MEDIA)
+    print 'LIBPATH_MEDIA: {0}'.format(conf.env.LIBPATH_MEDIA)
+    print 'INCLUDES_WEB: {0}'.format(conf.env.INCLUDES_WEB)
+    print 'LIBPATH_WEB: {0}'.format(conf.env.LIBPATH_WEB)
 
-    #Ensure those directories actually exist
-    #ctx.find_file('.', ctx.env.INCLUDES_MEDIA)
-    #ctx.find_file('.', ctx.env.LIBPATH_MEDIA)
-
-    ctx.define('APPNAME', APPNAME)
-    ctx.define('VERSION', VERSION)
-    ctx.write_config_header('config.h')
+    conf.define('APPNAME', APPNAME)
+    conf.define('VERSION', VERSION)
+    conf.write_config_header('config.h')
 
 
-def build(ctx):
-    ctx.install_files('${PREFIX}/include', [
+class GeneratedFile(object):
+    def __init__(self, xml, domain, type, version, target):
+        self.xml = xml
+        self.domain = domain
+        self.type = type
+        self.version = version
+        self.target = target
+
+upnp_services = [
+        GeneratedFile('OpenHome/Av/ServiceXml/OpenHome/Product1.xml', 'av.openhome.org', 'Product', '1', 'AvOpenhomeOrgProduct1'),
+        GeneratedFile('OpenHome/Av/ServiceXml/OpenHome/Volume1.xml', 'av.openhome.org', 'Volume', '1', 'AvOpenhomeOrgVolume1'),
+        GeneratedFile('OpenHome/Av/ServiceXml/OpenHome/Info1.xml', 'av.openhome.org', 'Info', '1', 'AvOpenhomeOrgInfo1'),
+        GeneratedFile('OpenHome/Av/ServiceXml/OpenHome/Playlist1.xml', 'av.openhome.org', 'Playlist', '1', 'AvOpenhomeOrgPlaylist1'),
+        GeneratedFile('OpenHome/Av/ServiceXml/OpenHome/Time1.xml', 'av.openhome.org', 'Time', '1', 'AvOpenhomeOrgTime1'),
+    ]
+
+
+def build(bld):
+
+    # Generated provider base classes
+    t4templatedir = bld.env['T4_TEMPLATE_PATH']
+    text_transform_exe_node = find_resource_or_fail(bld, bld.root, os.path.join(bld.env['TEXT_TRANSFORM_PATH'], 'TextTransform.exe'))
+    for service in upnp_services:
+        for t4Template, prefix, ext, args in [
+                ('DvUpnpCppCoreHeader.tt', 'Dv', '.h', '-a buffer:1'),
+                ('DvUpnpCppCoreSource.tt', 'Dv', '.cpp', '')
+                ]:
+            t4_template_node = find_resource_or_fail(bld, bld.root, os.path.join(t4templatedir, t4Template))
+            tgt = bld.path.find_or_declare(os.path.join('Generated', prefix + service.target + ext))
+            bld(
+                rule="mono " + text_transform_exe_node.abspath() + " -o " + tgt.abspath() + " " + t4_template_node.abspath() + " -a xml:../" + service.xml + " -a domain:" + service.domain + " -a type:" + service.type + " -a version:" + service.version + " " + args,
+                source=[text_transform_exe_node, t4_template_node, service.xml],
+                target=tgt
+                )
+    bld.add_group()
+
+    bld.install_files('${PREFIX}/include', [
             'OpenHome/Store.h',
         ], relative_trick=True)
 
-    ctx.install_files('${PREFIX}/share/Tests/TestStore', [
+    bld.install_files('${PREFIX}/share/Tests/TestStore', [
             'OpenHome/Tests/TestStore/defaults0.txt',
             'OpenHome/Tests/TestStore/defaultsString0.txt',
         ], relative_trick=False)
 
-    ctx.stlib(
+    bld.stlib(
         source = [
             'OpenHome/Store.cpp',
             'OpenHome/MurmurHash3.cpp'
         ],
         target = 'ohPersist',
-        use    = 'MEDIA',
-        includes = ctx.env.INCLUDES_MEDIA
+        use    = ['OHNET', 'MEDIA'],
+        includes = bld.env.INCLUDES_MEDIA
         )
 
-    ctx.program(
+    bld.program(
         source      = [
             'OpenHome/Tests/TestStore.cpp'
         ],
-        includes    = ctx.env.INCLUDES_MEDIA,
+        includes    = bld.env.INCLUDES_MEDIA,
         target      = 'TestStore',
         install_path= '${PREFIX}/bin/Tests',
         stlib       = ['ohNetCore', 'TestFramework'],
-        use         = ['MEDIA', 'ohPersist']
+        use         = ['OHNET', 'MEDIA', 'ohPersist']
         )
 
-    ctx.stlib(
+    bld.stlib(
         source = [
             'OpenHome/Media/Product.cpp',
             'OpenHome/Media/Info.cpp',
@@ -209,59 +188,65 @@ def build(ctx):
             'OpenHome/Media/Player.cpp',
             'OpenHome/Media/Standard.cpp',
             'OpenHome/Media/Source.cpp',
-            'OpenHome/Media/SourcePlaylist.cpp'
+            'OpenHome/Media/SourcePlaylist.cpp',
+            'Generated/DvAvOpenhomeOrgProduct1.cpp',
+            'Generated/DvAvOpenhomeOrgVolume1.cpp',
+            'Generated/DvAvOpenhomeOrgInfo1.cpp',
+            'Generated/DvAvOpenhomeOrgPlaylist1.cpp',
+            'Generated/DvAvOpenhomeOrgTime1.cpp'
         ],
         target = 'ohMedia',
-        use    = ['MEDIA', 'ohPersist'],
-        includes = ctx.env.INCLUDES_MEDIA
+        use    = ['OHNET', 'MEDIA', 'ohPersist'],
+        includes = bld.env.INCLUDES_MEDIA
         )
 
-    ctx.stlib(
+    bld.stlib(
         source      = [
             'Renderers/Dummy/Dummy.cpp',
             'Renderers/resources.csr'
             ],
-        includes    = ctx.env.INCLUDES_MEDIA,
+        includes    = bld.env.INCLUDES_MEDIA,
         target      = 'rendererDummy',
+        use         = 'OHNET'
         )
 
-    uses = ['ohMedia', 'rendererDummy']
+    uses = ['OHNET', 'ohMedia', 'rendererDummy']
 
-    if ctx.env.DISABLEVLC == False:
-        ctx.stlib(
+    if bld.env.DISABLEVLC == False:
+        bld.stlib(
             source      = [
                 'Renderers/Vlc/Vlc.cpp'
                 ],
-            includes    = ctx.env.INCLUDES_MEDIA,
+            includes    = bld.env.INCLUDES_MEDIA,
             target      = 'rendererVlc',
-            use         = ['VLC']
+            use         = ['OHNET', 'VLC']
             )
 
         uses.append('rendererVlc')
 
     config_includes = []
-    config_includes.extend(ctx.env.INCLUDES_MEDIA)
-    config_includes.extend(ctx.env.INCLUDES_WEB)
-    ctx.stlib(
+    config_includes.extend(bld.env.INCLUDES_MEDIA)
+    config_includes.extend(bld.env.INCLUDES_WEB)
+    bld.stlib(
         source      = [
             'Config/Config.cpp',
             'Config/resources.csr'
         ],
         includes    = config_includes,
         target      = 'config',
-        use         = 'WEB'
+        use         = ['OHNET', 'WEB']
         )
 
     uses.append('config')
 
-    ctx.program(
+    bld.program(
         source      = [
             'Renderers/main.cpp'
             ],
-        includes    = ctx.env.INCLUDES_MEDIA,
-        target      = 'ohMediaPlayer',
-        stlib       = ['ohNetCore', 'ohNetGeneratedDevices', 'ohNetDevices', 'TestFramework'],
-        lib         = ['rt'],
+        includes    = bld.env.INCLUDES_MEDIA,
+        target      = 'ohmediaplayer',
+        stlib       = ['ohNetCore', 'ohNetDevices', 'TestFramework'],
+        linkflags   = ['-lrt'],
         use         = uses,
         )
 

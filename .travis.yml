@@ -8,10 +8,12 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
     packages:
+      - binutils
       - libvlc-dev
       - libvlccore-dev
       - gcc-4.8
       - g++-4.8
+      - mono-complete
 install:
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
   - git clone https://github.com/openhome/ohdevtools.git

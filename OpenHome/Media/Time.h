@@ -6,7 +6,7 @@
 #include <OpenHome/Net/Core/DvDevice.h>
 #include <OpenHome/Private/Thread.h>
 
-#include <OpenHome/Net/Core/DvAvOpenhomeOrgTime1.h>
+#include <Generated/DvAvOpenhomeOrgTime1.h>
 
 namespace OpenHome {
 namespace Media {

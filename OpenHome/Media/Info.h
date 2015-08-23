@@ -3,7 +3,7 @@
 
 #include <OpenHome/Net/Core/DvDevice.h>
 
-#include <OpenHome/Net/Core/DvAvOpenhomeOrgInfo1.h>
+#include <Generated/DvAvOpenhomeOrgInfo1.h>
 
 namespace OpenHome {
 namespace Media {

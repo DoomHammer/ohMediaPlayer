@@ -39,20 +39,6 @@ public:
   void SetUpdateAvailable(const char *aValue);
 };
 
-class SubConfig
-{
-  private:
-    const char* iPartial;
-    const char* iController;
-    const char* iDefaultConfig;
-  public:
-    SubConfig(const char* aPartial, const char* aController, const char* aDefaultConfig)
-      : iPartial(aPartial)
-        , iController(aController)
-        , iDefaultConfig(aDefaultConfig)
-  {};
-};
-
 class ConfigMapper
 {
   protected:

@@ -71,10 +71,8 @@ private:
 private:
     std::list<Track*> iList;
 
-    TUint iId;
     TUint iToken;
     Bwh iIdArray;
-    TUint iTracksMax;
     Mutex iMutex;
     ETransportState iState;
     Source& iSource;

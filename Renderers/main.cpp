@@ -170,7 +170,8 @@ int main(int aArgc, char* aArgv[])
 
     char c = '\0';
     while (c != 'q') {
-        if(scanf("%c", &c));
+        if(scanf("%c", &c))
+          ;
     }
 
     Log::Print("Quiting...\n");

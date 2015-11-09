@@ -1,33 +1,22 @@
 [
-    {
-	    "name": "ohNet",
-        "type": "openhome",
-        "platform-specific": true,
-        "version": "1.1.1456",
-        "archive-suffix": "-${titlecase-debugmode}",
-        "configure-args": [
-            "--ohNetLibraries", "${dest}${name}-${platform}-${titlecase-debugmode}/lib",
-            "--ohNetHeaders", "${dest}${name}-${platform}-${titlecase-debugmode}/include/ohnet"
-        ]
-    },
-     {
-           "name": "ohNetGenerated",
-        "type": "openhome",
-        "platform-specific": true,
-        "version": "1.0.66",
-        "archive-suffix": "-${titlecase-debugmode}",
-        "configure-args": [
-            "--ohNetGeneratedLibraries", "${dest}${name}-${platform}-${titlecase-debugmode}/lib",
-            "--ohNetGeneratedHeaders", "${dest}${name}-${platform}-${titlecase-debugmode}/include/ohnet"
-        ]
-    },
-    {
-	    "name": "ohWafHelpers",
-        "type": "openhome",
-        "platform-specific": false,
-        "version": "0.0.22",
-        "archive-filename": "${name}-${version}.tar.gz"
-    },
+  {
+    "name": "ohNet",
+    "type": "openhome",
+    "platform-specific": true,
+    "version": "1.2.1527",
+    "archive-suffix": "-${titlecase-debugmode}",
+    "configure-args": [
+      "--ohnet-lib-dir", "${dest}${name}-${platform}-${titlecase-debugmode}/lib",
+      "--ohnet-include-dir", "${dest}${name}-${platform}-${titlecase-debugmode}/include/ohnet"
+    ]
+  },
+  {
+    "name": "ohWafHelpers",
+    "type": "openhome",
+    "platform-specific": false,
+    "version": "0.0.85",
+    "archive-filename": "${name}-${version}.tar.gz"
+  },
   {
     "name": "vsrd",
     "type": "external",
@@ -37,14 +26,14 @@
     "archive-path": "${binary-repo}/${archive-filename}",
     "archive-filename": "${name}-${platform}.tar.gz",
     "source-git": "https://github.com/DoomHammer/Very-Simple-Resource-Dumper.git",
-    "tag": "v0.0.1"
+    "tag": "v0.0.2"
   },
   {
     "name": "civetweb",
     "type": "external",
     "platform-specific": true,
-    "version": "1.6.1",
-    "binary-repo": "https://github.com/DoomHammer/civetweb/releases/download/v${version}",
+    "version": "1.7.0",
+    "binary-repo": "https://bintray.com/artifact/download/doomhammer/generic/${name}/${version}",
     "archive-path": "${binary-repo}/${archive-filename}",
     "archive-filename": "${name}-${platform}.tar.gz",
     "configure-args": [
@@ -52,14 +41,14 @@
       "--civetwebHeaders", "${dest}${name}-${version}/include"
     ],
     "source-git": "https://github.com/DoomHammer/civetweb.git",
-    "tag": "v1.6.1"
+    "tag": "v1.7.0"
   },
   {
     "name": "jsonhandle",
     "type": "external",
     "platform-specific": true,
-    "version": "0.5.3",
-    "binary-repo": "https://github.com/DoomHammer/jsonhandle/releases/download/v${version}",
+    "version": "0.5.3.1",
+    "binary-repo": "https://bintray.com/artifact/download/doomhammer/generic/${name}/${version}",
     "archive-path": "${binary-repo}/${archive-filename}",
     "archive-filename": "${name}-${platform}.tar.gz",
     "configure-args": [
@@ -67,6 +56,6 @@
       "--jsonhandleHeaders", "${dest}${name}/include"
     ],
     "source-git": "https://github.com/DoomHammer/jsonhandle.git",
-    "tag": "v0.5.2"
+    "tag": "v0.5.3"
   }
 ]

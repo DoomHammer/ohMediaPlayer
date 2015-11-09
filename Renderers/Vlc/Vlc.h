@@ -47,7 +47,6 @@ private:
     std::string iUri;
     uint32_t iSeconds;
     uint32_t iDuration;
-    uint32_t iSeekToSecond;
     bool iPendingVolume;
     uint32_t iPendingVolumeValue;
     bool iPendingMute;

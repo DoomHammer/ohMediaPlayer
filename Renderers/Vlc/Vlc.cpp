@@ -54,20 +54,17 @@ const char* kVlcArgs[] = {
     };
 
 Vlc::Vlc(Environment& aEnv)
-    : iVlc(0)
+    : iPendingVolume(false)
+    , iPendingMute(false)
+    , iMutex("VLC")
+    , iInitialised(false)
+    , iVlc(0)
     , iPlayer(0)
     , iMedia(0)
     , iStatus(0)
-    , iMutex("VLC")
-    , iInitialised(false)
-    , iPendingVolume(false)
-    , iPendingMute(false)
 {
     Debug::SetLevel(kMedia);
     iVlc = libvlc_new (sizeof(kVlcArgs) / sizeof(kVlcArgs[0]), kVlcArgs);
-    libvlc_set_log_verbosity(iVlc, 2);
-    libvlc_log_t* log = libvlc_log_open(iVlc);
-    libvlc_log_close(log);
     iTimerFinishedFunctor = MakeFunctor(*this, &Vlc::TimerFinishedExpired);
     iTimerFinished = new Timer(aEnv, iTimerFinishedFunctor, "VlcRendererFinished");
     iTimerPlayFunctor = MakeFunctor(*this, &Vlc::TimerPlayExpired);

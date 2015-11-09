@@ -7,7 +7,7 @@
 #include <OpenHome/Private/Thread.h>
 #include <OpenHome/Private/Timer.h>
 
-#include <OpenHome/Net/Core/DvAvOpenhomeOrgProduct1.h>
+#include <Generated/DvAvOpenhomeOrgProduct1.h>
 
 #include <OpenHome/Media/Source.h>
 #include <OpenHome/Media/Player.h>
